@@ -75,7 +75,7 @@ public class NewtonMethodUsingRandomVariableInterfaces implements RandomVariable
 		}
 
 		// Calculate next point
-        nextPoint = nextPoint.addRatio(value,derivative);
+        nextPoint = nextPoint.subRatio(value,derivative);
 
 		numberOfIterations++;
 
