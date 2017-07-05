@@ -47,4 +47,5 @@ public interface RandomVariableDifferentiableInterface extends RandomVariableInt
 	 * @return The gradient map.
 	 */
 	Map<Long, RandomVariableInterface> getGradient();
+	
 }
