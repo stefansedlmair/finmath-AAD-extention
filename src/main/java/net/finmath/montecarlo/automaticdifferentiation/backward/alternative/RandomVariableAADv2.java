@@ -18,6 +18,7 @@ import java.util.stream.DoubleStream;
 import net.finmath.functions.DoubleTernaryOperator;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
+import net.finmath.montecarlo.automaticdifferentiation.backward.alternative.RandomVariableAADv3.OperatorType;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**
@@ -498,57 +499,57 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	/* for all functions that need to be differentiated and are returned as double in the Interface, write a method to return it as RandomVariableAAD 
 	 * that is deterministic by its nature. For their double-returning pendant just return the average of the deterministic RandomVariableAAD  */
 
-	public RandomVariableInterface getAverageAsRandomVariableAAD(RandomVariableInterface probabilities){
+	public RandomVariableInterface average(RandomVariableInterface probabilities){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.AVERAGE, new RandomVariableInterface[]{this, probabilities});
 	}
 
-	public RandomVariableInterface getVarianceAsRandomVariableAAD(RandomVariableInterface probabilities){
+	public RandomVariableInterface variance(RandomVariableInterface probabilities){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.VARIANCE, new RandomVariableInterface[]{this, probabilities});
 	}
 
-	public RandomVariableInterface 	getStandardDeviationAsRandomVariableAAD(RandomVariableInterface probabilities){
+	public RandomVariableInterface 	standardDeviation(RandomVariableInterface probabilities){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.STDEV, new RandomVariableInterface[]{this, probabilities});
 	}
 
-	public RandomVariableInterface 	getStandardErrorAsRandomVariableAAD(RandomVariableInterface probabilities){
+	public RandomVariableInterface 	standardError(RandomVariableInterface probabilities){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.STDERROR, new RandomVariableInterface[]{this, probabilities});
 	}
 
-	public RandomVariableInterface getAverageAsRandomVariableAAD(){
+	public RandomVariableInterface average(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.AVERAGE, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface getVarianceAsRandomVariableAAD(){
+	public RandomVariableInterface variance(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.VARIANCE, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface getSampleVarianceAsRandomVariableAAD() {
+	public RandomVariableInterface sampleVariance() {
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.SVARIANCE, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface 	getStandardDeviationAsRandomVariableAAD(){
+	public RandomVariableInterface 	standardDeviation(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.STDEV, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface getStandardErrorAsRandomVariableAAD(){
+	public RandomVariableInterface standardError(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.STDERROR, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface 	getMinAsRandomVariableAAD(){
+	public RandomVariableInterface 	min(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.MIN, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface 	getMaxAsRandomVariableAAD(){
+	public RandomVariableInterface 	max(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.MAX, new RandomVariableInterface[]{this});
 	}
@@ -685,7 +686,7 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	 */
 	@Override
 	public double getMin() {
-		return ((RandomVariableAADv2) getMinAsRandomVariableAAD()).getRandomVariableInterface().getAverage();
+		return ((RandomVariableAADv2) min()).getRandomVariableInterface().getAverage();
 	}
 
 	/* (non-Javadoc)
@@ -693,7 +694,7 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	 */
 	@Override
 	public double getMax() {
-		return ((RandomVariableAADv2) getMaxAsRandomVariableAAD()).getRandomVariableInterface().getAverage();
+		return ((RandomVariableAADv2) max()).getRandomVariableInterface().getAverage();
 	}
 
 	/* (non-Javadoc)
@@ -701,7 +702,7 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	 */
 	@Override
 	public double getAverage() {		
-		return ((RandomVariableAADv2) getAverageAsRandomVariableAAD()).getRandomVariableInterface().getAverage();
+		return ((RandomVariableAADv2) average()).getRandomVariableInterface().getAverage();
 	}
 
 	/* (non-Javadoc)
@@ -709,7 +710,7 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	 */
 	@Override
 	public double getAverage(RandomVariableInterface probabilities) {
-		return ((RandomVariableAADv2) getAverageAsRandomVariableAAD(probabilities)).getRandomVariableInterface().getAverage();
+		return ((RandomVariableAADv2) average(probabilities)).getRandomVariableInterface().getAverage();
 	}
 
 	/* (non-Javadoc)
@@ -717,7 +718,7 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	 */
 	@Override
 	public double getVariance() {
-		return ((RandomVariableAADv2) getVarianceAsRandomVariableAAD()).getRandomVariableInterface().getAverage();
+		return ((RandomVariableAADv2) variance()).getRandomVariableInterface().getAverage();
 	}
 
 	/* (non-Javadoc)
@@ -725,7 +726,7 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	 */
 	@Override
 	public double getVariance(RandomVariableInterface probabilities) {
-		return ((RandomVariableAADv2) getAverageAsRandomVariableAAD(probabilities)).getRandomVariableInterface().getAverage();
+		return ((RandomVariableAADv2) average(probabilities)).getRandomVariableInterface().getAverage();
 	}
 
 	/* (non-Javadoc)
@@ -733,7 +734,7 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	 */
 	@Override
 	public double getSampleVariance() {
-		return ((RandomVariableAADv2) getSampleVarianceAsRandomVariableAAD()).getRandomVariableInterface().getAverage();
+		return ((RandomVariableAADv2) sampleVariance()).getRandomVariableInterface().getAverage();
 	}
 
 	/* (non-Javadoc)
@@ -741,7 +742,7 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	 */
 	@Override
 	public double getStandardDeviation() {
-		return ((RandomVariableAADv2) getStandardDeviationAsRandomVariableAAD()).getRandomVariableInterface().getAverage();
+		return ((RandomVariableAADv2) standardDeviation()).getRandomVariableInterface().getAverage();
 	}
 
 	/* (non-Javadoc)
@@ -749,7 +750,7 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	 */
 	@Override
 	public double getStandardDeviation(RandomVariableInterface probabilities) {
-		return ((RandomVariableAADv2) getStandardDeviationAsRandomVariableAAD(probabilities)).getRandomVariableInterface().getAverage();
+		return ((RandomVariableAADv2) standardDeviation(probabilities)).getRandomVariableInterface().getAverage();
 	}
 
 	/* (non-Javadoc)
@@ -757,7 +758,7 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	 */
 	@Override
 	public double getStandardError() {
-		return ((RandomVariableAADv2) getStandardErrorAsRandomVariableAAD()).getRandomVariableInterface().getAverage();
+		return ((RandomVariableAADv2) standardError()).getRandomVariableInterface().getAverage();
 	}
 
 	/* (non-Javadoc)
@@ -765,7 +766,7 @@ public class RandomVariableAADv2 implements RandomVariableDifferentiableInterfac
 	 */
 	@Override
 	public double getStandardError(RandomVariableInterface probabilities) {
-		return ((RandomVariableAADv2) getStandardErrorAsRandomVariableAAD(probabilities)).getRandomVariableInterface().getAverage();
+		return ((RandomVariableAADv2) standardError(probabilities)).getRandomVariableInterface().getAverage();
 	}
 
 	/* (non-Javadoc)

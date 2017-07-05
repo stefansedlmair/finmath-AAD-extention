@@ -451,57 +451,57 @@ public class RandomVariableDifferentiableAAD2 implements RandomVariableDifferent
 	/* for all functions that need to be differentiated and are returned as double in the Interface, write a method to return it as RandomVariableAAD 
 	 * that is deterministic by its nature. For their double-returning pendant just return the average of the deterministic RandomVariableAAD  */
 
-	public RandomVariableInterface getAverageAsRandomVariableAAD(RandomVariableInterface probabilities) {
+	public RandomVariableInterface average(RandomVariableInterface probabilities) {
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.AVERAGE2, new RandomVariableInterface[]{this, probabilities});
 	}
 
-	public RandomVariableInterface getVarianceAsRandomVariableAAD(RandomVariableInterface probabilities){
+	public RandomVariableInterface variance(RandomVariableInterface probabilities){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.VARIANCE2, new RandomVariableInterface[]{this, probabilities});
 	}
 
-	public RandomVariableInterface 	getStandardDeviationAsRandomVariableAAD(RandomVariableInterface probabilities){
+	public RandomVariableInterface 	standardDeviation(RandomVariableInterface probabilities){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.STDEV2, new RandomVariableInterface[]{this, probabilities});
 	}
 
-	public RandomVariableInterface 	getStandardErrorAsRandomVariableAAD(RandomVariableInterface probabilities){
+	public RandomVariableInterface 	standardError(RandomVariableInterface probabilities){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.STDERROR2, new RandomVariableInterface[]{this, probabilities});
 	}
 
-	public RandomVariableInterface getAverageAsRandomVariableAAD(){
+	public RandomVariableInterface average(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.AVERAGE, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface getVarianceAsRandomVariableAAD(){
+	public RandomVariableInterface variance(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.VARIANCE, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface getSampleVarianceAsRandomVariableAAD() {
+	public RandomVariableInterface sampleVariance() {
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.SVARIANCE, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface 	getStandardDeviationAsRandomVariableAAD(){
+	public RandomVariableInterface 	standardDeviation(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.STDEV, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface getStandardErrorAsRandomVariableAAD(){
+	public RandomVariableInterface standardError(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.STDERROR, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface 	getMinAsRandomVariableAAD(){
+	public RandomVariableInterface 	min(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.MIN, new RandomVariableInterface[]{this});
 	}
 
-	public RandomVariableInterface 	getMaxAsRandomVariableAAD(){
+	public RandomVariableInterface 	max(){
 		/*returns deterministic AAD random variable */
 		return apply(OperatorType.MAX, new RandomVariableInterface[]{this});
 	}
@@ -601,7 +601,7 @@ public class RandomVariableDifferentiableAAD2 implements RandomVariableDifferent
 	 */
 	@Override
 	public double getAverage(RandomVariableInterface probabilities) {
-		return ((RandomVariableDifferentiableAAD2) getAverageAsRandomVariableAAD(probabilities)).getValues().getAverage();
+		return getValues().getAverage(probabilities);
 	}
 
 	/* (non-Javadoc)
@@ -1024,4 +1024,5 @@ public class RandomVariableDifferentiableAAD2 implements RandomVariableDifferent
 	public RandomVariableInterface apply(DoubleTernaryOperator operator, RandomVariableInterface argument1, RandomVariableInterface argument2) {
 		throw new UnsupportedOperationException("Applying functions is not supported.");
 	}
+
 }
