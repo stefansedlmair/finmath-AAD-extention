@@ -5,14 +5,7 @@ package net.finmath.rootfinder;
 
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.Vector;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
-import net.finmath.concurrency.FutureWrapper;
 import net.finmath.functions.LinearAlgebra;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariableFactory;
@@ -30,15 +23,17 @@ public class LevenbergMarquardtSolver implements RandomVariableDifferentiableMul
 	private TreeMap<Long, RandomVariableInterface>	bestParameterSet;	/* \beta_{best} */
 		
 	private int			numberOfIterations		= 0;           								// Number of numberOfIterations
+	private int 		maxNumberOfIterations 	= Integer.MAX_VALUE;
 	private boolean		isDone					= false;             						// Will be true if machine accuracy has been reached
 	private double 		accuracy 				= Double.MAX_VALUE;		
+	private double		targetAccuracy			= 0.0;
 	
 	private double			 	lambda	 			= 0.001;
 	private final double		lambdaDivisor		= 1.3;
 	private final double		lambdaMultiplicator	= 2.0;
 	
 	/* predefine how to generate random variables */
-	private AbstractRandomVariableFactory randomVariableFactory = new RandomVariableFactory();
+	private AbstractRandomVariableFactory nonDifferentiableRandomVariableFactory = new RandomVariableFactory();
 	
 	/* predefine variables to  */
 	private final RandomVariableInterface targetFunctionValue;						/* y 			*/
@@ -67,9 +62,23 @@ public class LevenbergMarquardtSolver implements RandomVariableDifferentiableMul
 		this.bestParameterSet = initialValue;
 		
 		this.targetFunctionValue = targetFunctionValue;
-		this.uncertainties = randomVariableFactory.createRandomVariable(1.0);
+		this.uncertainties = nonDifferentiableRandomVariableFactory.createRandomVariable(1.0);
+	}
+	
+	public LevenbergMarquardtSolver(TreeMap<Long, RandomVariableInterface> initialValue, RandomVariableInterface targetFunctionValue,
+			double targetAccuracy, int maxNumberOfIterations) {
+		this(initialValue, targetFunctionValue);
+		this.targetAccuracy 		= targetAccuracy;
+		this.maxNumberOfIterations 	= maxNumberOfIterations;
 	}
 
+	public LevenbergMarquardtSolver(TreeMap<Long, RandomVariableInterface> initialValue, RandomVariableInterface targetFunctionValue,
+			RandomVariableInterface uncertainties, double targetAccuracy, int maxNumberOfIterations) {
+		this(initialValue, targetFunctionValue, uncertainties);
+		this.targetAccuracy 		= targetAccuracy;
+		this.maxNumberOfIterations 	= maxNumberOfIterations;
+	}
+	
 	/**
 	 * implements 
 	 * \[ 
@@ -121,52 +130,11 @@ public class LevenbergMarquardtSolver implements RandomVariableDifferentiableMul
 		
 		double[][] deltaArray = new double[numberOfRealizations][numberOfVariables];
 		
-		// TODO: possibly parallelisable or use giant sparse matrix and solve one linear equation
-		if(useMultithreading){
-			// We do not allocate more threads the twice the number of processors.
-			int numberOfThreads = Math.min(Math.max(2 * Runtime.getRuntime().availableProcessors(),1), numberOfRealizations);
-			ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
-				
-			Vector<Future<double[]>> deltasPerRealization = new Vector<Future<double[]>>();
-			deltasPerRealization.setSize(numberOfRealizations);
-			
-			// worker
-			for(int zIndex = 0; zIndex < numberOfRealizations; zIndex++){
-								
-				final double[][] 	thread_A = A[zIndex];
-				final double[]		thread_b = b[zIndex];
-				
-				Callable<double[]> getDeltaPerRealization = new Callable<double[]>() {
-					@Override
-					public double[] call() throws Exception {
-						return LinearAlgebra.solveLinearEquationSymmetric(thread_A, thread_b);
+		
+		// serial implementation
+		for(int zIndex = 0; zIndex < numberOfRealizations; zIndex++)
+			deltaArray[zIndex] = LinearAlgebra.solveLinearEquation(A[zIndex], b[zIndex]);
 
-					}
-				};
-				
-				executor.submit(getDeltaPerRealization);
-				
-				Future<double[]> result = null;
-				try {
-					result = new FutureWrapper<double[]>(getDeltaPerRealization.call());
-				} catch (Exception e) {}
-				
-				deltasPerRealization.set(zIndex, result);
-			}
-			
-			for(int zIndex = 0; zIndex < numberOfRealizations; zIndex++){
-				try {
-					deltaArray[zIndex] = deltasPerRealization.get(zIndex).get();
-				} catch (InterruptedException | ExecutionException e) {}
-			}			
-			
-			executor.shutdown();
-			
-		} else {
-			// serial implementation
-			for(int zIndex = 0; zIndex < numberOfRealizations; zIndex++)
-				deltaArray[zIndex] = LinearAlgebra.solveLinearEquationSymmetric(A[zIndex], b[zIndex]);
-		}		
 		
 		// re-associate the deltas with their parameter ids
 		TreeMap<Long, RandomVariableInterface> delta = new TreeMap<>();
@@ -177,7 +145,9 @@ public class LevenbergMarquardtSolver implements RandomVariableDifferentiableMul
 			for(int zIndex = 0; zIndex < numberOfRealizations; zIndex++)
 				deltaPerRealizations[zIndex] = deltaArray[zIndex][variableIndex];			
 			
-			delta.put(key, randomVariableFactory.createRandomVariable(gradient.get(key).getFiltrationTime(), deltaPerRealizations));
+			delta.put(key, nonDifferentiableRandomVariableFactory.createRandomVariable(gradient.get(key).getFiltrationTime(), 
+					/* take average over all suggested parameter updates from each realization */
+					nonDifferentiableRandomVariableFactory.createRandomVariable(0.0, deltaPerRealizations).getAverage()));
 			
 			variableIndex++;
 		}
@@ -191,7 +161,7 @@ public class LevenbergMarquardtSolver implements RandomVariableDifferentiableMul
     public void setValueAndDerivative(RandomVariableInterface currentFunctionValue, Map<Long, RandomVariableInterface> gradient) {
     	
     	double currentAccuracy = targetFunctionValue.sub(currentFunctionValue).div(uncertainties).squared()
-    			.getAverage(randomVariableFactory.createRandomVariable(1.0));
+    			.getAverage(nonDifferentiableRandomVariableFactory.createRandomVariable(1.0));
     	
     	if(currentAccuracy < getAccuracy())
 		{
@@ -213,6 +183,8 @@ public class LevenbergMarquardtSolver implements RandomVariableDifferentiableMul
     		nextParameterSet.put(key, nextParameterSet.get(key).add(delta.get(key)));
   
     	numberOfIterations++;
+    	
+    	isDone = getAccuracy() < targetAccuracy || getNumberOfIterations() >= maxNumberOfIterations || Double.isInfinite(getLambda());
 	}
 
 	/* (non-Javadoc)
