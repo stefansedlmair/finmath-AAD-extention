@@ -156,7 +156,7 @@ public class LIBORMarktModelSensitivityTest {
 		LIBORModelMonteCarloSimulationInterface liborMCmodel = new LIBORModelMonteCarloSimulation(liborModel, eulerScheme.clone());
 		
 		Swaption swaption = new Swaption(exerciseDate, swapTenor, swaprate);
-		return swaption.getValue(evaluationTime, liborMCmodel);
+		return swaption.getValue(evaluationTime, liborMCmodel).average();
 	}
 
 }

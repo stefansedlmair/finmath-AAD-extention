@@ -161,7 +161,7 @@ public class LevenbergMarquardtSolverTest {
 	}
 	
 	@Test
-	public void ProcessEulerSchemeTest() throws CalculationException{
+	public void ProcessEulerSchemeAADTest() throws CalculationException{
 		
 		/* set up Problem */
 		
@@ -261,7 +261,9 @@ public class LevenbergMarquardtSolverTest {
 
 	}
 	
-	private RandomVariableInterface swaptionPricer(			
+	
+	
+	static RandomVariableInterface swaptionPricer(			
 			TimeDiscretizationInterface simulationTenorStructur, 
 			TimeDiscretizationInterface liborPeriodDiscretization,
 			TimeDiscretizationInterface swapTenor,
