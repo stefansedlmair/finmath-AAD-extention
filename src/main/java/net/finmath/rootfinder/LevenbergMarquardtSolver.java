@@ -3,12 +3,14 @@
  */
 package net.finmath.rootfinder;
 
+import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeMap;
 
 import net.finmath.functions.LinearAlgebra;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**
@@ -179,9 +181,22 @@ public class LevenbergMarquardtSolver implements RandomVariableDifferentiableMul
     	Map<Long, RandomVariableInterface> delta = estimateDelta(currentFunctionValue, gradient);
     	
     	// add the delta to each associated parameter
-    	for(Long key : nextParameterSet.keySet())
-    		nextParameterSet.put(key, nextParameterSet.get(key).add(delta.get(key)));
-  
+    	TreeMap<Long, RandomVariableInterface> newNextParameterSet = new TreeMap<>();
+    	Iterator<Long> nextParameterKeySetIterator = nextParameterSet.keySet().iterator();
+    	Iterator<Long> deltaKeySetIterator = delta.keySet().iterator();
+    	
+    	while(deltaKeySetIterator.hasNext() && nextParameterKeySetIterator.hasNext()){
+    		Long deltaKey = deltaKeySetIterator.next();
+    		Long nextParameterKey = nextParameterKeySetIterator.next();
+    		
+    		newNextParameterSet.put(deltaKey, nextParameterSet.get(nextParameterKey).add(delta.get(deltaKey)));
+    	}
+//    	
+//    	for(Long key : nextParameterSet.keySet())
+//    		newNextParameterSet.put(((RandomVariableDifferentiableInterface) delta.get(key)).getID(), nextParameterSet.get(key).add(delta.get(key)));
+//    	
+    	nextParameterSet = newNextParameterSet;
+    	
     	numberOfIterations++;
     	
     	isDone = getAccuracy() < targetAccuracy || getNumberOfIterations() >= maxNumberOfIterations || Double.isInfinite(getLambda());
