@@ -38,7 +38,7 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 	
 	private static AtomicLong randomVariableUID = new AtomicLong(0);
 
-	private static AbstractRandomVariableFactory constantsFactory = new RandomVariableFactory();
+	private static AbstractRandomVariableFactory nonDifferentiableRandomVariableFactory = new RandomVariableFactory();
 	
 	/* static elements of the class are shared between all members */
 	public static enum OperatorType {
@@ -79,7 +79,7 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 			int posInArguments = getArgumentUIDs().indexOf(variableIndex);
 			
 			/* if random variable not dependent on variable or it is constant anyway return 0.0 */
-			if(posInArguments < 0 || isConstant) return constantsFactory.createRandomVariable(0.0);
+			if(posInArguments < 0 || isConstant) return nonDifferentiableRandomVariableFactory.createRandomVariable(0.0);
 
 			RandomVariableInterface resultrandomvariable = null;
 			RandomVariableInterface X = getArguments().size() > 0 ? valuesOf(getArguments().get(0)) : null;
@@ -110,7 +110,7 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 					resultrandomvariable = X.sin().mult(-1.0);
 					break;
 				case AVERAGE:
-					resultrandomvariable = constantsFactory.createRandomVariable(X.size()).invert();
+					resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(X.size()).invert();
 					break;
 				case VARIANCE:
 					resultrandomvariable = X.sub(X.getAverage()*(2.0*X.size()-1.0)/X.size()).mult(2.0/X.size());
@@ -134,10 +134,10 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 					resultrandomvariable = X.sub(X.getAverage()*(2.0*X.size()-1.0)/X.size()).mult(2.0/(X.size()-1));
 					break;
 				case ADD:
-					resultrandomvariable = constantsFactory.createRandomVariable(1.0);
+					resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(1.0);
 					break;
 				case SUB:
-					resultrandomvariable = constantsFactory.createRandomVariable(isFirstArgument ? 1.0 : -1.0);
+					resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(isFirstArgument ? 1.0 : -1.0);
 					break;
 				case MULT:
 					resultrandomvariable = isFirstArgument ? Y : X;
@@ -174,11 +174,11 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 					break;
 				case POW:
 					/* second argument will always be deterministic and constant! */
-					resultrandomvariable = isFirstArgument ? Y.mult(X.pow(Y.getAverage() - 1.0)) : constantsFactory.createRandomVariable(0.0);
+					resultrandomvariable = isFirstArgument ? Y.mult(X.pow(Y.getAverage() - 1.0)) : nonDifferentiableRandomVariableFactory.createRandomVariable(0.0);
 
 				case ADDPRODUCT:
 					if(isFirstArgument){
-						resultrandomvariable = constantsFactory.createRandomVariable(1.0);
+						resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(1.0);
 					} else if(isSecondArgument){
 						resultrandomvariable = Z;
 					} else {
@@ -187,7 +187,7 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 					break;
 				case ADDRATIO:
 					if(isFirstArgument){
-						resultrandomvariable = constantsFactory.createRandomVariable(1.0);
+						resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(1.0);
 					} else if(isSecondArgument){
 						resultrandomvariable = Z.invert();
 					} else {
@@ -196,7 +196,7 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 					break;
 				case SUBRATIO:
 					if(isFirstArgument){
-						resultrandomvariable = constantsFactory.createRandomVariable(1.0);
+						resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(1.0);
 					} else if(isSecondArgument){
 						resultrandomvariable = Z.invert().mult(-1.0);
 					} else {
@@ -225,9 +225,9 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 					if(isFirstArgument){
 						resultrandomvariable = X.apply(x -> (x == 0.0) ? Double.POSITIVE_INFINITY : 0.0);
 					} else if(isSecondArgument){
-						resultrandomvariable = X.barrier(X, constantsFactory.createRandomVariable(1.0), constantsFactory.createRandomVariable(0.0));
+						resultrandomvariable = X.barrier(X, nonDifferentiableRandomVariableFactory.createRandomVariable(1.0), nonDifferentiableRandomVariableFactory.createRandomVariable(0.0));
 					} else {
-						resultrandomvariable = X.barrier(X, constantsFactory.createRandomVariable(0.0), constantsFactory.createRandomVariable(1.0));
+						resultrandomvariable = X.barrier(X, nonDifferentiableRandomVariableFactory.createRandomVariable(0.0), nonDifferentiableRandomVariableFactory.createRandomVariable(1.0));
 					}
 				default:
 					break;
@@ -251,7 +251,7 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 			/* catch trivial case here */
 			if(idsOfDependentRandomVariables.size() == 1) 
 				return new TreeMap<Long, RandomVariableInterface>()
-					{{put(getID(), constantsFactory.createRandomVariable(getFiltrationTime(), isConstant() ? 0.0 : 1.0));}};
+					{{put(getID(), nonDifferentiableRandomVariableFactory.createRandomVariable(getFiltrationTime(), isConstant() ? 0.0 : 1.0));}};
 			
 				
 			/*_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_*/
@@ -262,14 +262,16 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 			/* first entry (with highest variable UID) of omegaHat is set to 1.0 */
 			long lastVariableIndex = mapOfDependentRandomVariables.lastKey();
 			
-			omegaHat.put(lastVariableIndex, constantsFactory.createRandomVariable(1.0));
+			omegaHat.put(lastVariableIndex, nonDifferentiableRandomVariableFactory.createRandomVariable(1.0));
 			
 			if(mapOfDependentRandomVariables.get(lastVariableIndex).isVariable())
 				gradient.put(lastVariableIndex, omegaHat.get(lastVariableIndex));
 			
 			for(long variableIndex : mapOfDependentRandomVariables.descendingKeySet().tailSet(lastVariableIndex, false)){
 				
-				RandomVariableInterface newOmegaHatEntry = constantsFactory.createRandomVariable(0.0);
+				RandomVariableAADv3 variable = mapOfDependentRandomVariables.get(variableIndex);
+				
+				RandomVariableInterface newOmegaHatEntry = nonDifferentiableRandomVariableFactory.createRandomVariable(0.0);
 				
 				for(long functionIndex : mapOfDependentRandomVariables.get(variableIndex).getChildrenUIDs()){
 					
@@ -280,8 +282,10 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 					}
 				}
 				
-				if(mapOfDependentRandomVariables.get(variableIndex).isVariable())
-					gradient.put(variableIndex, newOmegaHatEntry);
+				if(variable.isVariable())
+					gradient.put(variableIndex, variable.isDeterministic() ? 
+							newOmegaHatEntry.average(nonDifferentiableRandomVariableFactory.createRandomVariable(1)) /* sum up partial derivatives */ : 
+								newOmegaHatEntry);
 				
 				omegaHat.put(variableIndex, newOmegaHatEntry);
 			}
@@ -311,15 +315,15 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 	}
 	
 	public RandomVariableAADv3(double time, double[] values) {
-		this(constantsFactory.createRandomVariable(time, values), null, null, new ArrayList<Long>(), false);
+		this(nonDifferentiableRandomVariableFactory.createRandomVariable(time, values), null, null, new ArrayList<Long>(), false);
 	}
 	
 	public RandomVariableAADv3(double time, double value) {
-		this(constantsFactory.createRandomVariable(time, value), null, null, new ArrayList<Long>(), false);
+		this(nonDifferentiableRandomVariableFactory.createRandomVariable(time, value), null, null, new ArrayList<Long>(), false);
 	}
 	
 	public RandomVariableAADv3(double value) {
-		this(constantsFactory.createRandomVariable(value), null, null, new ArrayList<Long>(), false);
+		this(nonDifferentiableRandomVariableFactory.createRandomVariable(value), null, null, new ArrayList<Long>(), false);
 	}
 
 	public String toString(){
@@ -977,19 +981,19 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 				resultrandomvariable = X.invert();
 				break;
 			case AVERAGE:
-				resultrandomvariable = constantsFactory.createRandomVariable(X.getAverage());
+				resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(X.getFiltrationTime(), X.getAverage());
 				break;
 			case STDERROR:
-				resultrandomvariable = constantsFactory.createRandomVariable(X.getStandardError());
+				resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(X.getFiltrationTime(), X.getStandardError());
 				break;
 			case STDEV:
-				resultrandomvariable = constantsFactory.createRandomVariable(X.getStandardDeviation());
+				resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(X.getFiltrationTime(), X.getStandardDeviation());
 				break;
 			case VARIANCE:
-				resultrandomvariable = constantsFactory.createRandomVariable(X.getVariance());
+				resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(X.getFiltrationTime(), X.getVariance());
 				break;
 			case SVARIANCE:
-				resultrandomvariable = constantsFactory.createRandomVariable(X.getSampleVariance());
+				resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(X.getFiltrationTime(), X.getSampleVariance());
 				break;
 			case ADD:
 				resultrandomvariable = X.add(Y);
@@ -1013,16 +1017,16 @@ public class RandomVariableAADv3 implements RandomVariableDifferentiableInterfac
 				resultrandomvariable = X.pow( /* argument is deterministic random variable */ Y.getAverage());
 				break;
 			case AVERAGE2:
-				resultrandomvariable = constantsFactory.createRandomVariable(X.getAverage(Y));
+				resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(X.getFiltrationTime(), X.getAverage(Y));
 				break;
 			case STDERROR2:
-				resultrandomvariable = constantsFactory.createRandomVariable(X.getStandardError(Y));
+				resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(X.getFiltrationTime(), X.getStandardError(Y));
 				break;
 			case STDEV2:
-				resultrandomvariable = constantsFactory.createRandomVariable(X.getStandardDeviation(Y));
+				resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(X.getFiltrationTime(), X.getStandardDeviation(Y));
 				break;
 			case VARIANCE2:
-				resultrandomvariable = constantsFactory.createRandomVariable(X.getVariance(Y));
+				resultrandomvariable = nonDifferentiableRandomVariableFactory.createRandomVariable(X.getFiltrationTime(), X.getVariance(Y));
 				break;
 			case ADDPRODUCT:
 				resultrandomvariable = X.addProduct(Y,Z);
