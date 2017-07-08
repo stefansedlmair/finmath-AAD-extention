@@ -5,6 +5,7 @@ package net.finmath.montecarlo.automaticdifferentiation.backward;
 
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
@@ -16,9 +17,11 @@ import org.junit.runners.Parameterized.Parameters;
 
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariable;
+import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.automaticdifferentiation.backward.alternative.RandomVariableAADv2Factory;
+import net.finmath.montecarlo.automaticdifferentiation.backward.alternative.RandomVariableAADv3Factory;
 import net.finmath.stochastic.RandomVariableInterface;
 
 /**
@@ -34,22 +37,25 @@ public class RandomVariableDifferentiableInterfaceTest {
 	@Parameters
     public static Collection<Object[]> data(){
         return Arrays.asList(new Object[][] {
-        	{new RandomVariableDifferentiableAADFactory()},
-        	{new RandomVariableAADv2Factory()}
+        	{new RandomVariableAADv3Factory()}
         });
     }
 
-    private final AbstractRandomVariableFactory randomVariableFactory;
+    private final AbstractRandomVariableFactory differentiableRandomVariableFactory;
+    private final AbstractRandomVariableFactory nonDifferentiableRandomVariableFactory;
+    
     
     public RandomVariableDifferentiableInterfaceTest(AbstractRandomVariableFactory factory) {
-    	this.randomVariableFactory = factory;
+    	this.differentiableRandomVariableFactory = factory;
+    	this.nonDifferentiableRandomVariableFactory = new RandomVariableFactory();
+    	
     }
 	
 	@Test
 	public void testRandomVariableDeterministc() {
 
 		// Create a random variable with a constant
-		RandomVariableInterface randomVariable = randomVariableFactory.createRandomVariable(2.0);
+		RandomVariableInterface randomVariable = differentiableRandomVariableFactory.createRandomVariable(2.0);
 		
 		// Perform some calculations
 		randomVariable = randomVariable.mult(2.0);
@@ -70,7 +76,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 	public void testRandomVariableStochastic() {
 
 		// Create a stochastic random variable
-		RandomVariableInterface randomVariable2 = randomVariableFactory.createRandomVariable(0.0,
+		RandomVariableInterface randomVariable2 = differentiableRandomVariableFactory.createRandomVariable(0.0,
 				new double[] {-4.0, -2.0, 0.0, 2.0, 4.0} );
 
 		// Perform some calculations
@@ -84,7 +90,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 		Assert.assertEquals(2.0, randomVariable2.getVariance(), 1E-12);
 		
 		// Multiply two random variables, this will expand the receiver to a stochastic one
-		RandomVariableInterface randomVariable = randomVariableFactory.createRandomVariable(3.0);
+		RandomVariableInterface randomVariable = differentiableRandomVariableFactory.createRandomVariable(3.0);
 		randomVariable = randomVariable.mult(randomVariable2);
 		
 		// The random variable has average value 6.0
@@ -98,7 +104,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 	public void testRandomVariableArithmeticSqrtPow() {
 
 		// Create a stochastic random variable
-		RandomVariableInterface randomVariable = randomVariableFactory.createRandomVariable(0.0,
+		RandomVariableInterface randomVariable = differentiableRandomVariableFactory.createRandomVariable(0.0,
 				new double[] {3.0, 1.0, 0.0, 2.0, 4.0, 1.0/3.0} );
 
 		RandomVariableInterface check = randomVariable.sqrt().sub(randomVariable.pow(0.5));
@@ -113,7 +119,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 	public void testRandomVariableArithmeticSquaredPow() {
 
 		// Create a stochastic random variable
-		RandomVariableInterface randomVariable = randomVariableFactory.createRandomVariable(0.0,
+		RandomVariableInterface randomVariable = differentiableRandomVariableFactory.createRandomVariable(0.0,
 				new double[] {3.0, 1.0, 0.0, 2.0, 4.0, 1.0/3.0} );
 
 		RandomVariableInterface check = randomVariable.squared().sub(randomVariable.pow(2.0));
@@ -128,7 +134,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 	public void testRandomVariableStandardDeviation() {
 		
 		// Create a stochastic random variable
-		RandomVariableInterface randomVariable = randomVariableFactory.createRandomVariable(0.0,
+		RandomVariableInterface randomVariable = differentiableRandomVariableFactory.createRandomVariable(0.0,
 				new double[] {3.0, 1.0, 0.0, 2.0, 4.0, 1.0/3.0} );
 
 		double check = randomVariable.getStandardDeviation() - Math.sqrt(randomVariable.getVariance());
@@ -144,10 +150,10 @@ public class RandomVariableDifferentiableInterfaceTest {
 				new double[] {-4.0, -2.0, 0.0, 2.0, 4.0} );
 		
 		/*x_1*/
-		RandomVariableInterface aadRandomVariable01 = randomVariableFactory.createRandomVariable(randomVariable01.getFiltrationTime(), randomVariable01.getRealizations());
+		RandomVariableInterface aadRandomVariable01 = differentiableRandomVariableFactory.createRandomVariable(randomVariable01.getFiltrationTime(), randomVariable01.getRealizations());
 		
 		/*x_2*/
-		RandomVariableInterface aadRandomVariable02 =  randomVariableFactory.createRandomVariable(randomVariable02.getFiltrationTime(), randomVariable02.getRealizations());
+		RandomVariableInterface aadRandomVariable02 =  differentiableRandomVariableFactory.createRandomVariable(randomVariable02.getFiltrationTime(), randomVariable02.getRealizations());
 
 		
 		/* x_3 = x_1 + x_2 */
@@ -184,10 +190,10 @@ public class RandomVariableDifferentiableInterfaceTest {
 				new double[] {-4.0, -2.0, 0.0, 2.0, 4.0} );
 		
 		/*x_1*/
-		RandomVariableInterface aadRandomVariable01 = randomVariableFactory.createRandomVariable(randomVariable01.getFiltrationTime(), randomVariable01.getRealizations());
+		RandomVariableInterface aadRandomVariable01 = differentiableRandomVariableFactory.createRandomVariable(randomVariable01.getFiltrationTime(), randomVariable01.getRealizations());
 		
 		/*x_2*/
-		RandomVariableInterface aadRandomVariable02 = randomVariableFactory.createRandomVariable(randomVariable02.getFiltrationTime(), randomVariable02.getRealizations());
+		RandomVariableInterface aadRandomVariable02 = differentiableRandomVariableFactory.createRandomVariable(randomVariable02.getFiltrationTime(), randomVariable02.getRealizations());
 		
 		/* x_3 = x_1 + x_2 */
 		RandomVariableInterface aadRandomVariable03 = aadRandomVariable01.add(aadRandomVariable02);
@@ -229,12 +235,12 @@ public class RandomVariableDifferentiableInterfaceTest {
 		RandomVariable randomVariable01 = new RandomVariable(0.0, x);
 		
 		/*x_1*/
-		RandomVariableInterface aadRandomVariable01 = randomVariableFactory.createRandomVariable(randomVariable01.getFiltrationTime(), randomVariable01.getRealizations());
+		RandomVariableInterface aadRandomVariable01 = differentiableRandomVariableFactory.createRandomVariable(randomVariable01.getFiltrationTime(), randomVariable01.getRealizations());
 		
 		/* throws StackOverflowError/OutOfMemoryError for >= 10^4 iterations */
 		int numberOfIterations =  (int) Math.pow(10, 3);
 		
-		RandomVariableDifferentiableInterface sum =  (RandomVariableDifferentiableInterface) randomVariableFactory.createRandomVariable(0.0);
+		RandomVariableDifferentiableInterface sum =  (RandomVariableDifferentiableInterface) differentiableRandomVariableFactory.createRandomVariable(0.0);
 		for(int i = 0; i < numberOfIterations; i++){
 			sum = (RandomVariableDifferentiableInterface) sum.add(aadRandomVariable01);
 		}
@@ -266,12 +272,12 @@ public class RandomVariableDifferentiableInterfaceTest {
 				
 		/*x_1*/
 		RandomVariableDifferentiableInterface randomVariable01 = 
-				(RandomVariableDifferentiableInterface) randomVariableFactory.createRandomVariable(0.0, x);
+				(RandomVariableDifferentiableInterface) differentiableRandomVariableFactory.createRandomVariable(0.0, x);
 		
 		/* throws StackOverflowError/OutOfMemoryError for >= 10^4 iterations */
 		int numberOfIterations =  (int) Math.pow(10, 3);
 		
-		RandomVariableInterface sum = randomVariableFactory.createRandomVariable(0.0);
+		RandomVariableInterface sum = differentiableRandomVariableFactory.createRandomVariable(0.0);
 		for(int i = 0; i < numberOfIterations; i++) {
 			sum = sum.add(randomVariable01);
 		}
@@ -304,7 +310,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 
 		/*x_1*/
 		RandomVariableDifferentiableInterface aadRandomVariable01 = 
-				(RandomVariableDifferentiableInterface) randomVariableFactory.createRandomVariable(randomVariable01.getFiltrationTime(), randomVariable01.getRealizations());
+				(RandomVariableDifferentiableInterface) differentiableRandomVariableFactory.createRandomVariable(randomVariable01.getFiltrationTime(), randomVariable01.getRealizations());
 		
 		/* throws StackOverflowError/OutOfMemoryError for >= 10^4 iterations */
 		int numberOfIterations =  (int) Math.pow(10, 3);
@@ -314,7 +320,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 		 * Note: we like to differentiate with respect to x_1, that is, a should have no effect!
 		 */
 		
-		RandomVariableInterface sum = randomVariableFactory.createRandomVariable(0.0);
+		RandomVariableInterface sum = differentiableRandomVariableFactory.createRandomVariable(0.0);
 		
 		for(int i = 0; i < numberOfIterations; i++){
 			sum = sum.add(aadRandomVariable01);
@@ -350,7 +356,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 		Random random = new Random(2);
 		for(int j = 0; j < numberOfRandomVariables; j++) {
 			for(int i=0; i < lengthOfVectors; i++) values[i] = random.nextDouble();
-			randomVariables[j] = randomVariableFactory.createRandomVariable(0.0, values);
+			randomVariables[j] = differentiableRandomVariableFactory.createRandomVariable(0.0, values);
 		}
 	    
 	    /*
@@ -387,7 +393,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 		}
 		long endFD = System.currentTimeMillis();
 
-		System.out.println("Time needed for AAD (" + randomVariableFactory.getClass().getSimpleName() + "): " + ((endAAD - startAAD) / 1000.0) + "s");
+		System.out.println("Time needed for AAD (" + differentiableRandomVariableFactory.getClass().getSimpleName() + "): " + ((endAAD - startAAD) / 1000.0) + "s");
 		System.out.println("Time needed for FD: " + ((endFD - startFD) / 1000.0) + "s");
 		
 		// sort keys to compare aadGradient with numericGradient
@@ -414,5 +420,43 @@ public class RandomVariableDifferentiableInterfaceTest {
 		result = result.cap(randomVariables[randomVariables.length-1]).add(result.cap(randomVariables[randomVariables.length-1]));
 		
 		return result;
+	}
+	
+	@Test
+	public void testDeterministicPartialDerivative(){
+					
+		RandomVariableInterface randomVariable01 = differentiableRandomVariableFactory.createRandomVariable(0.0 /*time*/,
+				2.0);
+		
+		RandomVariableInterface randomVariable02 = nonDifferentiableRandomVariableFactory.createRandomVariable(0.0 /*time*/,
+				new double[]{1.0, 2.0, 3.0, 4.0, 5.0, 6.0});
+		
+		RandomVariableInterface randomVariable03 = testfunction01(randomVariable01, randomVariable02);
+		
+		//AAD
+		Map<Long, RandomVariableInterface> gradientAAD = ((RandomVariableDifferentiableInterface) randomVariable03).getGradient();
+		
+		//FD
+		double h = 1E-6;
+		RandomVariableInterface randomVariable01Plus = randomVariable01.add(h);
+		RandomVariableInterface randomVariable01Minus = randomVariable01.sub(h);
+		
+		RandomVariableInterface randomVariable03Plus = testfunction01(randomVariable01Plus, randomVariable02);
+		RandomVariableInterface randomVariable03Mius = testfunction01(randomVariable01Minus, randomVariable02);
+
+		Map<Long, RandomVariableInterface> gradientFD = new HashMap<>();
+		gradientFD.put(((RandomVariableDifferentiableInterface) randomVariable01).getID(),
+				randomVariable03Plus.sub(randomVariable03Mius).div(2*h));
+		
+		for(Long key : gradientAAD.keySet()){
+			System.out.println();
+			System.out.println("ParameterID:.............." + key);
+			System.out.println("derivative AAD:..........." + Arrays.toString(gradientAAD.get(key).getRealizations()));		
+			System.out.println("derivative FD:............" + Arrays.toString(gradientFD.get(key).getRealizations()));		
+		}
+	}
+	
+	private RandomVariableInterface testfunction01(RandomVariableInterface x, RandomVariableInterface y){
+		return x.mult(y).average();
 	}
 }
