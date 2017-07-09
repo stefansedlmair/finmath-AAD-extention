@@ -72,17 +72,17 @@ public class LIBORMarktModelSensitivityTest {
 
 		System.out.println(" Swaption Sensitivities");
 		
-		double swaprate 				= -0.1;
+		double swaprate 				= 0.01;
 		
 		double startTime 				= 0.0;
-		double endTime 					= 10.0;
+		double endTime 					= 6.0;
 		
 		double evaluationTime 			= 1.0;
-		double exerciseDate 			= 7.0;
+		double exerciseDate 			= 5.0;
 		
-		int numberOfLibors 				= 20;
-		int numberOfSiumlationSteps 	= 20;
-		int numberOfSwapPayments 		= 10;
+		int numberOfLibors 				= 10;
+		int numberOfSiumlationSteps 	= 10;
+		int numberOfSwapPayments 		= 5;
 		
 		int seed 						= 1234;
 		int numberOfFactors 			= 2; 
@@ -110,6 +110,9 @@ public class LIBORMarktModelSensitivityTest {
 		};
 		
 		RandomVariableInterface swaptionValue  = getSwaptionPrice(liborPeriodDiscretization, simulationTenorStructur, forwardRateCurve, swapTenor, exerciseDate, evaluationTime, swaprate, eulerScheme, numberOfFactors, covarianceParameters);
+		
+		System.out.println("\n" + "Swaption Value............" + swaptionValue.getAverage());
+
 		
 		// AAD
 		Map<Long, RandomVariableInterface> swaptionSensitivitiesAAD = ((RandomVariableDifferentiableInterface) swaptionValue).getGradient();
@@ -156,7 +159,7 @@ public class LIBORMarktModelSensitivityTest {
 		LIBORModelMonteCarloSimulationInterface liborMCmodel = new LIBORModelMonteCarloSimulation(liborModel, eulerScheme.clone());
 		
 		Swaption swaption = new Swaption(exerciseDate, swapTenor, swaprate);
-		return swaption.getValue(evaluationTime, liborMCmodel).average();
+		return swaption.getValue(evaluationTime, liborMCmodel);
 	}
 
 }
