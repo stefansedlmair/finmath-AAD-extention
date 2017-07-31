@@ -7,28 +7,34 @@
 package net.finmath.montecarlo.automaticdifferentiation.backward;
 
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
-import net.finmath.montecarlo.RandomVariable;
-import net.finmath.stochastic.RandomVariableInterface;
+import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.automaticdifferentiation.AbstractRandomVariableDifferentiableFactory;
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 
 /**
  * @author Christian Fries
  *
  */
-public class RandomVariableDifferentiableAADFactory extends AbstractRandomVariableFactory {
+public class RandomVariableDifferentiableAADFactory extends AbstractRandomVariableDifferentiableFactory {
+
+	public RandomVariableDifferentiableAADFactory() {
+		super(new RandomVariableFactory());
+	}
 
 	/**
-	 * 
+	 * @param randomVariableFactoryForNonDifferentiable
 	 */
-	public RandomVariableDifferentiableAADFactory() {
+	public RandomVariableDifferentiableAADFactory(AbstractRandomVariableFactory randomVariableFactoryForNonDifferentiable) {
+		super(randomVariableFactoryForNonDifferentiable);
 	}
 
 	@Override
-	public RandomVariableInterface createRandomVariable(double time, double value) {
-		return new RandomVariableDifferentiableAAD(new RandomVariable(time, value));
+	public RandomVariableDifferentiableInterface createRandomVariable(double time, double value) {
+		return new RandomVariableDifferentiableAAD(createRandomVariableNonDifferentiable(time, value));
 	}
 
 	@Override
-	public RandomVariableInterface createRandomVariable(double time, double[] values) {
-		return new RandomVariableDifferentiableAAD(new RandomVariable(time, values));
+	public RandomVariableDifferentiableInterface createRandomVariable(double time, double[] values) {
+		return new RandomVariableDifferentiableAAD(createRandomVariableNonDifferentiable(time, values));
 	}
 }
