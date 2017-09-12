@@ -221,7 +221,6 @@ public class LIBORMarketModelVegaTest {
 		System.out.println("ParameterID      AAD Value               FD Value                Deviation");
 		Map<Long, RandomVariableInterface> gradientDifferences = new HashMap<>();
 		for(long key : parameterID) {	
-//			try {
 				RandomVariableInterface aad = gradientAAD.getOrDefault(key, zero);
 				RandomVariableInterface fd = gradientFD.getOrDefault(key, zero);				
 				RandomVariableInterface diff = aad.sub(fd);				
@@ -231,10 +230,6 @@ public class LIBORMarketModelVegaTest {
 				System.out.println(key + "\t\t" + formatterValue.format(aad.getAverage()) + 
 										 "\t\t" + formatterValue.format(fd.getAverage()) + 
 										 "\t\t" +  formatterValue.format(diff.getAverage()));
-//			} catch (Exception e) {
-////				if(!gradientAAD.containsKey(key)) System.out.println("gradientAAD does not contain partial derivative wrt " + key + "!");
-////				if(!gradientFD.containsKey(key)) System.out.println("gradientFD does not contain partial derivative wrt " + key + "!");
-//			}			
 		}
 		
 		System.out.println();
@@ -251,7 +246,7 @@ public class LIBORMarketModelVegaTest {
 		errorRMS = Math.sqrt(errorRMS / (double) parameterID.length);
 		
 		System.out.println("Root-Mean-Square Error: " + formatterValue.format(errorRMS));
-		Assert.assertEquals(0.0, errorRMS, 1E-2);
+		Assert.assertEquals(0.0, errorRMS, 1E-3);
 	}
 	
 }
