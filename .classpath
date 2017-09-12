@@ -6,5 +6,24 @@
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/finmath lib"/>
 	<classpathentry kind="lib" path="/finmath lib/lib/commons-math3-3.6.1.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Alois Gugelhupfer/.m2/repository/net/finmath/finmath-lib/3.0.1/finmath-lib-3.0.1.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="net.finmath"/>
+			<attribute name="maven.artifactId" value="finmath-lib"/>
+			<attribute name="maven.version" value="3.0.1"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry combineaccessrules="false" kind="src" path="/finmath-lib-automaticdifferentiation-extensions"/>
+	<classpathentry kind="lib" path="C:/Users/Alois Gugelhupfer/.m2/repository/net/finmath/finmath-lib/3.0.6/finmath-lib-3.0.6.jar" sourcepath="C:/Users/Alois Gugelhupfer/.m2/repository/net/finmath/finmath-lib/3.0.6/finmath-lib-3.0.6-sources.jar">
+		<attributes>
+			<attribute name="maven.pomderived" value="true"/>
+			<attribute name="maven.groupId" value="net.finmath"/>
+			<attribute name="maven.artifactId" value="finmath-lib"/>
+			<attribute name="maven.version" value="3.0.6"/>
+			<attribute name="maven.scope" value="compile"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

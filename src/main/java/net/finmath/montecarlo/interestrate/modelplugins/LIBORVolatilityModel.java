@@ -22,10 +22,10 @@ public abstract class LIBORVolatilityModel {
     private TimeDiscretizationInterface	timeDiscretization;
     private TimeDiscretizationInterface	liborPeriodDiscretization;
 	
-    // You cannot instantiate the class empty
-    @SuppressWarnings("unused")
-	private LIBORVolatilityModel() {
-	}
+//    // You cannot instantiate the class empty
+//    @SuppressWarnings("unused")
+//	private LIBORVolatilityModel() {
+//	}
     
 	/**
 	 * @param timeDiscretization The vector of simulation time discretization points.
@@ -37,9 +37,13 @@ public abstract class LIBORVolatilityModel {
 		this.liborPeriodDiscretization = liborPeriodDiscretization;
 	}
 
-    public abstract RandomVariableInterface[]	getParameter();
-    public abstract void						setParameter(RandomVariableInterface[] parameters);
+    public abstract double[]	getParameter();
+    public abstract void		setParameter(double[] parameter);
 
+    // one of these methods might be necessary to know which derivative belongs to which parameter later on. 
+//    public abstract RandomVariableInterface[] 	getParameterRV();
+    public abstract long[]						getParameterID();
+    
     /**
      * Implement this method to complete the implementation.
 	 * @param timeIndex The time index (for timeDiscretization)
