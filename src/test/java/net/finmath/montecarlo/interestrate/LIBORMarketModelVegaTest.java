@@ -30,6 +30,10 @@ import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
 
+/**
+ * @author Stefan Sedlmair
+ * */
+
 public class LIBORMarketModelVegaTest {
 
 	private static DecimalFormat formatterValue		= new DecimalFormat(" 000.000%;-##0.000%", new DecimalFormatSymbols(Locale.ENGLISH));
@@ -198,9 +202,13 @@ public class LIBORMarketModelVegaTest {
 		long endAAD = System.currentTimeMillis();
 
 		//FD:
-		long startFD = System.currentTimeMillis();
-		
-		double finiteDifferencesStepSize = 1E-4;
+//		double[] bumpSizes = new double[]{1E-1, 1E-2, 1E-3, 1E-4, 1E-5, 1E-6, 1E-7, 1E-8, 1E-9, 1E-10};
+		double finiteDifferencesStepSize = 1E-6;
+
+//		for(double finiteDifferencesStepSize : bumpSizes) {
+//			System.out.println(finiteDifferencesStepSize);
+
+		long startFD = System.currentTimeMillis();	
 		Map<Long, RandomVariableInterface> gradientFD = new HashMap<>();
 		for(int parameterIndex = 0; parameterIndex < parameterID.length; parameterIndex++) {
 			double[] bumpedParameter = parameter.clone();
@@ -223,13 +231,13 @@ public class LIBORMarketModelVegaTest {
 		for(long key : parameterID) {	
 				RandomVariableInterface aad = gradientAAD.getOrDefault(key, zero);
 				RandomVariableInterface fd = gradientFD.getOrDefault(key, zero);				
-				RandomVariableInterface diff = aad.sub(fd);				
+				RandomVariableInterface diff = fd.apply((x,y) -> x == 0 ? 0.0 : (x-y)/x, aad);
 
 				gradientDifferences.put(key, diff);
 				
 				System.out.println(key + "\t\t" + formatterValue.format(aad.getAverage()) + 
 										 "\t\t" + formatterValue.format(fd.getAverage()) + 
-										 "\t\t" +  formatterValue.format(diff.getAverage()));
+										 "\t\t" + formatterValue.format(diff.getAverage()));
 		}
 		
 		System.out.println();
@@ -248,5 +256,6 @@ public class LIBORMarketModelVegaTest {
 		System.out.println("Root-Mean-Square Error: " + formatterValue.format(errorRMS));
 		Assert.assertEquals(0.0, errorRMS, 1E-3);
 	}
+//	}
 	
 }

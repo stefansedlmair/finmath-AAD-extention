@@ -77,6 +77,7 @@ import net.finmath.time.daycount.DayCountConvention_ACT_365;
  * This class tests the LIBOR market model and products.
  * 
  * @author Christian Fries
+ * @author Stefan Sedlmair
  */
 
 @RunWith(Parameterized.class)
@@ -100,8 +101,10 @@ public class LIBORMarketModelCalibrationTest {
 //			for(OptimizerType optimizerType : OptimizerType.values())
 				for(OptimizerDerivativeType derivativeType : OptimizerDerivativeType.values())
 					config.add(new Object[] {
-							OptimizerSolverType.VECTOR,//solverType, 
-							OptimizerType.LevenbergMarquardt, //optimizerType, 
+							OptimizerSolverType.SKALAR,
+							//solverType, 
+							OptimizerType.LevenbergMarquardt, 
+							//optimizerType, 
 							derivativeType});
 		
 		return config;
@@ -179,9 +182,9 @@ public class LIBORMarketModelCalibrationTest {
 		final int numberOfFactors	= 1;
 		
 		// Optimizer Settings
-		Double accuracy = new Double(1E-2);	// Lower accuracy to reduce runtime of the unit test
+		Double accuracy = new Double(1E-4);	// Lower accuracy to reduce runtime of the unit test
 		int maxIterations = 100;
-		int numberOfThreads = 4;
+		int numberOfThreads = 2;
 		
 		//------------------------------------------------------------------------------------------
 		
@@ -326,7 +329,7 @@ public class LIBORMarketModelCalibrationTest {
 		
 		calibrationParameters.put("solverType", solverType);
 		calibrationParameters.put("derivativeType", derivativeType);
-		calibrationParameters.put("scheme", Scheme.EULER_FUNCTIONAL);
+		calibrationParameters.put("scheme", Scheme.EULER);
 		
 		properties.put("calibrationParameters", calibrationParameters);
 
@@ -352,16 +355,47 @@ public class LIBORMarketModelCalibrationTest {
 
 		System.out.println("\nCalibrated parameters are:");
 		double[] param = ((AbstractLIBORCovarianceModelParametric)((LIBORMarketModel) liborMarketModelCalibrated).getCovarianceModel()).getParameter();
-		for (double p : param) System.out.println(p);
+		for (double p : param) System.out.println(formatterParam.format(p));
 
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion);
 		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
 
+		//-------------------------------------------------------------------------------------------------------------------------------------------------
+		
+		ArrayList<CalibrationItem> calibrationItemsVola		= new ArrayList<CalibrationItem>();
+		
+		for(int i=0; i<atmNormalVolatilities.length; i++ ) {
+
+			LocalDate exerciseDate = cal.createDateFromDateAndOffsetCode(referenceDate, atmExpiries[i]);
+			LocalDate tenorEndDate = cal.createDateFromDateAndOffsetCode(exerciseDate, atmTenors[i]);
+			double	exercise		= modelDC.getDaycountFraction(referenceDate, exerciseDate);
+			double	tenor			= modelDC.getDaycountFraction(exerciseDate, tenorEndDate);
+
+			// We consider an idealized tenor grid (alternative: adapt the model grid)
+			exercise	= Math.round(exercise/0.25)*0.25;
+			tenor		= Math.round(tenor/0.25)*0.25;
+
+			if(exercise < 1.0) continue;
+
+			int numberOfPeriods = (int)Math.round(tenor / swapPeriodLength);
+
+			double	moneyness			= 0.0;
+			double	targetVolatility	= atmNormalVolatilities[i];
+
+			String	targetVolatilityType = "VOLATILITYNORMAL";
+
+			double	weight = 1.0;
+
+			calibrationItemsVola.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, targetVolatilityType, forwardCurve, discountCurve));
+		}
+		
+		//-------------------------------------------------------------------------------------------------------------------------------------------------
+		
 		System.out.println("\nValuation on calibrated model:");
 		double deviationSum			= 0.0;
 		double deviationSquaredSum	= 0.0;
 		for (int i = 0; i < calibrationItems.size(); i++) {
-			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationItems.get(i).calibrationProduct;
+			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationItemsVola.get(i).calibrationProduct;
 			try {
 				double valueModel = calibrationProduct.getValue(simulationCalibrated);
 				double valueTarget = calibrationItems.get(i).calibrationTargetValue;

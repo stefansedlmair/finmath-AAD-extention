@@ -282,7 +282,6 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 				}
 //				long endTime = System.currentTimeMillis();
 
-//				for(double[] row : derivatives) System.out.println(Arrays.toString(row)); 
 //				System.out.println("calculation time for derivative (AAD): " + (endTime - startTime)/1E3 + "s"); 
 //				System.out.println();
 			}

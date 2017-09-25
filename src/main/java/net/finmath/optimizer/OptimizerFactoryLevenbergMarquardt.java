@@ -6,7 +6,9 @@
 
 package net.finmath.optimizer;
 
-import java.util.Arrays;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
 
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
@@ -21,6 +23,7 @@ public class OptimizerFactoryLevenbergMarquardt implements OptimizerFactoryInter
 	private final double	errorTolerance;
 	private final int		maxThreads;
 
+	
 	public OptimizerFactoryLevenbergMarquardt(int maxIterations, double errorTolerance, int maxThreads) {
 		super();
 		this.maxIterations = maxIterations;
@@ -61,8 +64,8 @@ public class OptimizerFactoryLevenbergMarquardt implements OptimizerFactoryInter
 //			public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
 //				super.setDerivatives(parameters, derivatives);
 //				
-//				System.out.println("FD:");
-//				for(double[] row : derivatives) System.out.println(Arrays.toString(row));
+//				System.out.println("FD - step# " + super.getIterations() + ":");
+//				printMatrix(derivatives);
 //				System.out.println();
 //			}
 		})
@@ -89,8 +92,8 @@ public class OptimizerFactoryLevenbergMarquardt implements OptimizerFactoryInter
 			public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
 				objectiveFunction.setDerivatives(parameters, derivatives);
 				
-//				System.out.println("AAD:");
-//				for(double[] row : derivatives) System.out.println(Arrays.toString(row));
+//				System.out.println("AAD - step# " + super.getIterations() + ":");
+//				printMatrix(derivatives);
 //				System.out.println();
 			}
 		})
@@ -106,5 +109,16 @@ public class OptimizerFactoryLevenbergMarquardt implements OptimizerFactoryInter
 	@Override
 	public OptimizerInterface getOptimizer(final DerivativeFunction objectiveFunction, final double[] initialParameters, final double[] lowerBound,final double[]  upperBound, double[] targetValues) {
 		return getOptimizer(objectiveFunction, initialParameters, lowerBound, upperBound, null, targetValues);
+	}
+	
+	
+	private static DecimalFormat formatterParam		= new DecimalFormat(" #0.000;-#0.000", new DecimalFormatSymbols(Locale.ENGLISH));
+
+	private void printMatrix(double[][] matrix) {
+		for(double[] row : matrix) {
+			for(double col : row) 
+				System.out.print(formatterParam.format(col) + " ");
+			System.out.println();
+		}
 	}
 }
