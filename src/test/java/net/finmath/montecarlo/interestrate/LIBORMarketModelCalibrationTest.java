@@ -97,12 +97,12 @@ public class LIBORMarketModelCalibrationTest {
 		
 		Collection<Object[]> config = new ArrayList<>();
 		
-//		for(OptimizerSolverType solverType : OptimizerSolverType.values())
+		for(OptimizerSolverType solverType : OptimizerSolverType.values())
 //			for(OptimizerType optimizerType : OptimizerType.values())
 				for(OptimizerDerivativeType derivativeType : OptimizerDerivativeType.values())
 					config.add(new Object[] {
-							OptimizerSolverType.SKALAR,
-							//solverType, 
+//							OptimizerSolverType.SKALAR,
+							solverType, 
 							OptimizerType.LevenbergMarquardt, 
 							//optimizerType, 
 							derivativeType});
@@ -162,9 +162,17 @@ public class LIBORMarketModelCalibrationTest {
 		 */
 		SwaptionSimple swaptionMonteCarlo = new SwaptionSimple(swaprate, swapTenor, SwaptionSimple.ValueUnit.valueOf(targetVolatilityType));
 		
-		double targetValuePrice = AnalyticFormulas.blackModelSwaptionValue(swaprate, targetVolatility, fixingDates[0], swaprate, SwapAnnuity.getSwapAnnuity(new TimeDiscretization(swapTenor), discountCurve));
+		CalibrationItem calibrationItem = null;
+		if(targetVolatilityType.equals("VALUE")) {
+			double targetValuePrice = AnalyticFormulas.blackModelSwaptionValue(swaprate, targetVolatility, fixingDates[0], swaprate, SwapAnnuity.getSwapAnnuity(new TimeDiscretization(swapTenor), discountCurve));
+			calibrationItem = new CalibrationItem(swaptionMonteCarlo, targetValuePrice, weight);
+		}
+		else if(targetVolatilityType.equals("VOLATILITYNORMAL")) {
+			calibrationItem = new CalibrationItem(swaptionMonteCarlo, targetVolatility, weight);
+		}
+		else throw new UnsupportedOperationException();
 		
-		return new CalibrationItem(swaptionMonteCarlo, targetValuePrice, weight);
+		return calibrationItem;
 	}
 
 	/**
@@ -394,11 +402,11 @@ public class LIBORMarketModelCalibrationTest {
 		System.out.println("\nValuation on calibrated model:");
 		double deviationSum			= 0.0;
 		double deviationSquaredSum	= 0.0;
-		for (int i = 0; i < calibrationItems.size(); i++) {
-			AbstractLIBORMonteCarloProduct calibrationProduct = calibrationItemsVola.get(i).calibrationProduct;
+		for (int i = 0; i < calibrationItemsVola.size(); i++) {
+			CalibrationItem calibrationItem = calibrationItemsVola.get(i);
 			try {
-				double valueModel = calibrationProduct.getValue(simulationCalibrated);
-				double valueTarget = calibrationItems.get(i).calibrationTargetValue;
+				double valueModel = calibrationItem.calibrationProduct.getValue(simulationCalibrated);
+				double valueTarget = calibrationItem.calibrationTargetValue;
 				double error = valueModel-valueTarget;
 				deviationSum += error;
 				deviationSquaredSum += error*error;
@@ -411,9 +419,9 @@ public class LIBORMarketModelCalibrationTest {
 		System.out.println("Calibration of curves........." + (millisCurvesEnd-millisCurvesStart)/1000.0);
 		System.out.println("Calibration of volatilities..." + (millisCalibrationEnd-millisCalibrationStart)/1000.0);
 		
-		double averageDeviation = deviationSum/calibrationItems.size();
+		double averageDeviation = deviationSum/calibrationItemsVola.size();
 		System.out.println("Mean Deviation:" + formatterValue.format(averageDeviation));
-		System.out.println("RMS Error.....:" + formatterValue.format(Math.sqrt(deviationSquaredSum/calibrationItems.size())));
+		System.out.println("RMS Error.....:" + formatterValue.format(Math.sqrt(deviationSquaredSum/calibrationItemsVola.size())));
 		System.out.println("__________________________________________________________________________________________\n");
 
 		Assert.assertEquals(0.0, averageDeviation, 1E-2);

@@ -231,7 +231,8 @@ public class LIBORMarketModelVegaTest {
 		for(long key : parameterID) {	
 				RandomVariableInterface aad = gradientAAD.getOrDefault(key, zero);
 				RandomVariableInterface fd = gradientFD.getOrDefault(key, zero);				
-				RandomVariableInterface diff = fd.apply((x,y) -> x == 0 ? 0.0 : (x-y)/x, aad);
+//				RandomVariableInterface diff = fd.apply((x,y) -> x == 0 ? 0.0 : (x-y)/x, aad);
+				RandomVariableInterface diff = fd.sub(aad);
 
 				gradientDifferences.put(key, diff);
 				
