@@ -164,7 +164,7 @@ public class LIBORMarketModelCalibrationTest {
 		
 		CalibrationItem calibrationItem = null;
 		if(targetVolatilityType.equals("VALUE")) {
-			double targetValuePrice = AnalyticFormulas.blackModelSwaptionValue(swaprate, targetVolatility, fixingDates[0], swaprate, SwapAnnuity.getSwapAnnuity(new TimeDiscretization(swapTenor), discountCurve));
+			double targetValuePrice = AnalyticFormulas.bachelierOptionValue(swaprate, targetVolatility, fixingDates[0], swaprate, SwapAnnuity.getSwapAnnuity(new TimeDiscretization(swapTenor), discountCurve));
 			calibrationItem = new CalibrationItem(swaptionMonteCarlo, targetValuePrice, weight);
 		}
 		else if(targetVolatilityType.equals("VOLATILITYNORMAL")) {
