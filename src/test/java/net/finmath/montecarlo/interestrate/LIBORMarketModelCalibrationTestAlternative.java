@@ -204,7 +204,9 @@ public class LIBORMarketModelCalibrationTestAlternative {
 		LIBORModelMonteCarloSimulation liborModelCalibratedMonteCarloSimulation = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, eulerScheme);
 		
 		System.out.println("\nCalibrated parameters are:");
-		double[] param = ((AbstractLIBORCovarianceModelParametric)((LIBORMarketModel) liborMarketModelCalibrated).getCovarianceModel()).getParameter();
+		AbstractLIBORCovarianceModelParametric calibratedCovarianceModel = (AbstractLIBORCovarianceModelParametric) ((LIBORMarketModel) liborMarketModelCalibrated).getCovarianceModel();
+
+		double[] param = calibratedCovarianceModel.getParameter();
 		for (double p : param) System.out.println(formatterParam.format(p));
 		System.out.println("\nValuation on calibrated model:");
 		int numberOfProducts = calibrationItems.length;
@@ -225,7 +227,8 @@ public class LIBORMarketModelCalibrationTestAlternative {
 		}
 
 		System.out.println("Calibration of prices... " + (millisCalibrationEnd-millisCalibrationStart)/1E3 + "s");
-				
+		System.out.println("Number of Iterations.... " + covarianceModelDisplaced.getCalibrationOptimizer().getIterations());
+		
 		double averageDeviation = deviationSum/numberOfProducts;
 		System.out.println("Mean Deviation:" + formatterValue.format(averageDeviation));
 		System.out.println("RMS Error.....:" + formatterValue.format(Math.sqrt(deviationSquaredSum/numberOfProducts)));
