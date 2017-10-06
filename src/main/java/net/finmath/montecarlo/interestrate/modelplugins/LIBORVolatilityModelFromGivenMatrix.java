@@ -31,7 +31,7 @@ public class LIBORVolatilityModelFromGivenMatrix extends LIBORVolatilityModel {
 	private transient double[]		parameter = null;
 	
 	// TODO: only one of those will be chosen later on
-	private transient RandomVariableInterface[]		parameterRVs = null;
+//	private transient RandomVariableInterface[]		parameterRVs = null;
 	private transient long[]						parameterIDs = null;
 	
 
@@ -116,7 +116,13 @@ public class LIBORVolatilityModelFromGivenMatrix extends LIBORVolatilityModel {
 		for(int timeIndex = 0; timeIndex<getTimeDiscretization().getNumberOfTimeSteps(); timeIndex++) {
 			for(int liborPeriodIndex = 0; liborPeriodIndex< getLiborPeriodDiscretization().getNumberOfTimeSteps(); liborPeriodIndex++) {
 				if(getTimeDiscretization().getTime(timeIndex) < getLiborPeriodDiscretization().getTime(liborPeriodIndex) ) {
-					volatilityMatrix[timeIndex][liborPeriodIndex] = Math.max(parameter[parameterIndex++],0.0);
+					double currentVolatility = parameter[parameterIndex++];
+					
+					// catch negative values
+					if(currentVolatility < 0.0) 
+						throw new IllegalArgumentException("Parameter at index " + (parameterIndex - 1) + " indicates negative Volatility(value: "+ currentVolatility +")!");
+					
+					volatilityMatrix[timeIndex][liborPeriodIndex] = currentVolatility;
 				}
 			}
 		}
