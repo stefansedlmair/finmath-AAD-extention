@@ -76,7 +76,7 @@ public class LIBORMarketModelVegaTest {
 		double[] paymentDates = new double[numberOfPeriods];
 		double[] swapTenor = new double[numberOfPeriods + 1];
 		double swapPeriodLength = 0.5;
-		String tenorCode = "6M";
+//		String tenorCode = "6M";
 
 		for (int periodStartIndex = 0; periodStartIndex < numberOfPeriods; periodStartIndex++) {
 			fixingDates[periodStartIndex] = exerciseDate + periodStartIndex * swapPeriodLength;
@@ -91,17 +91,17 @@ public class LIBORMarketModelVegaTest {
 		double swaprate = net.finmath.marketdata.products.Swap.getForwardSwapRate(swapTenorDiscretization, swapTenorDiscretization, forwardCurve, new DiscountCurveFromForwardCurve(forwardCurve));
 
 		// Set swap rates for each period
-		double[] swaprates = new double[numberOfPeriods];
-		Arrays.fill(swaprates, swaprate);
+//		double[] swaprates = new double[numberOfPeriods];
+//		Arrays.fill(swaprates, swaprate);
 
-		double[] periodLengths = new double[numberOfPeriods];
-		Arrays.fill(periodLengths, swapPeriodLength);
+//		double[] periodLengths = new double[numberOfPeriods];
+//		Arrays.fill(periodLengths, swapPeriodLength);
 
-		double[] periodNotionals = new double[numberOfPeriods];
-		Arrays.fill(periodNotionals, 1.0);
+//		double[] periodNotionals = new double[numberOfPeriods];
+//		Arrays.fill(periodNotionals, 1.0);
 
-		boolean[] isPeriodStartDateExerciseDate = new boolean[numberOfPeriods];
-		Arrays.fill(isPeriodStartDateExerciseDate, true);
+//		boolean[] isPeriodStartDateExerciseDate = new boolean[numberOfPeriods];
+//		Arrays.fill(isPeriodStartDateExerciseDate, true);
 		
 		product = new Swaption(exerciseDate, swapTenorDiscretization, swaprate);
 	}
