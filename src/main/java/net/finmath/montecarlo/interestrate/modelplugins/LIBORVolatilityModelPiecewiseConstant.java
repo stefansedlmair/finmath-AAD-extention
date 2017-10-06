@@ -50,16 +50,15 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 			indexMap.put(simulationTime, timeToMaturityIndexing);
 		}
 
-		this.volatility = new RandomVariableInterface[volatilityIndex];
+		// catch case where all values are the same
 		if(volatility.length == 1) {
-			for(int i = 0; i < this.volatility.length; i++)
-				this.volatility[i] = randomVariableFactory.createRandomVariable(volatility[0]);
+			double volatilityValue = volatility[0];
+			volatility = new double[volatilityIndex];
+			Arrays.fill(volatility, volatilityValue);
 		}
-		else {
-			if(volatility.length != volatilityIndex) throw new IllegalArgumentException("volatility.length should be equal to volatilityIndex!");
-			for(int i = 0; i < volatility.length; i++)
-				this.volatility[i] = randomVariableFactory.createRandomVariable(volatility[i]);
-		}
+		
+		this.volatility = new RandomVariableInterface[volatilityIndex];
+		setParameter(volatility, true);
 
 		if(volatilityIndex != this.volatility.length) throw new IllegalArgumentException("volatility.length should equal simulationTimeDiscretization.getNumberOfTimes()*timeToMaturityDiscretization.getNumberOfTimes().");
 		this.simulationTimeDiscretization = simulationTimeDiscretization;
@@ -96,13 +95,23 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 
 	@Override
 	public void setParameter(double[] parameter) {
-		if(isCalibrateable) {
-			if(parameter.length != volatility.length) throw new IllegalArgumentException("parameter.length has to conincide with volatility.length!");
-			for(int i = 0; i < volatility.length; i++)
-				this.volatility[i] = randomVariableFactory.createRandomVariable(parameter[i]);
-		}
+		setParameter(parameter, isCalibrateable);
 	}
 
+	private void setParameter(double[] parameter, boolean executeFunction) {
+		if(executeFunction) {
+			if(parameter.length != volatility.length) throw new IllegalArgumentException("parameter.length has to conincide with volatility.length!");
+			for(int i = 0; i < volatility.length; i++) {
+				double volatility = Math.max(parameter[i], 0.0);
+				// catch negative values for volatilities
+//				if(parameter[i] < 0.0) 
+//					throw new IllegalArgumentException("Volatility parameter " + i + " is negativ!");
+				
+				this.volatility[i] = randomVariableFactory.createRandomVariable(volatility);
+			}
+		}
+	}
+	
 	@Override
 	public RandomVariableInterface getVolatility(int timeIndex, int liborIndex) {
 		// Create a very simple volatility model here
@@ -133,8 +142,9 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 			//			volatilityInstanteaneous = volatility[timeIndexSimulationTime * timeToMaturityDiscretization.getNumberOfTimes() + timeIndexTimeToMaturity];
 			//			volatilityInstanteaneous = volatility[indexMap.get(timeIndexSimulationTime).get(timeIndexTimeToMaturity)];
 
-			// for addition filtration time will be carried over from the first variable, ie volatility[i] gets a new filtration time.
-			volatilityInstanteaneous = volatilityInstanteaneous.add(volatility[indexMap.get(timeIndexSimulationTime).get(timeIndexTimeToMaturity)]).floor(0.0);
+			// for addition filtration time will be carried over from the first variable, i.e. volatility[i] gets a new filtration time.
+			// volatilities cannot be negative anymore, i.e. no floor/max at 0.0 needed!
+			volatilityInstanteaneous = volatilityInstanteaneous.add(volatility[indexMap.get(timeIndexSimulationTime).get(timeIndexTimeToMaturity)]);
 		}
 		//		if(volatilityInstanteaneous < 0.0) volatilityInstanteaneous = Math.max(volatilityInstanteaneous,0.0);
 
