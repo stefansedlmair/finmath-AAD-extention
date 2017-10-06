@@ -6,10 +6,6 @@
 
 package net.finmath.optimizer;
 
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.util.Locale;
-
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
 
@@ -59,7 +55,7 @@ public class OptimizerFactoryLevenbergMarquardt implements OptimizerFactoryInter
 			public void setValues(double[] parameters, double[] values) throws SolverException {
 				objectiveFunction.setValues(parameters, values);
 			}
-			
+
 //			@Override
 //			public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
 //				super.setDerivatives(parameters, derivatives);
@@ -111,14 +107,12 @@ public class OptimizerFactoryLevenbergMarquardt implements OptimizerFactoryInter
 		return getOptimizer(objectiveFunction, initialParameters, lowerBound, upperBound, null, targetValues);
 	}
 	
-	
-	private static DecimalFormat formatterParam		= new DecimalFormat(" #0.000;-#0.000", new DecimalFormatSymbols(Locale.ENGLISH));
-
-	private void printMatrix(double[][] matrix) {
-		for(double[] row : matrix) {
-			for(double col : row) 
-				System.out.print(formatterParam.format(col) + " ");
-			System.out.println();
-		}
-	}
+//	private static DecimalFormat formatterParam		= new DecimalFormat(" #0.000;-#0.000", new DecimalFormatSymbols(Locale.ENGLISH));
+//	private void printMatrix(double[][] matrix) {
+//		for(double[] row : matrix) {
+//			for(double col : row) 
+//				System.out.print(formatterParam.format(col) + " ");
+//			System.out.println();
+//		}
+//	}
 }
