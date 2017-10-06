@@ -12,7 +12,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
@@ -67,6 +66,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 	}
 
 	private static final Logger logger = Logger.getLogger("net.finmath");
+	private OptimizerInterface optimizer = null;
 
 	/**
 	 * Constructor consuming time discretizations, which are handled by the super class.
@@ -126,7 +126,19 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 	 * @throws CalculationException Thrown if calibration has failed.
 	 */
 	public AbstractLIBORCovarianceModelParametric getCloneCalibrated(final LIBORMarketModelInterface calibrationModel, final AbstractLIBORMonteCarloProduct[] calibrationProducts, final double[] calibrationTargetValues, double[] calibrationWeights, Map<String,Object> calibrationParameters) throws CalculationException {
-
+		
+		/*
+		 * We allow for 2 simultaneous calibration models.
+		 * Note: In the case of a Monte-Carlo calibration, the memory requirement is that of
+		 * one model with 2 times the number of paths. In the case of an analytic calibration
+		 * memory requirement is not the limiting factor.
+		 */
+		final int numberOfThreads = 2;
+		final ExecutorService executor = null;
+		
+		//int numberOfThreadsForProductValuation = 2 * Math.max(2, Runtime.getRuntime().availableProcessors());
+		//Executors.newFixedThreadPool(numberOfThreads);//numberOfThreadsForProductValuation);
+		
 		double[] initialParameters = this.getParameter();
 				
 		int numberOfCalibrationProducts = calibrationProducts.length;
@@ -134,53 +146,26 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 		
 		if(numberOfCalibrationProducts != calibrationTargetValues.length) throw new IllegalArgumentException("Each calibration product has to have a target value!");
 		
+		// get calibration parameters
 		if(calibrationParameters == null) calibrationParameters = new HashMap<String,Object>();
-		Integer numberOfPathsParameter	= (Integer)calibrationParameters.get("numberOfPaths");
-		Integer seedParameter			= (Integer)calibrationParameters.get("seed");
-		Integer maxIterationsParameter	= (Integer)calibrationParameters.get("maxIterations");
-		Double	parameterStepParameter	= (Double)calibrationParameters.get("parameterStep");
-		Double	accuracyParameter		= (Double)calibrationParameters.get("accuracy");
 		
-		Scheme processSchemeParameter	= (Scheme)calibrationParameters.get("scheme");
+		final int 						numberOfPaths		= (int)calibrationParameters.getOrDefault(		"numberOfPaths", 		2000);
+		final int 						seed				= (int)calibrationParameters.getOrDefault(		"seed", 				31415);
+		final int 						maxIterations		= (int)calibrationParameters.getOrDefault(		"maxIterations", 		400);
+		final double					parameterStepValue	= (double)calibrationParameters.getOrDefault(	"parameterStep", 		1E-4);
+		final double					accuracy			= (double)calibrationParameters.getOrDefault(	"accuracy", 			1E-7);
+		final Scheme 					processScheme		= (Scheme)calibrationParameters.getOrDefault(	"scheme",  				Scheme.EULER_FUNCTIONAL);
+		final double[] 					lowerBound 			= (double[])calibrationParameters.getOrDefault(	"parameterLowerBound", 	initialzeDoubleArray(Double.NEGATIVE_INFINITY, numberOfParameters));
+		final double[] 					upperBound 			= (double[])calibrationParameters.getOrDefault(	"parameterUpperBound", 	initialzeDoubleArray(Double.POSITIVE_INFINITY, numberOfParameters));
+		final OptimizerSolverType 		solverType 			= (OptimizerSolverType) calibrationParameters.getOrDefault(		"solverType", 			OptimizerSolverType.VECTOR);
+		final OptimizerDerivativeType	derivativeType 		= (OptimizerDerivativeType) calibrationParameters.getOrDefault(	"derivativeType", 		OptimizerDerivativeType.FINITE_DIFFERENCES);
+		final BrownianMotionInterface 	brownianMotion		= (BrownianMotionInterface)calibrationParameters.getOrDefault(	"brownianMotion", 	new BrownianMotion(getTimeDiscretization(), getNumberOfFactors(), numberOfPaths, seed));
+		final OptimizerFactoryInterface optimizerFactory 	= (OptimizerFactoryInterface)calibrationParameters.getOrDefault("optimizerFactory", new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads));
 
-		OptimizerSolverType solverTypeParameter = (OptimizerSolverType) calibrationParameters.get("solverType");
-		OptimizerDerivativeType derivativeTypeParameter = (OptimizerDerivativeType) calibrationParameters.get("derivativeType");
-
-		BrownianMotionInterface brownianMotionParameter	= (BrownianMotionInterface)calibrationParameters.get("brownianMotion");
-
-		double[] lowerBound = new double[numberOfParameters];
-		double[] upperBound = new double[numberOfParameters];
-		double[] parameterStep = new double[numberOfParameters];
-		double[] zero = new double[numberOfCalibrationProducts];
-		Arrays.fill(lowerBound, Double.NEGATIVE_INFINITY);
-		Arrays.fill(upperBound, Double.POSITIVE_INFINITY);
-		Arrays.fill(parameterStep, parameterStepParameter != null ? parameterStepParameter.doubleValue() : 1E-4);
-		Arrays.fill(zero, 0);
-
-		/*
-		 * We allow for 2 simultaneous calibration models.
-		 * Note: In the case of a Monte-Carlo calibration, the memory requirement is that of
-		 * one model with 2 times the number of paths. In the case of an analytic calibration
-		 * memory requirement is not the limiting factor.
-		 */
-		int numberOfThreads = 2;
-		OptimizerFactoryInterface optimizerFactoryParameter = (OptimizerFactoryInterface)calibrationParameters.get("optimizerFactory");
-
-		int numberOfPaths	= numberOfPathsParameter != null 	? numberOfPathsParameter.intValue() 	: 2000;
-		int seed			= seedParameter != null 			? seedParameter.intValue() 				: 31415;
-		int maxIterations	= maxIterationsParameter != null 	? maxIterationsParameter.intValue() 	: 400;
-		double accuracy		= accuracyParameter != null 		? accuracyParameter.doubleValue() 		: 1E-7;
+		final double[] parameterStep = initialzeDoubleArray(parameterStepValue, numberOfParameters);
 		
-		final BrownianMotionInterface brownianMotion 	= brownianMotionParameter 	!= null ? brownianMotionParameter 	: new BrownianMotion(getTimeDiscretization(), getNumberOfFactors(), numberOfPaths, seed);
-		final Scheme processScheme						= processSchemeParameter 	!= null ? processSchemeParameter	: Scheme.EULER_FUNCTIONAL;
-		OptimizerFactoryInterface optimizerFactory 		= optimizerFactoryParameter != null ? optimizerFactoryParameter : new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
 
-		final OptimizerSolverType solverType 			= solverTypeParameter 		!= null ? solverTypeParameter 		: OptimizerSolverType.VECTOR;
-		final OptimizerDerivativeType derivativeType 	= derivativeTypeParameter 	!= null ? derivativeTypeParameter 	: OptimizerDerivativeType.FINITE_DIFFERENCES;
-		
-//		int numberOfThreadsForProductValuation = 2 * Math.max(2, Runtime.getRuntime().availableProcessors());
-		final ExecutorService executor = null;//Executors.newFixedThreadPool(numberOfThreads);//numberOfThreadsForProductValuation);
-
+		// define evaluating functions
 		ObjectiveFunction calibrationError = new ObjectiveFunction() {			
 			// Calculate model values for given parameters
 			@Override
@@ -210,7 +195,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 							double error = calibratedPrices[i] - calibrationTargetValues[i];
 							errorRMS += error * error;
 					}
-					errorRMS /= (double) numberOfCalibrationProducts;
+//					errorRMS /= (double) numberOfCalibrationProducts;
 					System.arraycopy(new double[] {Math.sqrt(errorRMS)} , 0, values, 0, 1);
 					break;
 				}
@@ -266,8 +251,9 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 							RandomVariableInterface error = calibratedPrices[i].sub(calibrationTargetValues[i]);
 							errorRMS = (errorRMS == null) ? error.squared() : errorRMS.addProduct(error, error);
 					}
-					errorRMS = errorRMS.div(numberOfCalibrationProducts).sqrt();
-					
+//					errorRMS = errorRMS.div(numberOfCalibrationProducts).sqrt();
+					errorRMS = errorRMS.sqrt();
+							
 					// take gradient of the mean-square-error (here AAD should bring the most improvement!)
 					Map<Long, RandomVariableInterface> gradient = ((RandomVariableDifferentiableInterface) errorRMS).getGradient();
 										
@@ -300,7 +286,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 			break;
 		}
 
-		OptimizerInterface optimizer = null;
+//		OptimizerInterface optimizer = null;
 		switch(derivativeType) {
 		case FINITE_DIFFERENCES:
 			optimizer = optimizerFactory.getOptimizer(calibrationError, initialParameters, lowerBound, upperBound, parameterStep, targetValues);
@@ -380,10 +366,20 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 		return valueFutures;
 	}
 	
+	public OptimizerInterface getCalibrationOptimizer() {
+		return optimizer; 
+	}
+	
 	
 	@Override
 	public String toString() {
 		return "AbstractLIBORCovarianceModelParametric [getParameter()="
 				+ Arrays.toString(getParameter()) + "]";
+	}
+	
+	private double[] initialzeDoubleArray(double value, int length) {
+		double[] array = new double[length];
+		Arrays.fill(array, value);
+		return array;
 	}
 }
