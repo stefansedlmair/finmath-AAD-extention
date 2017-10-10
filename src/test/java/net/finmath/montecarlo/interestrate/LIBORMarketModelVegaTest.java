@@ -2,13 +2,18 @@ package net.finmath.montecarlo.interestrate;
 
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
+import org.junit.runners.Parameterized.Parameters;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
@@ -34,6 +39,7 @@ import net.finmath.time.TimeDiscretizationInterface;
  * @author Stefan Sedlmair
  * */
 
+@RunWith(Parameterized.class)
 public class LIBORMarketModelVegaTest {
 
 	private static DecimalFormat formatterValue		= new DecimalFormat(" 000.000%;-##0.000%", new DecimalFormatSymbols(Locale.ENGLISH));
@@ -42,11 +48,24 @@ public class LIBORMarketModelVegaTest {
 	LIBORModelMonteCarloSimulationInterface liborMarketModelMonteCarloSimulation;
 	AbstractLIBORMonteCarloProduct product;
 	
+	int numberOfPaths;
 	
-	public LIBORMarketModelVegaTest() throws CalculationException {
+	@Parameters(name="numberOfPaths={0}")
+	public static Collection<Object[]> data() {
+
+		Collection<Object[]> config = new ArrayList<>();
+		
+		config.add(new Object[]{(int) 1E2});
+		config.add(new Object[]{(int) 1E3});
+		config.add(new Object[]{(int) 1E4}); /* needs ~14GB of RAM: use '-mx14G' in run-config*/
+
+		return config;
+	}
+	
+	public LIBORMarketModelVegaTest(int numberOfPaths) throws CalculationException {
 		
 		AbstractRandomVariableFactory randomVariableFactory = new RandomVariableDifferentiableAADFactory();
-		int numberOfPaths				= (int) 1E3;
+		this.numberOfPaths				= numberOfPaths;
 		int numberOfFactors				= 1;
 		double correlationDecayParam	= 4.0;
 		
@@ -242,7 +261,7 @@ public class LIBORMarketModelVegaTest {
 		}
 		
 		System.out.println();
-		System.out.println("Calculation Time: \n" +
+		System.out.println("Calculation Time for " + numberOfPaths + " Paths: \n" +
 							"AAD...:" + formatterParam.format((endAAD - startAAD)/(1E3)) + "\n" + 
 							"FD....:" + formatterParam.format((endFD - startFD)/(1E3)));
 	
@@ -255,7 +274,9 @@ public class LIBORMarketModelVegaTest {
 		errorRMS = Math.sqrt(errorRMS / (double) parameterID.length);
 		
 		System.out.println("Root-Mean-Square Error: " + formatterValue.format(errorRMS));
-		Assert.assertEquals(0.0, errorRMS, 1E-3);
+		System.out.println("__________________________________________________________________________________________\n");
+
+		Assert.assertEquals(0.0, errorRMS, 2E-3);
 	}
 //	}
 	
