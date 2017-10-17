@@ -3,8 +3,10 @@ package net.finmath.montecarlo.automaticdifferentiation.forward;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,6 +18,8 @@ import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.automaticdifferentiation.AbstractRandomVariableDifferentiableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
+import net.finmath.montecarlo.automaticdifferentiation.forward.RandomVariableADFactory.RandomVariableAD;
+import net.finmath.randomnumbers.MersenneTwister;
 import net.finmath.stochastic.RandomVariableInterface;
 
 @RunWith(Parameterized.class)
@@ -29,7 +33,7 @@ public class RandomVariableADTest {
 		List<Object[]> config = new ArrayList<>();
 		
 		config.add(new Object[]{ new RandomVariableADFactory(), "AD"});
-		config.add(new Object[]{ new RandomVariableDifferentiableAADFactory(), "AAD"});
+//		config.add(new Object[]{ new RandomVariableDifferentiableAADFactory(), "AAD"});
 
 		return config;
 	}
@@ -133,79 +137,131 @@ public class RandomVariableADTest {
 	@Test
 	public void testRandomVariableSimpleGradient(){
 
-		RandomVariable randomVariable01 = new RandomVariable(0.0,
+		RandomVariable x0 = new RandomVariable(0.0,
 				new double[] {3.0, 1.0, 0.0, 2.0, 4.0});
-		RandomVariable randomVariable02 = new RandomVariable(0.0,
+		RandomVariable x1 = new RandomVariable(0.0,
 				new double[] {-4.0, -2.0, 0.0, 2.0, 4.0} );
 
+		/*x_0*/
+		RandomVariableInterface randomVariable00 = randomVariableFactory.createRandomVariable(x0.getFiltrationTime(), x0.getRealizations());
+
 		/*x_1*/
-		RandomVariableInterface aadRandomVariable01 = randomVariableFactory.createRandomVariable(randomVariable01.getFiltrationTime(), randomVariable01.getRealizations());
-
-		/*x_2*/
-		RandomVariableInterface aadRandomVariable02 =  randomVariableFactory.createRandomVariable(randomVariable02.getFiltrationTime(), randomVariable02.getRealizations());
+		RandomVariableInterface randomVariable01 =  randomVariableFactory.createRandomVariable(x1.getFiltrationTime(), x1.getRealizations());
 
 
-		/* x_3 = x_1 + x_2 */
-		RandomVariableInterface aadRandomVariable03 = aadRandomVariable01.add(aadRandomVariable02);
-		/* x_4 = x_3 * x_1 */
-		RandomVariableInterface aadRandomVariable04 = aadRandomVariable03.mult(aadRandomVariable01);
-		/* x_5 = x_4 + x_1 = ((x_1 + x_2) * x_1) + x_1 = x_1^2 + x_2x_1 + x_1*/
-		RandomVariableInterface aadRandomVariable05 = aadRandomVariable04.add(aadRandomVariable01);
+		/* x_2 = x_0 + x_1 */
+		RandomVariableInterface randomVariable02 = randomVariable00.add(randomVariable01);
+		/* x_3 = x_2 * x_0 */
+		RandomVariableInterface randomVariable03 = randomVariable02.mult(randomVariable00);
+		/* x_4 = x_3 + x_0 = ((x_0 + x_1) * x_0) + x_0 = x_0^2 + x_1x_0 + x_0*/
+		RandomVariableInterface randomVariable04 = randomVariable03.add(randomVariable00);
 
-		Map<Long, RandomVariableInterface> aadGradient = ((RandomVariableDifferentiableInterface)aadRandomVariable05).getGradient();
+		Map<Long, RandomVariableInterface> adGradient = new HashMap<>();
+		
+		RandomVariableAD adRandomVariable00 = (RandomVariableAD) randomVariable00;
+		RandomVariableAD adRandomVariable01 = (RandomVariableAD) randomVariable01;
+		RandomVariableAD adRandomVariable04 = (RandomVariableAD) randomVariable04;
+		
+		adGradient.put(adRandomVariable00.getID(), adRandomVariable00.getAllPartialDerivatives().get(adRandomVariable04.getID()));
+		adGradient.put(adRandomVariable01.getID(), adRandomVariable01.getAllPartialDerivatives().get(adRandomVariable04.getID()));	
 
-		/* dy/dx_1 = x_1 * 2 + x_2 + 1
-		 * dy/dx_2 = x_1 */
+		/* dx_4/dx_0 = x_0 * 2 + x_1 + 1
+		 * dx_4/dx_1 = x_0 */
 		RandomVariableInterface[] analyticGradient = new RandomVariableInterface[]{
-				randomVariable01.mult(2.0).add(randomVariable02).add(1.0),
-				randomVariable01
+				x0.mult(2.0).add(x1).add(1.0),
+				x0
 		};
 
-		Long[] keys = new Long[aadGradient.keySet().size()];
-		keys = aadGradient.keySet().toArray(keys);
+		Long[] keys = new Long[adGradient.keySet().size()];
+		keys = adGradient.keySet().toArray(keys);
 		Arrays.sort(keys);
 
 		for(int i=0; i<analyticGradient.length;i++){
-			Assert.assertTrue(analyticGradient[i].equals(aadGradient.get(keys[i])));
+//			System.out.println(analyticGradient[i]);
+//			System.out.println(adGradient.get(keys[i]));
+			Assert.assertTrue(analyticGradient[i].equals(adGradient.get(keys[i])));
 		}
 	}
 
 	@Test
 	public void testRandomVariableSimpleGradient2(){
 
-		RandomVariable randomVariable01 = new RandomVariable(0.0,
+		RandomVariable x0 = new RandomVariable(0.0,
 				new double[] {3.0, 1.0, 0.0, 2.0, 4.0});
-		RandomVariable randomVariable02 = new RandomVariable(0.0,
+		RandomVariable x1 = new RandomVariable(0.0,
 				new double[] {-4.0, -2.0, 0.0, 2.0, 4.0} );
 
+		/*x_0*/
+		RandomVariableInterface randomVariable00 = randomVariableFactory.createRandomVariable(x0.getFiltrationTime(), x0.getRealizations());
+
 		/*x_1*/
-		RandomVariableInterface aadRandomVariable00 = randomVariableFactory.createRandomVariable(randomVariable01.getFiltrationTime(), randomVariable01.getRealizations());
+		RandomVariableInterface randomVariable01 = randomVariableFactory.createRandomVariable(x1.getFiltrationTime(), x1.getRealizations());
 
-		/*x_2*/
-		RandomVariableInterface aadRandomVariable01 = randomVariableFactory.createRandomVariable(randomVariable02.getFiltrationTime(), randomVariable02.getRealizations());
+		/* x_2 = x_0 + x_1 */
+		RandomVariableInterface randomVariable02 = randomVariable00.add(randomVariable01);
+		/* x_3 = x_2 * x_0 */
+		RandomVariableInterface randomVariable03 = randomVariable02.mult(randomVariable00);
+		/* x_4 = x_3 + x_0 = ((x_0 + x_1) * x_0) + x_0 = x_0^2 + x_1x_0 + x_0*/
+		RandomVariableInterface randomVariable04 = randomVariable03.add(randomVariable00);
 
-		/* x_3 = x_1 + x_2 */
-		RandomVariableInterface aadRandomVariable02 = aadRandomVariable00.add(aadRandomVariable01);
-		/* x_4 = x_3 * x_1 */
-		RandomVariableInterface aadRandomVariable03 = aadRandomVariable02.mult(aadRandomVariable00);
-		/* x_5 = x_4 + x_1 = ((x_1 + x_2) * x_1) + x_1 = x_1^2 + x_2x_1 + x_1*/
-		RandomVariableInterface aadRandomVariable04 = aadRandomVariable03.add(aadRandomVariable00);
+		Map<Long, RandomVariableInterface> adGradient = new HashMap<>();
+		
+		RandomVariableAD adRandomVariable00 = (RandomVariableAD) randomVariable00;
+		RandomVariableAD adRandomVariable01 = (RandomVariableAD) randomVariable01;
+		RandomVariableAD adRandomVariable04 = (RandomVariableAD) randomVariable04;
+		
+		adGradient.put(adRandomVariable00.getID(), adRandomVariable00.getAllPartialDerivatives().get(adRandomVariable04.getID()));
+		adGradient.put(adRandomVariable01.getID(), adRandomVariable01.getAllPartialDerivatives().get(adRandomVariable04.getID()));	
 
-		Map<Long, RandomVariableInterface> aadGradient = ((RandomVariableDifferentiableInterface) aadRandomVariable04).getGradient();
-
-		/* dy/dx_1 = x_1 * 2 + x_2 + 1
-		 * dy/dx_2 = x_1 */
+		/* dy/dx_0 = x_0 * 2 + x_1 + 1
+		 * dy/dx_1 = x_0 */
 		RandomVariableInterface[] analyticGradient = new RandomVariableInterface[]{
-				randomVariable01.mult(2.0).add(randomVariable02).add(1.0),
-				randomVariable01
+				x0.mult(2.0).add(x1).add(1.0),
+				x0
 		};
 
-		Long[] keys = new Long[aadGradient.keySet().size()];
-		keys = aadGradient.keySet().toArray(keys);
+		Long[] keys = new Long[adGradient.keySet().size()];
+		keys = adGradient.keySet().toArray(keys);
 		Arrays.sort(keys);
 
 		for(int i=0; i<analyticGradient.length;i++){
-			Assert.assertTrue(analyticGradient[i].equals(aadGradient.get(keys[i])));
+//			System.out.println(analyticGradient[i]);
+//			System.out.println(adGradient.get(keys[i]));
+			Assert.assertTrue(analyticGradient[i].equals(adGradient.get(keys[i])));
+		}
+	}
+	
+	@Test
+	public void testRandomVariableADMultipleIndependentFunctions() {
+		
+		int seed = 1234;
+		MersenneTwister mt = new MersenneTwister(seed);
+		
+		int numberOfRalisations = (int) 1E3;
+		int numberOfFunctionRepetitions = (int) 1E3;
+		
+		double[] realizations = new double[numberOfRalisations];
+		for(int i=0; i< numberOfRalisations; i++)
+			realizations[i] = mt.nextDouble();
+		
+		RandomVariableInterface x = randomVariableFactory.createRandomVariable(0.0, realizations);
+		
+		long[] resultIDs = new long[numberOfFunctionRepetitions];
+		
+		for(int i = 0; i < numberOfFunctionRepetitions; i++) {
+			RandomVariableInterface y = x.squared().exp().mult(0.5);
+			resultIDs[i] = ((RandomVariableDifferentiableInterface) y).getID();
+		}
+		
+		long start = System.currentTimeMillis();
+		Map<Long, RandomVariableInterface> partialDerivatives = ((RandomVariableAD) x).getAllPartialDerivatives();
+		long end = System.currentTimeMillis();
+		
+		System.out.print(((end-start)/1E3));
+		
+		RandomVariableInterface analyticResult = x.mult(x.squared().exp());
+		for(int i=0; i < numberOfFunctionRepetitions; i++) {
+			Assert.assertTrue(partialDerivatives.get(resultIDs[i]).equals(analyticResult));
 		}
 	}
 }
