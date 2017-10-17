@@ -84,13 +84,12 @@ public class LIBORMarketModelCalibrationTestAlternative {
 	public static Collection<Object[]> data() {
 
 		Collection<Object[]> config = new ArrayList<>();
-		for(OptimizerSolverType solverType : OptimizerSolverType.values())
-			for(OptimizerDerivativeType derivativeType : OptimizerDerivativeType.values())
-				config.add(new Object[] {
-						//							OptimizerSolverType.SKALAR,
-						solverType, 
-						derivativeType});
-
+		
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
+//		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.FINITE_DIFFERENCES});
+//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.FINITE_DIFFERENCES});
+		
 		return config;
 	}	
 
@@ -99,6 +98,8 @@ public class LIBORMarketModelCalibrationTestAlternative {
 
 	public LIBORMarketModelCalibrationTestAlternative(OptimizerSolverType solverType, OptimizerDerivativeType derivativeType) {
 
+		System.out.println(solverType + " - " + derivativeType);
+		
 		double simulationStart 		= 0.0;
 		double simulationEnd 		= 40.0;
 		double liborPeriodLength 	= 0.25;
