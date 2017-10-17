@@ -9,7 +9,6 @@ import java.util.ArrayList;
 
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariableFactory;
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
 
@@ -28,12 +27,7 @@ public class LIBORVolatilityModelFromGivenMatrix extends LIBORVolatilityModel {
 	 * A cache for the parameter associated with this model, it is only used when getParameter is
 	 * called repeatedly.
 	 */
-	private transient double[]		parameter = null;
-	
-	// TODO: only one of those will be chosen later on
-//	private transient RandomVariableInterface[]		parameterRVs = null;
-	private transient long[]						parameterIDs = null;
-	
+	private transient RandomVariableInterface[]		parameter = null;	
 
 	// A lazy init cache
 	private transient RandomVariableInterface[][] volatility;
@@ -90,26 +84,6 @@ public class LIBORVolatilityModelFromGivenMatrix extends LIBORVolatilityModel {
 	}
 
 	@Override
-	public double[] getParameter() {
-		synchronized (this) {
-			if(parameter == null) {
-				ArrayList<Double> parameterArray = new ArrayList<Double>();
-				for(int timeIndex = 0; timeIndex<getTimeDiscretization().getNumberOfTimeSteps(); timeIndex++) {
-					for(int liborPeriodIndex = 0; liborPeriodIndex< getLiborPeriodDiscretization().getNumberOfTimeSteps(); liborPeriodIndex++) {
-						if(getTimeDiscretization().getTime(timeIndex) < getLiborPeriodDiscretization().getTime(liborPeriodIndex) ) {
-							parameterArray.add(volatilityMatrix[timeIndex][liborPeriodIndex]);
-						}
-					}
-				}
-				parameter = new double[parameterArray.size()];
-				for(int i=0; i<parameter.length; i++) parameter[i] = parameterArray.get(i);
-			}
-		}
-
-		return parameter;
-	}
-
-	@Override
 	public void setParameter(double[] parameter) {
 		this.parameter = null;		// Invalidate cache
 		int parameterIndex = 0;
@@ -151,49 +125,23 @@ public class LIBORVolatilityModelFromGivenMatrix extends LIBORVolatilityModel {
 				newVolatilityArray);
 	}
 
-//	@Override
-//	public RandomVariableInterface[] getParameterRV() {
-//		synchronized (this) {
-//			if(parameterRVs == null) {
-//				ArrayList<RandomVariableInterface> parameterArray = new ArrayList<>();
-//				for(int timeIndex = 0; timeIndex<getTimeDiscretization().getNumberOfTimeSteps(); timeIndex++) {
-//					for(int liborPeriodIndex = 0; liborPeriodIndex< getLiborPeriodDiscretization().getNumberOfTimeSteps(); liborPeriodIndex++) {
-//						if(getTimeDiscretization().getTime(timeIndex) < getLiborPeriodDiscretization().getTime(liborPeriodIndex) ) {
-//							parameterArray.add(getVolatility(timeIndex, liborPeriodIndex));
-//						}
-//					}
-//				}
-//				parameterRVs = new RandomVariableInterface[parameterArray.size()];
-//				for(int i=0; i<parameterRVs.length; i++) parameterRVs[i] = parameterArray.get(i);
-//			}
-//		}
-//
-//		return parameterRVs;	
-//	}
-
 	@Override
-	public long[] getParameterID() {
-		
-		// if one volatility is not differentiable the others not as well 
-		if(!(getVolatility(0, 0) instanceof RandomVariableDifferentiableInterface)) return null;
-		
+	public RandomVariableInterface[] getParameterAsRandomVariable() {
 		synchronized (this) {
-			if(parameterIDs == null) {
-				ArrayList<Long> parameterArray = new ArrayList<>();
+			if(parameter == null) {
+				ArrayList<RandomVariableInterface> parameterArray = new ArrayList<>();
 				for(int timeIndex = 0; timeIndex<getTimeDiscretization().getNumberOfTimeSteps(); timeIndex++) {
 					for(int liborPeriodIndex = 0; liborPeriodIndex< getLiborPeriodDiscretization().getNumberOfTimeSteps(); liborPeriodIndex++) {
 						if(getTimeDiscretization().getTime(timeIndex) < getLiborPeriodDiscretization().getTime(liborPeriodIndex) ) {
-							parameterArray.add(((RandomVariableDifferentiableInterface) getVolatility(timeIndex, liborPeriodIndex)).getID());
-						} else {
-							parameterArray.add(Long.MAX_VALUE);
+							parameterArray.add(getVolatility(timeIndex, liborPeriodIndex));
 						}
 					}
 				}
-				parameterIDs = new long[parameterArray.size()];
-				for(int i=0; i<parameterIDs.length; i++) parameterIDs[i] = parameterArray.get(i);
+				parameter = new RandomVariableInterface[parameterArray.size()];
+				for(int i=0; i<parameter.length; i++) parameter[i] = parameterArray.get(i);
 			}
 		}
 
-		return parameterIDs;	
+		return parameter;	
 	}
 }

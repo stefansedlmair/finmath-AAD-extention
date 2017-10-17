@@ -88,48 +88,28 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
     	
         return covariance;
     }
-
+	
 	@Override
-	public double[] getParameter() {
-		double[] volatilityParameter	= volatilityModel.getParameter();
-		double[] correlationParameter	= correlationModel.getParameter();
+	public RandomVariableInterface[] getParameterAsRandomVariable() {
+		// get parameters
+		RandomVariableInterface[] volatilityParameter = volatilityModel.getParameterAsRandomVariable();
+		RandomVariableInterface[] correlationParameter = null; //correlationModel.getParameterAsRandomVariable();
+
+		// cover case of not calibrateable models
+		if(volatilityParameter  == null) volatilityParameter  = new RandomVariableInterface[] {};
+		if(correlationParameter == null) correlationParameter = new RandomVariableInterface[] {};
+
+		// copy parameters into new storage
+		int numberOfParameters = volatilityParameter.length + correlationParameter.length;
 		
-		int parameterLength = 0;
-		parameterLength += volatilityParameter	!= null ? volatilityParameter.length : 0;
-		parameterLength += correlationParameter != null ? correlationParameter.length : 0;
+		RandomVariableInterface[] parameter = new RandomVariableInterface[numberOfParameters];
 		
-		double[] parameter = new double[parameterLength];
-		
-		int parameterIndex = 0;
-		if(volatilityParameter != null) {
-			System.arraycopy(volatilityParameter, 0, parameter, parameterIndex, volatilityParameter.length);
-			parameterIndex += volatilityParameter.length;
-		}
-		if(correlationParameter != null) {
-			System.arraycopy(correlationParameter, 0, parameter, parameterIndex, correlationParameter.length);
-			parameterIndex += correlationParameter.length;
-		}
+		System.arraycopy(volatilityParameter,  0, parameter, 0, 							volatilityParameter.length);
+		System.arraycopy(correlationParameter, 0, parameter, volatilityParameter.length, 	parameter.length - volatilityParameter.length);
 
 		return parameter;
 	}
-
-	@Override
-	public long[] getParameterID() {
-		long[] volatilityParameterID	= volatilityModel.getParameterID();
-		long[] correlationParameterID	= null;//correlationModel.getParameterID();
-	
-		if(volatilityParameterID == null && correlationParameterID == null) return null;
 		
-		if(volatilityParameterID == null) volatilityParameterID = new long[] {};
-		if(correlationParameterID == null) correlationParameterID = new long[] {};
-	
-		long[] jointParameterID = new long[volatilityParameterID.length + correlationParameterID.length];
-		System.arraycopy(volatilityParameterID, 0, jointParameterID, 0, volatilityParameterID.length);
-		System.arraycopy(correlationParameterID, 0, jointParameterID, volatilityParameterID.length, correlationParameterID.length);
-		
-		return jointParameterID;
-	}
-	
 	@Override
 	public Object clone() {
 		return new LIBORCovarianceModelFromVolatilityAndCorrelation(
@@ -176,4 +156,6 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
 	public LIBORCorrelationModel getCorrelationModel() {
 		return correlationModel;
 	}
+
+
 }

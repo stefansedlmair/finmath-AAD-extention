@@ -5,6 +5,7 @@
  */
 package net.finmath.montecarlo.interestrate.modelplugins;
 
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
 
@@ -37,12 +38,26 @@ public abstract class LIBORVolatilityModel {
 		this.liborPeriodDiscretization = liborPeriodDiscretization;
 	}
 
-    public abstract double[]	getParameter();
     public abstract void		setParameter(double[] parameter);
 
-    // one of these methods might be necessary to know which derivative belongs to which parameter later on. 
-//    public abstract RandomVariableInterface[] 	getParameterRV();
-    public abstract long[]						getParameterID();
+    public abstract RandomVariableInterface[] getParameterAsRandomVariable();
+    
+    public double[]	getParameter() {
+		// get parameters
+		RandomVariableInterface[] parameterAsRandomVariable = getParameterAsRandomVariable();
+
+		// cover case of not calibrateable models
+		if(parameterAsRandomVariable == null) return null;
+
+		// get values of deterministic random variables
+		double[] parameter = new double[parameterAsRandomVariable.length];
+		for(int parameterIndex = 0; parameterIndex < parameterAsRandomVariable.length; parameterIndex++)
+			parameter[parameterIndex] = parameterAsRandomVariable[parameterIndex].get(0);
+
+		return parameter;
+	}
+	
+    
     
     /**
      * Implement this method to complete the implementation.

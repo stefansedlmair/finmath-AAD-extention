@@ -21,6 +21,7 @@ import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
+import net.finmath.montecarlo.automaticdifferentiation.forward.RandomVariableADFactory.RandomVariableAD;
 import net.finmath.montecarlo.interestrate.LIBORMarketModelInterface;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
@@ -58,7 +59,7 @@ import net.finmath.time.TimeDiscretizationInterface;
 public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIBORCovarianceModel {
 
 	public enum OptimizerDerivativeType{
-		FINITE_DIFFERENCES, ADJOINT_DIFFERENCIATION
+		FINITE_DIFFERENCES, ADJOINT_ALGORITHMIC_DIFFERENCIATION, ALGORITHMIC_DIFFERENCIATION
 	}
 	
 	public enum OptimizerSolverType{
@@ -86,8 +87,35 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 	 * 
 	 * @return Parameter vector.
 	 */
-	public abstract double[]	getParameter();	
-	public abstract long[]		getParameterID();
+	
+	public abstract RandomVariableInterface[] getParameterAsRandomVariable();
+	
+	public double[]	getParameter() {
+		// get parameters
+		RandomVariableInterface[] parameterAsRandomVariable = getParameterAsRandomVariable();
+
+		// cover case of not calibrateable models
+		if(parameterAsRandomVariable == null) return null;
+
+		// get values of deterministic random variables
+		double[] parameter = new double[parameterAsRandomVariable.length];
+		for(int parameterIndex = 0; parameterIndex < parameterAsRandomVariable.length; parameterIndex++)
+			parameter[parameterIndex] = parameterAsRandomVariable[parameterIndex].get(0);
+
+		return parameter;
+	}
+	
+	public long[]		getParameterID() {
+		RandomVariableInterface[] parameterAsRandomVariable = getParameterAsRandomVariable();
+		
+		if(parameterAsRandomVariable == null || !(parameterAsRandomVariable[0] instanceof RandomVariableDifferentiableInterface)) return null;
+		
+		long[] parameterIDs = new long[parameterAsRandomVariable.length];
+		for(int parameterIndex = 0; parameterIndex < parameterIDs.length; parameterIndex++)
+			parameterIDs[parameterIndex] = ((RandomVariableDifferentiableInterface) parameterAsRandomVariable[parameterIndex]).getID();
+		
+		return parameterIDs;
+	}
 
 	@Override
 	public abstract Object clone();
@@ -212,7 +240,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 			@Override
 			public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
 				
-//				long startTime = System.currentTimeMillis();
+				long startTime = System.currentTimeMillis();
 				
 				AbstractLIBORCovarianceModelParametric calibrationCovarianceModel = AbstractLIBORCovarianceModelParametric.this.getCloneWithModifiedParameters(parameters);
 				
@@ -231,17 +259,31 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 
 				switch(solverType) {
 				case VECTOR:
-					// take the gradient for every product (might not be the best idea)
-					for(int productIndex=0; productIndex < numberOfCalibrationProducts; productIndex++) {
-						RandomVariableInterface calibratedPrice = calibratedPrices[productIndex];
+					switch(derivativeType) {
+					case ADJOINT_ALGORITHMIC_DIFFERENCIATION:
+						for(int productIndex=0; productIndex < numberOfCalibrationProducts; productIndex++) {
+							RandomVariableInterface calibratedPrice = calibratedPrices[productIndex];
 
-						Map<Long, RandomVariableInterface> gradient = ((RandomVariableDifferentiableInterface) calibratedPrice).getGradient();
-					
-						// request the ids of the parameters from the calibrated model
-						long[] keys = calibrationCovarianceModel.getParameterID();					
-						for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) 
-							// do not stop the optimizer when derivative is not found. Set default to zero.
-							derivatives[parameterIndex][productIndex] = gradient.getOrDefault(keys[parameterIndex], zero).getAverage();
+							Map<Long, RandomVariableInterface> gradient = ((RandomVariableDifferentiableInterface) calibratedPrice).getGradient();
+						
+							// request the ids of the parameters from the calibrated model
+							long[] keys = calibrationCovarianceModel.getParameterID();					
+							for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) 
+								// do not stop the optimizer when derivative is not found. Set default to zero.
+								derivatives[parameterIndex][productIndex] = gradient.getOrDefault(keys[parameterIndex], zero).getAverage();
+						}	
+						break;
+					case ALGORITHMIC_DIFFERENCIATION:
+						RandomVariableInterface[] parameterRandomVariables = calibrationCovarianceModel.getParameterAsRandomVariable();
+						
+						for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) {
+							Map<Long, RandomVariableInterface> partialDerivatives = ((RandomVariableAD) parameterRandomVariables[parameterIndex]).getAllPartialDerivatives();
+							for(int productIndex = 0; productIndex < numberOfCalibrationProducts; productIndex++) {
+								long productID = ((RandomVariableDifferentiableInterface) calibratedPrices[productIndex]).getID();
+								derivatives[parameterIndex][productIndex] = partialDerivatives.getOrDefault(productID, zero).getAverage();
+							}
+						}
+						break;
 					}
 					break;
 				case SKALAR:
@@ -266,10 +308,10 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 						derivatives[parameterIndex][0] = gradient.getOrDefault(keys[parameterIndex], zero).getAverage();
 					break;
 				}
-//				long endTime = System.currentTimeMillis();
+				long endTime = System.currentTimeMillis();
 
-//				System.out.println("calculation time for derivative (AAD): " + (endTime - startTime)/1E3 + "s"); 
-//				System.out.println();
+				System.out.println("calculation time for derivative (AD): " + (endTime - startTime)/1E3 + "s"); 
+				System.out.println();
 			}
 		};
 		
@@ -291,7 +333,8 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 		case FINITE_DIFFERENCES:
 			optimizer = optimizerFactory.getOptimizer(calibrationError, initialParameters, lowerBound, upperBound, parameterStep, targetValues);
 			break;
-		case ADJOINT_DIFFERENCIATION:
+		case ADJOINT_ALGORITHMIC_DIFFERENCIATION:
+		case ALGORITHMIC_DIFFERENCIATION:
 			optimizer = optimizerFactory.getOptimizer(calibrationErrorExtended, initialParameters, lowerBound, upperBound, parameterStep, targetValues);
 			break;
 		}

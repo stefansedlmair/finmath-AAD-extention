@@ -11,7 +11,6 @@ import java.util.Map;
 
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariableFactory;
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
 
@@ -83,14 +82,11 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 	}
 
 	@Override
-	public double[] getParameter() {
-		if(isCalibrateable)	{
-			double[] parameter = new double[volatility.length];
-			for(int i = 0; i < parameter.length; i++)
-				parameter[i] = volatility[i].get(0);
-			return parameter;
-		}
-		else return null;
+	public RandomVariableInterface[] getParameterAsRandomVariable() {
+		if(!isCalibrateable) return null;
+		
+		return volatility;
+			
 	}
 
 	@Override
@@ -122,11 +118,7 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 
 		// initialize with zero and time 
 		RandomVariableInterface volatilityInstanteaneous = randomVariableFactory.createRandomVariable(time, 0.0); 
-		//		if(timeToMaturity <= 0)
-		//		{
-		//			volatilityInstanteaneous = randomVariableFactory.createRandomVariable(time, 0.0);   // This forward rate is already fixed, no volatility
-		//		}
-		//		else
+		
 		if(timeToMaturity > 0)
 		{
 			int timeIndexSimulationTime = simulationTimeDiscretization.getTimeIndex(time);
@@ -139,16 +131,11 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 			if(timeIndexTimeToMaturity < 0) timeIndexTimeToMaturity = 0;
 			if(timeIndexTimeToMaturity >= timeToMaturityDiscretization.getNumberOfTimes()) timeIndexTimeToMaturity--;
 
-			//			volatilityInstanteaneous = volatility[timeIndexSimulationTime * timeToMaturityDiscretization.getNumberOfTimes() + timeIndexTimeToMaturity];
-			//			volatilityInstanteaneous = volatility[indexMap.get(timeIndexSimulationTime).get(timeIndexTimeToMaturity)];
-
 			// for addition filtration time will be carried over from the first variable, i.e. volatility[i] gets a new filtration time.
 			// volatilities cannot be negative anymore, i.e. no floor/max at 0.0 needed!
 			volatilityInstanteaneous = volatilityInstanteaneous.add(volatility[indexMap.get(timeIndexSimulationTime).get(timeIndexTimeToMaturity)]);
 		}
-		//		if(volatilityInstanteaneous < 0.0) volatilityInstanteaneous = Math.max(volatilityInstanteaneous,0.0);
-
-		//		return randomVariableFactory.createRandomVariable(time, volatilityInstanteaneous);
+	
 		return volatilityInstanteaneous;
 	}
 
@@ -160,21 +147,8 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 				super.getLiborPeriodDiscretization(),
 				this.simulationTimeDiscretization,
 				this.timeToMaturityDiscretization,
-				//				this.volatility.clone(),
 				this.getParameter(),
 				this.isCalibrateable
 				);
-	}
-
-	@Override
-	public long[] getParameterID() {
-		if(!(volatility[0] instanceof RandomVariableDifferentiableInterface)) return null;
-		else {
-			long[] parameterID = new long[volatility.length];
-			for(int i=0; i< volatility.length; i++)
-				parameterID[i] = ((RandomVariableDifferentiableInterface) volatility[i]).getID();
-			return parameterID;
-		}
-
 	}
 }

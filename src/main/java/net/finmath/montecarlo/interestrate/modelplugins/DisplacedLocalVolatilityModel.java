@@ -5,6 +5,8 @@
  */
 package net.finmath.montecarlo.interestrate.modelplugins;
 
+import java.util.Arrays;
+
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
@@ -101,33 +103,24 @@ public class DisplacedLocalVolatilityModel extends AbstractLIBORCovarianceModelP
 	public AbstractLIBORCovarianceModelParametric getBaseCovarianceModel() {
 		return covarianceModel;
 	}
-
+	
 	@Override
-	public double[] getParameter() {
-//		if(!isCalibrateable) return covarianceModel.getParameter();
-//
-//		double[] covarianceParameters = covarianceModel.getParameter();
-//		if(covarianceParameters == null) return new double[] { displacement };
-//
-//		// Append displacement to the end of covarianceParameters
-//		double[] jointParameters = new double[covarianceParameters.length+1];
-//		System.arraycopy(covarianceParameters, 0, jointParameters, 0, covarianceParameters.length);
-//		jointParameters[covarianceParameters.length] = displacement;
-//
-//		return jointParameters;
+	public RandomVariableInterface[] getParameterAsRandomVariable() {
+		// get parameters
+		RandomVariableInterface[] covarianceParameter = covarianceModel.getParameterAsRandomVariable();
+		RandomVariableInterface[] displacementParameter = new RandomVariableInterface[] {displacement};
 		
-		double[] covarianceParameter = covarianceModel.getParameter();
-		double[] displacementParameter = isCalibrateable ? new double[] { getDispacementAsDouble() } : new double[] {};
+		// cover case of not calibrateable models
+		if(covarianceParameter == null) covarianceParameter = new RandomVariableInterface[] {};
+		if(!isCalibrateable)			displacementParameter = new RandomVariableInterface[] {};
 		
-		if(covarianceParameter == null) covarianceParameter = new double[] {};
+		// copy parameters into new storage
+		int numberOfParameters = covarianceParameter.length + displacementParameter.length;
+		RandomVariableInterface[] parameter = new RandomVariableInterface[numberOfParameters];
+		System.arraycopy(covarianceParameter, 0, parameter, 0, covarianceParameter.length);
+		System.arraycopy(displacementParameter, 0, parameter, covarianceParameter.length, parameter.length - covarianceParameter.length);
 		
-		double[] jointParameters = new double[covarianceParameter.length + displacementParameter.length];
-		System.arraycopy(covarianceParameter, 0, jointParameters, 0, covarianceParameter.length);
-		System.arraycopy(displacementParameter, 0, jointParameters, covarianceParameter.length, displacementParameter.length);
-		
-		return jointParameters;
-
-		
+		return parameter;
 	}
 
 	@Override
