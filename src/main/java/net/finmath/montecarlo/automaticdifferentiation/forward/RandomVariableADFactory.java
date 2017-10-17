@@ -178,7 +178,7 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 			Map<Long, RandomVariableInterface> gradient = new HashMap<>();
 			
 			for(Long leafID : operatorTreeNode.leafNodes.keySet()){
-				Map<Long, RandomVariableInterface> reversGradientWRTLeaf = getReverseGradientFor(leafID);
+				Map<Long, RandomVariableInterface> reversGradientWRTLeaf = getAllPartialDerivativesFor(leafID);
 				gradient.put(leafID, reversGradientWRTLeaf.get(getID()));
 			}
 			
@@ -199,67 +199,13 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 		 * @author Stefan Sedlmair
 		 * @author Christian Fries
 		 * */
-		public Map<Long, RandomVariableInterface> getReverseGradientFor(Long leafID) {
-			OperatorTreeNode leafTreeNode = this.operatorTreeNode.leafNodes.get(leafID);
-			
-			Map<Long, RandomVariableInterface> reverseGradient = new HashMap<>();
-			
-			if(leafTreeNode == null) return reverseGradient;
-				
-			// every child in the operator tree is of the same instance of its parents
-			TreeMap<Long, OperatorTreeNode> treeNodesToPropagte = new TreeMap<>();
-			RandomVariableInterface zero = getFactory().createRandomVariableNonDifferentiable(getFiltrationTime(), 0.0);
-
-			// partial derivative with respect to itself
-			reverseGradient.put(leafID, getFactory().createRandomVariableNonDifferentiable(getFiltrationTime(), 1.0));
-			
-			// add id of lowest variable
-			for(OperatorTreeNode childTreeNode : leafTreeNode.childTreeNodes){
-				treeNodesToPropagte.put(childTreeNode.id, childTreeNode);
-				reverseGradient.put(childTreeNode.id, childTreeNode.getPartialDerivative(leafTreeNode));
-			}
-			
-			if(!leafTreeNode.childTreeNodes.isEmpty() || factory.keepAllDerivativesOfOperatorTree) reverseGradient.remove(leafID);
-						
-			while(!treeNodesToPropagte.isEmpty()){
-				
-				// get and remove smallest ID from treeNodesToPropagate
-				Entry<Long, OperatorTreeNode> lowestEntry = treeNodesToPropagte.pollFirstEntry();
-				
-				Long parentID = lowestEntry.getKey();
-				OperatorTreeNode parentOperatorTreeNode = lowestEntry.getValue();
-				
-				// \frac{\partial f}{\partial x}
-				RandomVariableInterface parentPartialDerivtivWRTLeaf = reverseGradient.get(parentID);
-				
-				for(OperatorTreeNode childTreeNode : parentOperatorTreeNode.childTreeNodes){
-					
-					Long childID = childTreeNode.id;
-					
-					// \frac{\partial F}{\partial f}
-					RandomVariableInterface childPartialDerivativeWRTParent = childTreeNode.getPartialDerivative(parentOperatorTreeNode);
-					
-					// chain rule - get already existing part of the sum
-					RandomVariableInterface existingChainRuleSum = reverseGradient.getOrDefault(childID, zero);
-					
-					// 
-					RandomVariableInterface chainRuleSum = existingChainRuleSum.addProduct(childPartialDerivativeWRTParent, parentPartialDerivtivWRTLeaf);
-					
-					// put result back in reverseGradient
-					reverseGradient.put(childID, chainRuleSum);
-
-					// add all children to workSet to propagate derivatives further upwards
-					treeNodesToPropagte.put(childTreeNode.id, childTreeNode);
-				}
-				
-				// if not defined otherwise delete parent after derivative has been propagated upwards to children
-				// if no children existed leave if it for the results
-				if(!parentOperatorTreeNode.childTreeNodes.isEmpty() || factory.keepAllDerivativesOfOperatorTree) reverseGradient.remove(parentID); 
-				
-			}
-			
-			return reverseGradient;
+		public Map<Long, RandomVariableInterface> getAllPartialDerivativesFor(Long leafID) {
+			return this.operatorTreeNode.leafNodes.get(leafID).getAllPartialDerivatives();
 		}
+		
+		public Map<Long, RandomVariableInterface> getAllPartialDerivatives() {
+			return this.operatorTreeNode.getAllPartialDerivatives();
+		} 
 		
 		/* (non-Javadoc)
 		 * @see net.finmath.stochastic.RandomVariableInterface#equals(net.finmath.stochastic.RandomVariableInterface)
@@ -1094,6 +1040,65 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 			}
 
 			return resultrandomvariable;
+		}
+		
+		public Map<Long, RandomVariableInterface> getAllPartialDerivatives(){
+		
+			Map<Long, RandomVariableInterface> partialDerivatives = new HashMap<>();
+							
+			// every child in the operator tree is of the same instance of its parents
+			TreeMap<Long, OperatorTreeNode> treeNodesToPropagte = new TreeMap<>();
+			RandomVariableInterface zero = factory.createRandomVariableNonDifferentiable(0.0, 0.0);
+
+			// partial derivative with respect to itself
+			partialDerivatives.put(id, factory.createRandomVariableNonDifferentiable(0.0, 1.0));
+			
+			// add id of lowest variable
+			for(OperatorTreeNode childTreeNode : this.childTreeNodes){
+				treeNodesToPropagte.put(childTreeNode.id, childTreeNode);
+				partialDerivatives.put(childTreeNode.id, childTreeNode.getPartialDerivative(this));
+			}
+			
+			if(!this.childTreeNodes.isEmpty() || factory.keepAllDerivativesOfOperatorTree) partialDerivatives.remove(id);
+						
+			while(!treeNodesToPropagte.isEmpty()){
+				
+				// get and remove smallest ID from treeNodesToPropagate
+				Entry<Long, OperatorTreeNode> lowestEntry = treeNodesToPropagte.pollFirstEntry();
+				
+				Long parentID = lowestEntry.getKey();
+				OperatorTreeNode parentOperatorTreeNode = lowestEntry.getValue();
+				
+				// \frac{\partial f}{\partial x}
+				RandomVariableInterface parentPartialDerivtivWRTLeaf = partialDerivatives.get(parentID);
+				
+				for(OperatorTreeNode childTreeNode : parentOperatorTreeNode.childTreeNodes){
+					
+					Long childID = childTreeNode.id;
+					
+					// \frac{\partial F}{\partial f}
+					RandomVariableInterface childPartialDerivativeWRTParent = childTreeNode.getPartialDerivative(parentOperatorTreeNode);
+					
+					// chain rule - get already existing part of the sum
+					RandomVariableInterface existingChainRuleSum = partialDerivatives.getOrDefault(childID, zero);
+					
+					// 
+					RandomVariableInterface chainRuleSum = existingChainRuleSum.addProduct(childPartialDerivativeWRTParent, parentPartialDerivtivWRTLeaf);
+					
+					// put result back in reverseGradient
+					partialDerivatives.put(childID, chainRuleSum);
+
+					// add all children to workSet to propagate derivatives further upwards
+					treeNodesToPropagte.put(childTreeNode.id, childTreeNode);
+				}
+				
+				// if not defined otherwise delete parent after derivative has been propagated upwards to children
+				// if no children existed leave if it for the results
+				if(!parentOperatorTreeNode.childTreeNodes.isEmpty() || factory.keepAllDerivativesOfOperatorTree) partialDerivatives.remove(parentID); 
+				
+			}
+			
+			return partialDerivatives;
 		}
 		
 	}
