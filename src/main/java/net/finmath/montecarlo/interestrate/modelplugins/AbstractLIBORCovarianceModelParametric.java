@@ -238,10 +238,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 			}
 			
 			@Override
-			public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
-				
-				long startTime = System.currentTimeMillis();
-				
+			public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {				
 				AbstractLIBORCovarianceModelParametric calibrationCovarianceModel = AbstractLIBORCovarianceModelParametric.this.getCloneWithModifiedParameters(parameters);
 				
 				ArrayList<Future<RandomVariableInterface>> valueFutures = 
@@ -308,10 +305,6 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 						derivatives[parameterIndex][0] = gradient.getOrDefault(keys[parameterIndex], zero).getAverage();
 					break;
 				}
-				long endTime = System.currentTimeMillis();
-
-				System.out.println("calculation time for derivative (AD): " + (endTime - startTime)/1E3 + "s"); 
-				System.out.println();
 			}
 		};
 		

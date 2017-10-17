@@ -47,6 +47,7 @@ import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
+import net.finmath.montecarlo.automaticdifferentiation.forward.RandomVariableADFactory;
 import net.finmath.montecarlo.interestrate.LIBORMarketModel.CalibrationItem;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric.OptimizerDerivativeType;
@@ -89,9 +90,9 @@ public class LIBORMarketModelCalibrationTest {
 	private static DecimalFormat formatterDeviation	= new DecimalFormat(" 0.00000E00;-0.00000E00", new DecimalFormatSymbols(Locale.ENGLISH));
 
 	private enum OptimizerType {
-		LevenbergMarquardtWithBounds
-		,LevenbergMarquardt
-//		,GradientDescent
+		LevenbergMarquardtWithBounds,
+		LevenbergMarquardt,
+		GradientDescent
 	}
 
 	@Parameters(name="{0}-{1}-{2}")
@@ -99,17 +100,11 @@ public class LIBORMarketModelCalibrationTest {
 
 		Collection<Object[]> config = new ArrayList<>();
 
-		for(OptimizerSolverType solverType : OptimizerSolverType.values())
-//			for(OptimizerType optimizerType : OptimizerType.values())
-				for(OptimizerDerivativeType derivativeType : OptimizerDerivativeType.values())
-					config.add(new Object[] {
-//							OptimizerSolverType.VECTOR,
-							solverType, 
-							OptimizerType.LevenbergMarquardt, 
-//							optimizerType, 
-//							OptimizerDerivativeType.FINITE_DIFFERENCES,
-							derivativeType
-							});
+//		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.FINITE_DIFFERENCES});
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.ALGORITHMIC_DIFFERENCIATION});
+//		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
+//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.FINITE_DIFFERENCES});
+//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
 
 		return config;
 	}	
@@ -131,8 +126,11 @@ public class LIBORMarketModelCalibrationTest {
 		randomVariableFactoryProperties.put("isGradientRetainsLeafNodesOnly", true);
 
 		switch(derivativeType) {
-		case ADJOINT_DIFFERENCIATION:
+		case ADJOINT_ALGORITHMIC_DIFFERENCIATION:
 			this.randomVariableFactory = new RandomVariableDifferentiableAADFactory(new RandomVariableFactory(), randomVariableFactoryProperties);
+			break;
+		case ALGORITHMIC_DIFFERENCIATION:
+			this.randomVariableFactory = new RandomVariableADFactory();
 			break;
 		default:
 			this.randomVariableFactory = new RandomVariableFactory();
@@ -190,7 +188,7 @@ public class LIBORMarketModelCalibrationTest {
 
 		// Simulation Settings
 		final int seed				= 1234;
-		final int numberOfPaths		= (int) 1E3;
+		final int numberOfPaths		= (int) 1E2;
 		final int numberOfFactors	= 1;
 
 		// Optimizer Settings
@@ -330,9 +328,9 @@ public class LIBORMarketModelCalibrationTest {
 		case LevenbergMarquardt:
 			optimizerFactory = new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
 			break;
-//		case GradientDescent:
-//			optimizerFactory = new OptimizerFactoryGradientDescent(maxIterations, accuracy, numberOfThreads);
-//			break;
+		case GradientDescent:
+			optimizerFactory = new OptimizerFactoryGradientDescent(maxIterations, accuracy, numberOfThreads);
+			break;
 		}
 
 		// Set calibration properties (should use our brownianMotion for calibration - needed to have to right correlation).
@@ -375,42 +373,42 @@ public class LIBORMarketModelCalibrationTest {
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion);
 		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
 
-		//-------------------------------------------------------------------------------------------------------------------------------------------------
-
-		ArrayList<CalibrationItem> calibrationItemsVola		= new ArrayList<CalibrationItem>();
-
-		for(int i=0; i<atmNormalVolatilities.length; i++ ) {
-
-			LocalDate exerciseDate = cal.createDateFromDateAndOffsetCode(referenceDate, atmExpiries[i]);
-			LocalDate tenorEndDate = cal.createDateFromDateAndOffsetCode(exerciseDate, atmTenors[i]);
-			double	exercise		= modelDC.getDaycountFraction(referenceDate, exerciseDate);
-			double	tenor			= modelDC.getDaycountFraction(exerciseDate, tenorEndDate);
-
-			// We consider an idealized tenor grid (alternative: adapt the model grid)
-			exercise	= Math.round(exercise/0.25)*0.25;
-			tenor		= Math.round(tenor/0.25)*0.25;
-
-			if(exercise < 1.0) continue;
-
-			int numberOfPeriods = (int)Math.round(tenor / swapPeriodLength);
-
-			double	moneyness			= 0.0;
-			double	targetVolatility	= atmNormalVolatilities[i];
-
-			String	targetVolatilityType = "VOLATILITYNORMAL";
-
-			double	weight = 1.0;
-
-			calibrationItemsVola.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, targetVolatilityType, forwardCurve, discountCurve));
-		}
-
-		//-------------------------------------------------------------------------------------------------------------------------------------------------
+//		//-------------------------------------------------------------------------------------------------------------------------------------------------
+//
+//		ArrayList<CalibrationItem> calibrationItemsVola		= new ArrayList<CalibrationItem>();
+//
+//		for(int i=0; i<atmNormalVolatilities.length; i++ ) {
+//
+//			LocalDate exerciseDate = cal.createDateFromDateAndOffsetCode(referenceDate, atmExpiries[i]);
+//			LocalDate tenorEndDate = cal.createDateFromDateAndOffsetCode(exerciseDate, atmTenors[i]);
+//			double	exercise		= modelDC.getDaycountFraction(referenceDate, exerciseDate);
+//			double	tenor			= modelDC.getDaycountFraction(exerciseDate, tenorEndDate);
+//
+//			// We consider an idealized tenor grid (alternative: adapt the model grid)
+//			exercise	= Math.round(exercise/0.25)*0.25;
+//			tenor		= Math.round(tenor/0.25)*0.25;
+//
+//			if(exercise < 1.0) continue;
+//
+//			int numberOfPeriods = (int)Math.round(tenor / swapPeriodLength);
+//
+//			double	moneyness			= 0.0;
+//			double	targetVolatility	= atmNormalVolatilities[i];
+//
+//			String	targetVolatilityType = "VOLATILITYNORMAL";
+//
+//			double	weight = 1.0;
+//
+//			calibrationItemsVola.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, targetVolatilityType, forwardCurve, discountCurve));
+//		}
+//
+//		//-------------------------------------------------------------------------------------------------------------------------------------------------
 
 		System.out.println("\nValuation on calibrated model:");
 		double deviationSum			= 0.0;
 		double deviationSquaredSum	= 0.0;
-		for (int i = 0; i < calibrationItemsVola.size(); i++) {
-			CalibrationItem calibrationItem = calibrationItemsVola.get(i);
+		for (int i = 0; i < calibrationItems.size(); i++) {
+			CalibrationItem calibrationItem = calibrationItems.get(i);
 			try {
 				double valueModel = calibrationItem.calibrationProduct.getValue(simulationCalibrated);
 				double valueTarget = calibrationItem.calibrationTargetValue;
@@ -427,9 +425,9 @@ public class LIBORMarketModelCalibrationTest {
 		System.out.println("Calibration of volatilities..." + (millisCalibrationEnd-millisCalibrationStart)/1000.0);
 		System.out.println("Number of Iterations.........." + covarianceModelDisplaced.getCalibrationOptimizer().getIterations());
 
-		double averageDeviation = deviationSum/calibrationItemsVola.size();
+		double averageDeviation = deviationSum/calibrationItems.size();
 		System.out.println("Mean Deviation:" + formatterValue.format(averageDeviation));
-		System.out.println("RMS Error.....:" + formatterValue.format(Math.sqrt(deviationSquaredSum/calibrationItemsVola.size())));
+		System.out.println("RMS Error.....:" + formatterValue.format(Math.sqrt(deviationSquaredSum/calibrationItems.size())));
 		System.out.println("__________________________________________________________________________________________\n");
 
 		Assert.assertEquals(0.0, averageDeviation, 1E-2);
