@@ -5,6 +5,7 @@ package net.finmath.montecarlo.automaticdifferentiation.forward;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -175,20 +176,13 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 		 * 
 		 * */
 		public Map<Long, RandomVariableInterface> getGradient() {
-			Map<Long, RandomVariableInterface> gradient = new HashMap<>();
-			
-			for(Long leafID : operatorTreeNode.leafNodes.keySet()){
-				Map<Long, RandomVariableInterface> reversGradientWRTLeaf = getAllPartialDerivativesFor(leafID);
-				gradient.put(leafID, reversGradientWRTLeaf.get(getID()));
-			}
-			
-			return gradient;
+			throw new UnsupportedOperationException();
 		}
 		
 		/**
 		 * The method implements an AD algorithm, scaling with the number of inputs.
 		 * 
-		 * Returning map includes all identifiers of (final) values that are dependent on the parameter (stated in argument), 
+		 * Returning map includes all identifiers of (final) values that are dependent on the parameter (stated in parent), 
 		 * and their partial derivatives with respect to this parameter
 		 * 
 		 * @param leafID identifier of the parameter to calculate the derivatives
@@ -198,11 +192,7 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 		 * 
 		 * @author Stefan Sedlmair
 		 * @author Christian Fries
-		 * */
-		public Map<Long, RandomVariableInterface> getAllPartialDerivativesFor(Long leafID) {
-			return this.operatorTreeNode.leafNodes.get(leafID).getAllPartialDerivatives();
-		}
-		
+		 * */	
 		public Map<Long, RandomVariableInterface> getAllPartialDerivatives() {
 			return this.operatorTreeNode.getAllPartialDerivatives();
 		} 
@@ -700,12 +690,12 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 		}
 
 		@Override
-		public RandomVariableInterface apply(DoubleBinaryOperator operator, RandomVariableInterface argument) {
+		public RandomVariableInterface apply(DoubleBinaryOperator operator, RandomVariableInterface parent) {
 			throw new UnsupportedOperationException("Applying functions is not supported.");
 		}
 
 		@Override
-		public RandomVariableInterface apply(DoubleTernaryOperator operator, RandomVariableInterface argument1, RandomVariableInterface argument2) {
+		public RandomVariableInterface apply(DoubleTernaryOperator operator, RandomVariableInterface parent1, RandomVariableInterface parent2) {
 			throw new UnsupportedOperationException("Applying functions is not supported.");
 		}
 
@@ -808,7 +798,7 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 	/**
 	 * A node in the <i>operator tree</i>. It
 	 * stores an id (the index m), the operator (the function f_m), and theparentTreeNodes.
-	 * It also stores reference to the argument values, if required.
+	 * It also stores reference to the parent values, if required.
 	 * 
 	 * @author Christian Fries
 	 */
@@ -821,47 +811,87 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 		private final List<OperatorTreeNode> parentTreeNodes;
 
 		private final List<OperatorTreeNode> childTreeNodes;
-		
-		private final Map<Long, OperatorTreeNode> leafNodes;
-		
+			
 		private final RandomVariableADFactory factory;
 		
-		public OperatorTreeNode(OperatorType operatorType, List<RandomVariableInterface> parents, Object estimator, RandomVariableADFactory factory) {
+		public OperatorTreeNode(OperatorType operatorType, List<RandomVariableInterface> arguments, Object operator, RandomVariableADFactory factory) {
+			this(operatorType, extractOperatorTreeNodes(arguments), extractOperatorValues(arguments), operator, factory);
+		}
+		
+		private static List<OperatorTreeNode> extractOperatorTreeNodes(List<RandomVariableInterface> parents) {
+			return parents != null ? parents.stream().map((RandomVariableInterface x) -> {
+				return (x != null && x instanceof RandomVariableAD) ? ((RandomVariableAD)x).getOperatorTreeNode(): null;
+				}
+			).collect(Collectors.toList()) : new ArrayList<>();
+		};
+
+		private static List<RandomVariableInterface> extractOperatorValues(List<RandomVariableInterface> parents) {
+			return parents != null ? parents.stream().map((RandomVariableInterface x) -> {
+				return (x != null && x instanceof RandomVariableAD) ? ((RandomVariableAD)x).getValues() : x;
+				}
+			).collect(Collectors.toList()) : null;
+		};
+		
+		private static boolean operatorTypRequieresAnyValues(OperatorType operatorType) {
+			if(operatorType == null) return false;
+			else if(operatorType.equals(OperatorType.ADD)) return false;
+			else if(operatorType.equals(OperatorType.SUB)) return false;
+			else if(operatorType.equals(OperatorType.AVERAGE)) return false;
+			else return true;
+		}
+		
+		public OperatorTreeNode(OperatorType operatorType, List<OperatorTreeNode> parentTreeNodes , List<RandomVariableInterface> parentValues, Object estimator, RandomVariableADFactory factory) {
 			this.id = indexOfNextRandomVariable.getAndIncrement();
 			this.operatorType = operatorType;
 			
-			// split up parents
-			if(parents != null){
-				this.parentValues = parents.stream().map(
-						(RandomVariableInterface x) -> (x instanceof RandomVariableAD) ? ((RandomVariableAD) x).values :  null
-								).collect(Collectors.toList());
-				
-				this.parentTreeNodes = parents.stream().map(
-						(RandomVariableInterface x) -> (x instanceof RandomVariableAD) ? ((RandomVariableAD) x).operatorTreeNode :  null
-								).collect(Collectors.toList());
-			} else {
-				this.parentValues = new ArrayList<>(); 
-				this.parentTreeNodes = new ArrayList<>();
-			}
-			
 			// children are always empty
-			this.childTreeNodes = new ArrayList<>();
-			
-			// add this to parents as a child
-			for(OperatorTreeNode parentTreeNode : parentTreeNodes) if(parentTreeNode != null) parentTreeNode.childTreeNodes.add(this);					
-			
-			// look for leaves in parents / if non there be a leaf yourself.
-			this.leafNodes = new HashMap<>();
-			for(OperatorTreeNode parentTreeNode : parentTreeNodes) if(parentTreeNode != null) leafNodes.putAll(parentTreeNode.leafNodes);
-			if(leafNodes.isEmpty()) leafNodes.put(id, this);
-			
+			this.childTreeNodes = Collections.synchronizedList(new ArrayList<OperatorTreeNode>());
+								
 			// factory
 			this.factory = factory;
 			
 			// estimator for conditional expectation  | TODO: is this still valid for AD? 
 			this.operator = estimator;	
+	
+			// clear references to 
+			if(operatorTypRequieresAnyValues(operatorType)) {
+				if(operatorType.equals(OperatorType.MULT)) {
+					// Product only needs to retain factors on differentiables
+					if(parentTreeNodes.get(0) == null) parentValues.set(1, null);
+					if(parentTreeNodes.get(1) == null) parentValues.set(0, null);
+				}
+				else if(operatorType.equals(OperatorType.ADDPRODUCT)) {
+					// Addition does not need to retain parents
+					parentValues.set(0, null);
+					// Addition of product only needs to retain factors on differentiables
+					if(parentTreeNodes.get(1) == null) parentValues.set(2, null);
+					if(parentTreeNodes.get(2) == null) parentValues.set(1, null);
+				}
+				else if(operatorType.equals(OperatorType.ACCRUE)) {
+					// Addition of product only needs to retain factors on differentiables
+					if(parentTreeNodes.get(1) == null && parentTreeNodes.get(2) == null) parentValues.set(0, null);
+					if(parentTreeNodes.get(0) == null && parentTreeNodes.get(1) == null) parentValues.set(1, null);
+					if(parentTreeNodes.get(0) == null && parentTreeNodes.get(2) == null) parentValues.set(2, null);
+				}
+				else if(operatorType.equals(OperatorType.BARRIER)) {
+					if(parentTreeNodes.get(0) == null) {
+						parentValues.set(1, null);
+						parentValues.set(2, null);
+					}
+				}
+			} else {
+				parentValues = null;
+			}
+			
+			this.parentTreeNodes = parentTreeNodes;
+			this.parentValues = parentValues;
+			
+			// add this to parents as a child
+			for(OperatorTreeNode parentTreeNode : this.parentTreeNodes) if(parentTreeNode != null) parentTreeNode.childTreeNodes.add(this);
+					
 		}
-
+			
+		
 		private RandomVariableInterface getPartialDerivative(OperatorTreeNode differential){
 				
 			if(!parentTreeNodes.contains(differential)) return new RandomVariable(0.0);
@@ -874,7 +904,10 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 			RandomVariableInterface resultrandomvariable = null;
 
 			switch(operatorType) {
-			/* functions with one argument  */
+			/* functions with one parent  */
+			case INVERT:
+				resultrandomvariable = X.squared().invert().mult(-1.0);
+				break;
 			case SQUARED:
 				resultrandomvariable = X.mult(2.0);
 				break;
@@ -1035,8 +1068,6 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 				} else {
 					resultrandomvariable = X.barrier(X, new RandomVariable(0.0), new RandomVariable(1.0));
 				}
-			default:
-				break;
 			}
 
 			return resultrandomvariable;
