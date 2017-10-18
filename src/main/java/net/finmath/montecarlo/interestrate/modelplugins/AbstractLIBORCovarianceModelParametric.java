@@ -42,7 +42,7 @@ import net.finmath.time.TimeDiscretizationInterface;
  * Parametric models feature a parameter vector which can be inspected
  * and modified for calibration purposes.
  * 
- * The parameter vector may have zero length, which indicated that the model
+ * The parameter vector may be null, which indicated that the model
  * is not calibrateable.
  * 
  * This class includes the implementation of a generic calibration algorithm.
@@ -52,9 +52,9 @@ import net.finmath.time.TimeDiscretizationInterface;
  * values is minimized.
  * 
  * @author Christian Fries
- * @date 20.05.2006
- * @date 23.02.2014
- * @version 1.1
+ * @author Stefan Sedlmair
+ * @date 20.10.2017
+ * @version 0.1
  */
 public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIBORCovarianceModel {
 
@@ -85,11 +85,17 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 	 * covariance model. The parameters are usually free parameters
 	 * which may be used in calibration.
 	 * 
-	 * @return Parameter vector.
+	 * @return Parameter in {@link RandomVariableInterface}-array.
 	 */
-	
 	public abstract RandomVariableInterface[] getParameterAsRandomVariable();
 	
+	/**
+	 * Get the parameters of determining this parametric
+	 * covariance model. The parameters are usually free parameters
+	 * which may be used in calibration.
+	 * 
+	 * @return Parameter in double-array.
+	 */
 	public double[]	getParameter() {
 		// get parameters
 		RandomVariableInterface[] parameterAsRandomVariable = getParameterAsRandomVariable();
@@ -105,7 +111,16 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 		return parameter;
 	}
 	
-	public long[]		getParameterID() {
+	/**
+	 * Get the parameter identifiers of determining this parametric
+	 * covariance model, in case parameters are of 
+	 * instance {@link RandomVariableDifferentiableInterface}.
+	 * 
+	 * @return Array of parameter identifiers, null if no internal 
+	 * model is calibratable or random variables are not of 
+	 * instance {@link RandomVariableDifferentiableInterface}
+	 * */
+	public long[] getParameterID() {
 		RandomVariableInterface[] parameterAsRandomVariable = getParameterAsRandomVariable();
 		
 		if(parameterAsRandomVariable == null || !(parameterAsRandomVariable[0] instanceof RandomVariableDifferentiableInterface)) return null;
@@ -191,25 +206,35 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 		final OptimizerFactoryInterface optimizerFactory 	= (OptimizerFactoryInterface)calibrationParameters.getOrDefault("optimizerFactory", new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads));
 
 		final double[] parameterStep = initialzeDoubleArray(parameterStepValue, numberOfParameters);
-		
-
-		// define evaluating functions
-		ObjectiveFunction calibrationError = new ObjectiveFunction() {			
-			// Calculate model values for given parameters
+				
+		DerivativeFunction calibrationErrorExtended = new DerivativeFunction() {
+			
+			// avoid calculating the products twice with the same parameters
+			double[]								currentParameters = null;
+			RandomVariableInterface[] 				currentCalibratedPrices = null;
+			AbstractLIBORCovarianceModelParametric 	currentCalibrationCovarianceModel = null;
+			
+			private void updateCalibratedPriceStorage(double[] parameters){
+				// if parameters are the same do not calculate the prices again
+				if(!Arrays.equals(currentParameters, parameters)){
+					currentParameters = parameters.clone();
+					currentCalibrationCovarianceModel = AbstractLIBORCovarianceModelParametric.this.getCloneWithModifiedParameters(currentParameters);
+				
+					currentCalibratedPrices = 
+						getFutureValuesFromParameters(currentCalibrationCovarianceModel, calibrationModel, brownianMotion, calibrationProducts, 
+														numberOfCalibrationProducts, executor, calibrationTargetValues, processScheme);
+				}
+			}
+			
 			@Override
 			public void setValues(double[] parameters, double[] values) throws SolverException {
 
-				AbstractLIBORCovarianceModelParametric calibrationCovarianceModel = AbstractLIBORCovarianceModelParametric.this.getCloneWithModifiedParameters(parameters);
+				updateCalibratedPriceStorage(parameters);
 				
-				ArrayList<Future<RandomVariableInterface>> valueFutures = 
-						getFutureValuesFromParameters(calibrationCovarianceModel, calibrationModel, brownianMotion, calibrationProducts, 
-														numberOfCalibrationProducts, executor, calibrationTargetValues, processScheme);
-				
-				// get calculated prices
+				// get calculated prices as double array
 				double[] calibratedPrices = new double[numberOfCalibrationProducts];
 				for(int calibrationProductIndex=0; calibrationProductIndex < numberOfCalibrationProducts; calibrationProductIndex++)
-					try { calibratedPrices[calibrationProductIndex] = valueFutures.get(calibrationProductIndex).get().getAverage(); }
-					catch (InterruptedException | ExecutionException e) { throw new SolverException(e);}
+					calibratedPrices[calibrationProductIndex] = currentCalibratedPrices[calibrationProductIndex].getAverage();
 				
 				switch(solverType) {
 				case VECTOR:
@@ -226,31 +251,14 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 //					errorRMS /= (double) numberOfCalibrationProducts;
 					System.arraycopy(new double[] {Math.sqrt(errorRMS)} , 0, values, 0, 1);
 					break;
-				}
-			}		
-		};
-		
-		DerivativeFunction calibrationErrorExtended = new DerivativeFunction() {
-			
-			@Override
-			public void setValues(double[] parameters, double[] values) throws SolverException {
-				calibrationError.setValues(parameters, values);
+				}		
 			}
 			
 			@Override
 			public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {				
-				AbstractLIBORCovarianceModelParametric calibrationCovarianceModel = AbstractLIBORCovarianceModelParametric.this.getCloneWithModifiedParameters(parameters);
 				
-				ArrayList<Future<RandomVariableInterface>> valueFutures = 
-						getFutureValuesFromParameters(calibrationCovarianceModel, calibrationModel, brownianMotion, calibrationProducts, 
-														numberOfCalibrationProducts, executor, calibrationTargetValues, processScheme);
+				updateCalibratedPriceStorage(parameters);
 				
-				// get calculated prices
-				RandomVariableInterface[] calibratedPrices = new RandomVariableInterface[numberOfCalibrationProducts];
-				for(int calibrationProductIndex=0; calibrationProductIndex < numberOfCalibrationProducts; calibrationProductIndex++)
-					try { calibratedPrices[calibrationProductIndex] = valueFutures.get(calibrationProductIndex).get(); }
-					catch (InterruptedException | ExecutionException e) { throw new SolverException(e);}
-
 				// for convenience
 				RandomVariableInterface zero = calibrationModel.getRandomVariableForConstant(0.0);
 
@@ -258,25 +266,26 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 				case VECTOR:
 					switch(derivativeType) {
 					case ADJOINT_ALGORITHMIC_DIFFERENCIATION:
+						long[] keys = currentCalibrationCovarianceModel.getParameterID();					
+
 						for(int productIndex=0; productIndex < numberOfCalibrationProducts; productIndex++) {
-							RandomVariableInterface calibratedPrice = calibratedPrices[productIndex];
+							RandomVariableInterface calibratedPrice = currentCalibratedPrices[productIndex];
 
 							Map<Long, RandomVariableInterface> gradient = ((RandomVariableDifferentiableInterface) calibratedPrice).getGradient();
 						
 							// request the ids of the parameters from the calibrated model
-							long[] keys = calibrationCovarianceModel.getParameterID();					
 							for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) 
 								// do not stop the optimizer when derivative is not found. Set default to zero.
 								derivatives[parameterIndex][productIndex] = gradient.getOrDefault(keys[parameterIndex], zero).getAverage();
 						}	
 						break;
 					case ALGORITHMIC_DIFFERENCIATION:
-						RandomVariableInterface[] parameterRandomVariables = calibrationCovarianceModel.getParameterAsRandomVariable();
+						RandomVariableInterface[] parameterRandomVariables = currentCalibrationCovarianceModel.getParameterAsRandomVariable();
 						
 						for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) {
 							Map<Long, RandomVariableInterface> partialDerivatives = ((RandomVariableAD) parameterRandomVariables[parameterIndex]).getAllPartialDerivatives();
 							for(int productIndex = 0; productIndex < numberOfCalibrationProducts; productIndex++) {
-								long productID = ((RandomVariableDifferentiableInterface) calibratedPrices[productIndex]).getID();
+								long productID = ((RandomVariableDifferentiableInterface) currentCalibratedPrices[productIndex]).getID();
 								derivatives[parameterIndex][productIndex] = partialDerivatives.getOrDefault(productID, zero).getAverage();
 							}
 						}
@@ -287,7 +296,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 					// get the root-mean-square error of the calibration for every path
 					RandomVariableInterface errorRMS = null;
 					for(int i = 0; i < numberOfCalibrationProducts; i++) {
-							RandomVariableInterface error = calibratedPrices[i].sub(calibrationTargetValues[i]);
+							RandomVariableInterface error = currentCalibratedPrices[i].sub(calibrationTargetValues[i]);
 							errorRMS = (errorRMS == null) ? error.squared() : errorRMS.addProduct(error, error);
 					}
 //					errorRMS = errorRMS.div(numberOfCalibrationProducts).sqrt();
@@ -297,7 +306,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 					Map<Long, RandomVariableInterface> gradient = ((RandomVariableDifferentiableInterface) errorRMS).getGradient();
 										
 					// request the ids of the parameters from the calibrated model
-					long[] keys = calibrationCovarianceModel.getParameterID();
+					long[] keys = currentCalibrationCovarianceModel.getParameterID();
 					
 					// fill in the calculated gradient in the derivative matrix
 					for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) 
@@ -306,6 +315,16 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 					break;
 				}
 			}
+		};
+
+		// define evaluating functions
+		ObjectiveFunction calibrationError = new ObjectiveFunction() {		
+
+			// Calculate model values for given parameters
+			@Override
+			public void setValues(double[] parameters, double[] values) throws SolverException {
+				calibrationErrorExtended.setValues(parameters, values);
+			}		
 		};
 		
 		// in case of a skalar solving the target value will be zero
@@ -362,7 +381,9 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 		return calibrationCovarianceModel;    	
 	}
 
-	private ArrayList<Future<RandomVariableInterface>> getFutureValuesFromParameters(AbstractLIBORCovarianceModel calibrationCovarianceModel, LIBORMarketModelInterface calibrationModel, BrownianMotionInterface brownianMotion, final AbstractLIBORMonteCarloProduct[] calibrationProducts, int numberOfCalibrationProducts, ExecutorService executor, double[] calibrationTargetValues, Scheme processScheme){
+	
+	
+	private RandomVariableInterface[] getFutureValuesFromParameters(AbstractLIBORCovarianceModel calibrationCovarianceModel, LIBORMarketModelInterface calibrationModel, BrownianMotionInterface brownianMotion, final AbstractLIBORMonteCarloProduct[] calibrationProducts, int numberOfCalibrationProducts, ExecutorService executor, double[] calibrationTargetValues, Scheme processScheme){
 				
 		// Create a LIBOR market model with the new covariance structure.
 		LIBORMarketModelInterface model = calibrationModel.getCloneWithModifiedCovarianceModel(calibrationCovarianceModel);
@@ -399,7 +420,16 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 				valueFutures.add(calibrationProductIndex, valueFutureTask);
 			}
 		}
-		return valueFutures;
+		
+		// get calculated prices
+		RandomVariableInterface[] calibratedPrices = new RandomVariableInterface[numberOfCalibrationProducts];
+		for(int calibrationProductIndex=0; calibrationProductIndex < numberOfCalibrationProducts; calibrationProductIndex++)
+			try {
+				calibratedPrices[calibrationProductIndex] = valueFutures.get(calibrationProductIndex).get();
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
+			}
+		return calibratedPrices;
 	}
 	
 	public OptimizerInterface getCalibrationOptimizer() {
