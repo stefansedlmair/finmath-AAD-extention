@@ -1100,7 +1100,7 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 				Long parentID = lowestEntry.getKey();
 				OperatorTreeNode parentOperatorTreeNode = lowestEntry.getValue();
 				
-				// \frac{\partial f}{\partial x}
+				// \frac{\partial f}{\partial x} | has to exist by construction!
 				RandomVariableInterface parentPartialDerivtivWRTLeaf = partialDerivatives.get(parentID);
 				
 				for(OperatorTreeNode childTreeNode : parentOperatorTreeNode.childTreeNodes){
@@ -1119,7 +1119,7 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 					// put result back in reverseGradient
 					partialDerivatives.put(childID, chainRuleSum);
 
-					// add all children to workSet to propagate derivatives further upwards
+					// add child to ToDo-list to propagate derivatives further upwards
 					treeNodesToPropagte.put(childTreeNode.id, childTreeNode);
 				}
 				
