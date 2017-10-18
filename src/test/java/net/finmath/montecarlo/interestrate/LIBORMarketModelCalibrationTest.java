@@ -100,9 +100,9 @@ public class LIBORMarketModelCalibrationTest {
 
 		Collection<Object[]> config = new ArrayList<>();
 
-//		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.FINITE_DIFFERENCES});
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.FINITE_DIFFERENCES});
 		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.ALGORITHMIC_DIFFERENCIATION});
-//		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
 //		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.FINITE_DIFFERENCES});
 //		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
 
@@ -188,7 +188,7 @@ public class LIBORMarketModelCalibrationTest {
 
 		// Simulation Settings
 		final int seed				= 1234;
-		final int numberOfPaths		= (int) 1E2;
+		final int numberOfPaths		= (int) 1E3;
 		final int numberOfFactors	= 1;
 
 		// Optimizer Settings
