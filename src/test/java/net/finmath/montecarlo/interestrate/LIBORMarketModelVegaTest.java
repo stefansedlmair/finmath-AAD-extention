@@ -57,7 +57,10 @@ public class LIBORMarketModelVegaTest {
 		
 		config.add(new Object[]{(int) 1E2});
 		config.add(new Object[]{(int) 1E3});
-		config.add(new Object[]{(int) 1E4}); /* needs ~14GB of RAM: use '-mx14G' in run-config*/
+		config.add(new Object[]{(int) 3E3});
+		config.add(new Object[]{(int) 5E3});
+		config.add(new Object[]{(int) 7E3});
+//		config.add(new Object[]{(int) 1E4}); /* needs ~14GB of RAM: use '-mx14G' in run-config*/
 
 		return config;
 	}

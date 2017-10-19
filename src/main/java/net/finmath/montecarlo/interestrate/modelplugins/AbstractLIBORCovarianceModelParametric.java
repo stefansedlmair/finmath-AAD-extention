@@ -28,10 +28,10 @@ import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProdu
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.montecarlo.process.ProcessEulerScheme.Scheme;
 import net.finmath.optimizer.OptimizerFactoryInterface;
-import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.optimizer.OptimizerInterface;
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
+import net.finmath.optimizer.gaussnewton.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
@@ -217,12 +217,18 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 			private void updateCalibratedPriceStorage(double[] parameters){
 				// if parameters are the same do not calculate the prices again
 				if(!Arrays.equals(currentParameters, parameters)){
+					
+					long start = System.currentTimeMillis();
+					
 					currentParameters = parameters.clone();
 					currentCalibrationCovarianceModel = AbstractLIBORCovarianceModelParametric.this.getCloneWithModifiedParameters(currentParameters);
 				
 					currentCalibratedPrices = 
 						getFutureValuesFromParameters(currentCalibrationCovarianceModel, calibrationModel, brownianMotion, calibrationProducts, 
 														numberOfCalibrationProducts, executor, calibrationTargetValues, processScheme);
+					long end = System.currentTimeMillis();
+					
+					System.out.println("calculation time of product values :" + ((end - start)/1E3));
 				}
 			}
 			
@@ -268,27 +274,48 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 					case ADJOINT_ALGORITHMIC_DIFFERENCIATION:
 						long[] keys = currentCalibrationCovarianceModel.getParameterID();					
 
+						double sumAAD = 0.0;
+						
 						for(int productIndex=0; productIndex < numberOfCalibrationProducts; productIndex++) {
 							RandomVariableInterface calibratedPrice = currentCalibratedPrices[productIndex];
-
+							
+							long start = System.currentTimeMillis();
+							
 							Map<Long, RandomVariableInterface> gradient = ((RandomVariableDifferentiableInterface) calibratedPrice).getGradient();
-						
+
+							long end = System.currentTimeMillis();
+							sumAAD += (end - start)/1E3;
+
 							// request the ids of the parameters from the calibrated model
 							for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) 
 								// do not stop the optimizer when derivative is not found. Set default to zero.
 								derivatives[parameterIndex][productIndex] = gradient.getOrDefault(keys[parameterIndex], zero).getAverage();
 						}	
+						
+						System.out.println("AAD - average calaculation time : " + (sumAAD/numberOfCalibrationProducts));
+						System.out.println("AAD - total time for derivative : " + sumAAD);
 						break;
 					case ALGORITHMIC_DIFFERENCIATION:
 						RandomVariableInterface[] parameterRandomVariables = currentCalibrationCovarianceModel.getParameterAsRandomVariable();
 						
+						double sumAD = 0.0;
+						
 						for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) {
+							
+							long start = System.currentTimeMillis();
+							
 							Map<Long, RandomVariableInterface> partialDerivatives = ((RandomVariableAD) parameterRandomVariables[parameterIndex]).getAllPartialDerivatives();
+							
+							long end = System.currentTimeMillis();
+							sumAD += (end - start)/1E3;
 							for(int productIndex = 0; productIndex < numberOfCalibrationProducts; productIndex++) {
 								long productID = ((RandomVariableDifferentiableInterface) currentCalibratedPrices[productIndex]).getID();
 								derivatives[parameterIndex][productIndex] = partialDerivatives.getOrDefault(productID, zero).getAverage();
 							}
 						}
+						
+						System.out.println("AD - average calaculation time : " + (sumAD/numberOfParameters));
+						System.out.println("AD - total time for derivative : " + sumAD);
 						break;
 					}
 					break;
