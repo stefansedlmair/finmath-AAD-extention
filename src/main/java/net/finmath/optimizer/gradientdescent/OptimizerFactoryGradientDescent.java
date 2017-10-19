@@ -1,13 +1,17 @@
 /**
  * 
  */
-package net.finmath.optimizer;
+package net.finmath.optimizer.gradientdescent;
 
+import net.finmath.optimizer.OptimizerFactoryInterface;
+import net.finmath.optimizer.OptimizerInterface;
+import net.finmath.optimizer.OptimizerInterfaceAAD;
+import net.finmath.optimizer.SolverException;
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
 
 /**
- * @author Alois Gugelhupfer
+ * @author Stefan Sedlmair
  *
  */
 public class OptimizerFactoryGradientDescent implements OptimizerFactoryInterface {

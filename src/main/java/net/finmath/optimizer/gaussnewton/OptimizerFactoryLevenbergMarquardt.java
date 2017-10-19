@@ -4,8 +4,13 @@
  * Created on 29.05.2015
  */
 
-package net.finmath.optimizer;
+package net.finmath.optimizer.gaussnewton;
 
+import net.finmath.optimizer.LevenbergMarquardt;
+import net.finmath.optimizer.OptimizerFactoryInterface;
+import net.finmath.optimizer.OptimizerInterface;
+import net.finmath.optimizer.OptimizerInterfaceAAD;
+import net.finmath.optimizer.SolverException;
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
 
