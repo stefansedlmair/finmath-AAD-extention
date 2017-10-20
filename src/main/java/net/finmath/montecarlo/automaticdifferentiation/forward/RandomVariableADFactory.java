@@ -793,6 +793,11 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 					getFactory());
 		}
 
+		@Override
+		public Double doubleValue() {
+			return values.doubleValue();
+		}
+
 	}
 	
 	/**
