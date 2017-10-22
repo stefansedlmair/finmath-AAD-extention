@@ -64,7 +64,7 @@ import net.finmath.montecarlo.process.ProcessEulerScheme.Scheme;
 import net.finmath.optimizer.OptimizerFactoryInterface;
 import net.finmath.optimizer.SolverException;
 import net.finmath.optimizer.gaussnewton.OptimizerFactoryLevenbergMarquardt;
-import net.finmath.optimizer.gradientdescent.OptimizerFactoryGradientDescent;
+import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.ScheduleGenerator;
 import net.finmath.time.ScheduleInterface;
 import net.finmath.time.TimeDiscretization;
@@ -86,38 +86,28 @@ public class LIBORMarketModelCalibrationTest {
 	private static DecimalFormat formatterParam		= new DecimalFormat(" #0.000;-#0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 	private static DecimalFormat formatterDeviation	= new DecimalFormat(" 0.00000E00;-0.00000E00", new DecimalFormatSymbols(Locale.ENGLISH));
 
-	private enum OptimizerType {
-		LevenbergMarquardtWithBounds,
-		LevenbergMarquardt,
-		GradientDescent
-	}
-
-	@Parameters(name="{0}-{1}-{2}")
+	@Parameters(name="{0}-{1}")
 	public static Collection<Object[]> data() {
 
 		Collection<Object[]> config = new ArrayList<>();
 
-		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.FINITE_DIFFERENCES});
-		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.ALGORITHMIC_DIFFERENCIATION});
-		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
-//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.FINITE_DIFFERENCES});
-//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerType.LevenbergMarquardt, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.FINITE_DIFFERENCES});
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ALGORITHMIC_DIFFERENCIATION});
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
 
 		return config;
 	}	
 
 	private final OptimizerSolverType solverType;
-	private final OptimizerType optimizerType;
 	private final OptimizerDerivativeType derivativeType;
 
 	private final AbstractRandomVariableFactory randomVariableFactory;
 
-	public LIBORMarketModelCalibrationTest(OptimizerSolverType solverType, OptimizerType optimizerType, OptimizerDerivativeType derivativeType) {
+	public LIBORMarketModelCalibrationTest(OptimizerSolverType solverType, OptimizerDerivativeType derivativeType) {
 		this.solverType = solverType;
-		this.optimizerType = optimizerType;
 		this.derivativeType = derivativeType;
 
-		System.out.println(solverType + " - " + optimizerType + " - " + derivativeType + "\n");
+		System.out.println(solverType + " - LevenbergMarquardt - " + derivativeType + "\n");
 
 		Map<String, Object> randomVariableFactoryProperties = new HashMap<>();
 		randomVariableFactoryProperties.put("isGradientRetainsLeafNodesOnly", true);
@@ -282,6 +272,7 @@ public class LIBORMarketModelCalibrationTest {
 		/* volatility model from piecewise constant interpolated matrix */
 		TimeDiscretizationInterface volatilitySurfaceDiscretization = new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0, 40.0); 
 		double[] initialVolatility = new double[] { 0.50 / 100 };
+//		double[] initialVolatility = new double[] { Math.log(Math.exp(0.50 / 100) - 1.0) };
 		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory, timeDiscretization, liborPeriodDiscretization, volatilitySurfaceDiscretization, volatilitySurfaceDiscretization, initialVolatility, true);
 
 		//		/* volatility model from given matrix */
@@ -317,15 +308,8 @@ public class LIBORMarketModelCalibrationTest {
 		Arrays.fill(parameterUpperBound, Double.POSITIVE_INFINITY);
 
 		// Set calibration properties (should use our brownianMotion for calibration - needed to have to right correlation).		
-		OptimizerFactoryInterface optimizerFactory = null;
-		switch(optimizerType) {
-		case LevenbergMarquardt:
-			optimizerFactory = new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
-			break;
-		case GradientDescent:
-			optimizerFactory = new OptimizerFactoryGradientDescent(maxIterations, accuracy, numberOfThreads);
-			break;
-		}
+		OptimizerFactoryInterface optimizerFactory = new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
+
 
 		// Set calibration properties (should use our brownianMotion for calibration - needed to have to right correlation).
 		Map<String, Object> calibrationParameters = new HashMap<String, Object>();
@@ -361,8 +345,9 @@ public class LIBORMarketModelCalibrationTest {
 
 		System.out.println("\nCalibrated parameters are:");
 		AbstractLIBORCovarianceModelParametric calibratedCovarianceModel = (AbstractLIBORCovarianceModelParametric) ((LIBORMarketModel) liborMarketModelCalibrated).getCovarianceModel();
-		double[] param = calibratedCovarianceModel.getParameter();
-		for (double p : param) System.out.println(formatterParam.format(p));
+		RandomVariableInterface[] param = calibratedCovarianceModel.getParameterAsRandomVariable();
+		for (RandomVariableInterface p : param) 
+			System.out.println(formatterParam.format(LIBORVolatilityModelPiecewiseConstant.parameterTransform(p).doubleValue()));
 
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion);
 		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
