@@ -5,7 +5,6 @@ package net.finmath.optimizer.gradientdescent;
 
 import net.finmath.optimizer.OptimizerFactoryInterface;
 import net.finmath.optimizer.OptimizerInterface;
-import net.finmath.optimizer.OptimizerInterfaceAAD;
 import net.finmath.optimizer.SolverException;
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
@@ -18,13 +17,11 @@ public class OptimizerFactoryGradientDescent implements OptimizerFactoryInterfac
 
 	private final int		maxIterations;
 	private final double	errorTolerance;
-	private final int		maxThreads;
 	
-	public OptimizerFactoryGradientDescent(int maxIterations, double errorTolerance, int maxThreads) {
+	public OptimizerFactoryGradientDescent(int maxIterations, double errorTolerance) {
 		super();
 		this.maxIterations = maxIterations;
 		this.errorTolerance = errorTolerance;
-		this.maxThreads = maxThreads;
 	}
 	
 	/* (non-Javadoc)
@@ -48,7 +45,7 @@ public class OptimizerFactoryGradientDescent implements OptimizerFactoryInterfac
 	 */
 	@Override
 	public OptimizerInterface getOptimizer(ObjectiveFunction objectiveFunction, double[] initialParameters,	double[] lowerBound, double[] upperBound, double[] finiteDifferenceStepSize, double[] targetValues) {
-		return (new GradientDescent(initialParameters, targetValues, errorTolerance, maxIterations) {
+		return (new GradientDescent(initialParameters, targetValues[0], errorTolerance, maxIterations) {
 
 			private static final long serialVersionUID = -597832728090163557L;
 
@@ -64,7 +61,7 @@ public class OptimizerFactoryGradientDescent implements OptimizerFactoryInterfac
 	 */
 	@Override
 	public OptimizerInterface getOptimizer(DerivativeFunction objectiveFunction, double[] initialParameters, double[] lowerBound, double[] upperBound, double[] finiteDifferenceStepSizes, double[] targetValues) {
-		return (new GradientDescent(initialParameters, targetValues, errorTolerance, maxIterations) {
+		return (new GradientDescent(initialParameters, targetValues[0], errorTolerance, maxIterations) {
 
 			private static final long serialVersionUID = 8937061844543179013L;
 

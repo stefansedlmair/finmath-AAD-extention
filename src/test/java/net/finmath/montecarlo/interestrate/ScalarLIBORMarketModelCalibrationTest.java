@@ -66,6 +66,7 @@ import net.finmath.optimizer.gradientdescent.OptimizerFactoryGradientDecentAmrij
 import net.finmath.optimizer.gradientdescent.OptimizerFactoryGradientDescent;
 import net.finmath.optimizer.gradientdescent.OptimizerFactoryTGNU;
 import net.finmath.optimizer.quasinewton.OptimizerFactoryBroydenFletcherGoldfarbShanno;
+import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.ScheduleGenerator;
 import net.finmath.time.ScheduleInterface;
 import net.finmath.time.TimeDiscretization;
@@ -97,20 +98,19 @@ public class ScalarLIBORMarketModelCalibrationTest {
 
 		Collection<Object[]> config = new ArrayList<>();
 
+//		config.add(new Object[]{OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, 
+//				new OptimizerFactoryBroydenFletcherGoldfarbShanno(30 /*maxIterations*/ ,1E-4 /*errorTolerance*/, 1.5E-2 /*targetAccuracy*/),
+//				"BFGS"});
 		config.add(new Object[]{OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, 
-				new OptimizerFactoryBroydenFletcherGoldfarbShanno(100 /*maxIterations*/ ,1E-4 /*errorTolerance*/, 1E-4 /*targetAccuracy*/),
-				"BFGS"});
-		config.add(new Object[]{OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, 
-				new OptimizerFactoryTGNU(100, 1E-5 , 1E-2),
+				new OptimizerFactoryTGNU(100 /*maxIterations*/, 1E-5 /*errorTolerance*/),
 				"TGNU"});
 		config.add(new Object[]{OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, 
-				new OptimizerFactoryGradientDecentAmrijosRule(100, 1E-5 , 1E-4),
+				new OptimizerFactoryGradientDecentAmrijosRule(100 /*maxIterations*/, 1E-5 /*errorTolerance*/),
 				"GDA"});
 		config.add(new Object[]{OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, 
-				new OptimizerFactoryGradientDescent(100, 1E-5 , 2),
+				new OptimizerFactoryGradientDescent(100 /*maxIterations*/, 1E-5 /*errorTolerance*/),
 				"GD"});
 
-		
 		return config;
 	}	
 
@@ -125,7 +125,7 @@ public class ScalarLIBORMarketModelCalibrationTest {
 
 		this.optimizerFactory = optimizerFactory;
 		
-		System.out.println(solverType + " - " + derivativeType + "\n");
+		System.out.println(Name + " - " + solverType + " - " + derivativeType + "\n");
 
 		Map<String, Object> randomVariableFactoryProperties = new HashMap<>();
 		randomVariableFactoryProperties.put("isGradientRetainsLeafNodesOnly", true);
@@ -187,11 +187,6 @@ public class ScalarLIBORMarketModelCalibrationTest {
 		final int seed				= 1234;
 		final int numberOfPaths		= (int) 1E3;
 		final int numberOfFactors	= 1;
-
-		// Optimizer Settings
-		Double accuracy = new Double(1E-4);	// Lower accuracy to reduce runtime of the unit test
-		int maxIterations = 100;
-		int numberOfThreads = 2;
 
 		//------------------------------------------------------------------------------------------
 
@@ -281,15 +276,15 @@ public class ScalarLIBORMarketModelCalibrationTest {
 
 		/* volatility model from piecewise constant interpolated matrix */
 		TimeDiscretizationInterface volatilitySurfaceDiscretization = new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0, 40.0); 
-		double[] initialVolatility = new double[] { 0.50 / 100 };
-//		double[] initialVolatility = new double[] { Math.log(Math.exp(0.50 / 100) - 1.0) };
+//		double[] initialVolatility = new double[] { 0.50 / 100 };
+		double[] initialVolatility = new double[] { LIBORVolatilityModelPiecewiseConstant.parameterTransformInverse(0.5 / 100) };
 		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory, timeDiscretization, liborPeriodDiscretization, volatilitySurfaceDiscretization, volatilitySurfaceDiscretization, initialVolatility, true);
 
-		//		/* volatility model from given matrix */
-		//		double initialVolatility = 0.005;
-		//		double[][] volatility = new double[timeDiscretization.getNumberOfTimeSteps()][liborPeriodDiscretization.getNumberOfTimeSteps()];
-		//		for(int i = 0; i < timeDiscretization.getNumberOfTimeSteps(); i++) Arrays.fill(volatility[i], initialVolatility);
-		//		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelFromGivenMatrix(randomVariableFactory, timeDiscretization, liborPeriodDiscretization, volatility);
+		/* volatility model from given matrix */
+//		double initialVolatility = 0.005;
+//		double[][] volatility = new double[timeDiscretization.getNumberOfTimeSteps()][liborPeriodDiscretization.getNumberOfTimeSteps()];
+//		for(int i = 0; i < timeDiscretization.getNumberOfTimeSteps(); i++) Arrays.fill(volatility[i], initialVolatility);
+//		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelFromGivenMatrix(randomVariableFactory, timeDiscretization, liborPeriodDiscretization, volatility);
 
 		/* Correlation Model with exponential decay */
 		LIBORCorrelationModel correlationModel = new LIBORCorrelationModelExponentialDecay(timeDiscretization, liborPeriodDiscretization, numberOfFactors, 0.05, false);
@@ -322,7 +317,7 @@ public class ScalarLIBORMarketModelCalibrationTest {
 
 		// Set calibration properties (should use our brownianMotion for calibration - needed to have to right correlation).
 		Map<String, Object> calibrationParameters = new HashMap<String, Object>();
-		calibrationParameters.put("accuracy", accuracy);
+//		calibrationParameters.put("accuracy", accuracy); // option only necessary if no optimizer factory given
 		calibrationParameters.put("brownianMotion", brownianMotion);
 		calibrationParameters.put("optimizerFactory", optimizerFactory);
 		calibrationParameters.put("parameterStep", new Double(1E-4));
@@ -354,8 +349,8 @@ public class ScalarLIBORMarketModelCalibrationTest {
 
 		System.out.println("\nCalibrated parameters are:");
 		AbstractLIBORCovarianceModelParametric calibratedCovarianceModel = (AbstractLIBORCovarianceModelParametric) ((LIBORMarketModel) liborMarketModelCalibrated).getCovarianceModel();
-		double[] param = calibratedCovarianceModel.getParameter();
-		for (double p : param) System.out.println(formatterParam.format(p));
+		RandomVariableInterface[] param = calibratedCovarianceModel.getParameterAsRandomVariable();
+		for (RandomVariableInterface p : param) System.out.println(formatterParam.format(LIBORVolatilityModelPiecewiseConstant.parameterTransform(p).doubleValue()));
 
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion);
 		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
@@ -388,7 +383,7 @@ public class ScalarLIBORMarketModelCalibrationTest {
 		System.out.println("RMS Error.....:" + formatterValue.format(Math.sqrt(deviationSquaredSum/calibrationItems.size())));
 		System.out.println("__________________________________________________________________________________________\n");
 
-		Assert.assertEquals(0.0, averageDeviation, 1E-4);
+		Assert.assertEquals(0.0, averageDeviation, 1E-2);
 	}
 
 	public AnalyticModelInterface getCalibratedCurve() throws SolverException {

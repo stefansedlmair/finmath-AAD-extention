@@ -2,7 +2,6 @@ package net.finmath.optimizer.gradientdescent;
 
 import net.finmath.optimizer.OptimizerFactoryInterface;
 import net.finmath.optimizer.OptimizerInterface;
-import net.finmath.optimizer.OptimizerInterfaceAAD;
 import net.finmath.optimizer.SolverException;
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
@@ -10,21 +9,19 @@ import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
 public class OptimizerFactoryTGNU implements OptimizerFactoryInterface {
 
 	private final int		maxIterations;
-	private final double	targetAccuracy;
 	private final double	minAdvancePerStep;
 
 	
-	public OptimizerFactoryTGNU(int maxIterations,double minAdvancePerStep ,double targetAccuracy) {
+	public OptimizerFactoryTGNU(int maxIterations,double minAdvancePerStep) {
 		super();
 		this.maxIterations = maxIterations;
-		this.targetAccuracy = targetAccuracy;
 		this.minAdvancePerStep = minAdvancePerStep;
 	}
 	
 	@Override
 	public OptimizerInterface getOptimizer(ObjectiveFunction objectiveFunction, double[] initialParameters,
 			double[] targetValues) {
-		return new TGNU(initialParameters, targetValues[0], targetAccuracy, minAdvancePerStep, maxIterations) {
+		return new TruncatedGaussNewtonForUnterdetNSLP(initialParameters, targetValues[0], minAdvancePerStep, maxIterations) {
 
 			private static final long serialVersionUID = 4815986388931167776L;
 
@@ -57,7 +54,7 @@ public class OptimizerFactoryTGNU implements OptimizerFactoryInterface {
 	@Override
 	public OptimizerInterface getOptimizer(DerivativeFunction objectiveFunction, double[] initialParameters,
 			double[] targetValues) {
-		return new TGNU(initialParameters, targetValues[0], targetAccuracy, minAdvancePerStep, maxIterations) {
+		return new TruncatedGaussNewtonForUnterdetNSLP(initialParameters, targetValues[0], minAdvancePerStep, maxIterations) {
 
 			private static final long serialVersionUID = 4815986388931167776L;
 
