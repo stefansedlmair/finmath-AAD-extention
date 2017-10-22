@@ -218,7 +218,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 				// if parameters are the same do not calculate the prices again
 				if(!Arrays.equals(currentParameters, parameters)){
 					
-					long start = System.currentTimeMillis();
+//					long start = System.currentTimeMillis();
 					
 					currentParameters = parameters.clone();
 					currentCalibrationCovarianceModel = AbstractLIBORCovarianceModelParametric.this.getCloneWithModifiedParameters(currentParameters);
@@ -226,9 +226,9 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 					currentCalibratedPrices = 
 						getFutureValuesFromParameters(currentCalibrationCovarianceModel, calibrationModel, brownianMotion, calibrationProducts, 
 														numberOfCalibrationProducts, executor, calibrationTargetValues, processScheme);
-					long end = System.currentTimeMillis();
+//					long end = System.currentTimeMillis();
 					
-					System.out.println("calculation time of product values :" + ((end - start)/1E3));
+//					System.out.println("calculation time of product values :" + ((end - start)/1E3));
 				}
 			}
 			
@@ -254,7 +254,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 							double error = calibratedPrices[i] - calibrationTargetValues[i];
 							errorRMS += error * error;
 					}
-//					errorRMS /= (double) numberOfCalibrationProducts;
+					errorRMS /= (double) numberOfCalibrationProducts;
 					System.arraycopy(new double[] {Math.sqrt(errorRMS)} , 0, values, 0, 1);
 					break;
 				}		
