@@ -93,8 +93,9 @@ public class LIBORVolatilityModelFromGivenMatrix extends LIBORVolatilityModel {
 					double currentVolatility = parameter[parameterIndex++];
 					
 					// catch negative values
-					if(currentVolatility < 0.0) 
-						throw new IllegalArgumentException("Parameter at index " + (parameterIndex - 1) + " indicates negative Volatility(value: "+ currentVolatility +")!");
+//					if(currentVolatility < 0.0) 
+//						throw new IllegalArgumentException("Parameter at index " + (parameterIndex - 1) + " indicates negative Volatility(value: "+ currentVolatility +")!");
+					currentVolatility = Math.max(currentVolatility, 0.0);
 					
 					volatilityMatrix[timeIndex][liborPeriodIndex] = currentVolatility;
 				}
