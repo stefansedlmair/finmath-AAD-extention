@@ -7,7 +7,9 @@ package net.finmath.montecarlo.interestrate.modelplugins;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariableFactory;
@@ -86,7 +88,6 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 		if(!isCalibrateable) return null;
 		
 		return volatility;
-			
 	}
 
 	@Override
@@ -96,16 +97,11 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 
 	private void setParameter(double[] parameter, boolean executeFunction) {
 		if(executeFunction) {
-			if(parameter.length != volatility.length) throw new IllegalArgumentException("parameter.length has to conincide with volatility.length!");
-			for(int i = 0; i < volatility.length; i++) {
-				double volatility = Math.max(parameter[i], 0.0);
-				// catch negative values for volatilities
-//				if(parameter[i] < 0.0) 
-//					throw new IllegalArgumentException("Volatility parameter " + i + " is negativ!");
-				
-				this.volatility[i] = randomVariableFactory.createRandomVariable(volatility);
+			int numberOfParameters = parameter.length;
+			if(numberOfParameters != volatility.length) throw new IllegalArgumentException("parameter.length has to conincide with volatility.length!");
+			for(int i = 0; i < parameter.length; i++)
+				this.volatility[i] = randomVariableFactory.createRandomVariable(parameter[i]);
 			}
-		}
 	}
 	
 	@Override
@@ -131,12 +127,10 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 			if(timeIndexTimeToMaturity < 0) timeIndexTimeToMaturity = 0;
 			if(timeIndexTimeToMaturity >= timeToMaturityDiscretization.getNumberOfTimes()) timeIndexTimeToMaturity--;
 
-			// for addition filtration time will be carried over from the first variable, i.e. volatility[i] gets a new filtration time.
-			// volatilities cannot be negative anymore, i.e. no floor/max at 0.0 needed!
 			volatilityInstanteaneous = volatilityInstanteaneous.add(volatility[indexMap.get(timeIndexSimulationTime).get(timeIndexTimeToMaturity)]);
 		}
 	
-		return volatilityInstanteaneous;
+		return parameterTransform(volatilityInstanteaneous);
 	}
 
 	@Override
@@ -150,5 +144,17 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 				this.getParameter(),
 				this.isCalibrateable
 				);
+	}
+	
+	private static final double scalingParameter = 100.0;
+	
+	public static RandomVariableInterface parameterTransform(RandomVariableInterface parameter){
+		return parameter.mult(scalingParameter).exp().add(1.0).log().div(scalingParameter);
+//		return parameter.floor(0.0);
+	}
+	
+	public static double parameterTransformInverse(double volatility){
+		return Math.log(Math.exp(volatility * scalingParameter) - 1.0) /scalingParameter;
+//		return volatility;
 	}
 }
