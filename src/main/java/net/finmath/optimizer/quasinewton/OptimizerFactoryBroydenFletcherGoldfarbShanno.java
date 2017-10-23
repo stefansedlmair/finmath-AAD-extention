@@ -19,21 +19,19 @@ public class OptimizerFactoryBroydenFletcherGoldfarbShanno implements OptimizerF
 
 
 	private final int		maxIterations;
-	private final double	targetAccuracy;
 	private final double	errorTolerance;
 
 	
-	public OptimizerFactoryBroydenFletcherGoldfarbShanno(int maxIterations,double errorTolerance ,double targetAccuracy) {
+	public OptimizerFactoryBroydenFletcherGoldfarbShanno(int maxIterations,double errorTolerance) {
 		super();
 		this.maxIterations = maxIterations;
-		this.targetAccuracy = targetAccuracy;
 		this.errorTolerance = errorTolerance;
 	}
 	
 	@Override
 	public OptimizerInterface getOptimizer(ObjectiveFunction objectiveFunction, double[] initialParameters,
 			double[] targetValues) {
-		return new BroydenFletcherGoldfarbShanno(initialParameters, targetValues[0], targetAccuracy, maxIterations, errorTolerance) {
+		return new BroydenFletcherGoldfarbShanno(initialParameters, targetValues[0], maxIterations, errorTolerance) {
 
 			private static final long serialVersionUID = 7815089222413087835L;
 
@@ -66,7 +64,7 @@ public class OptimizerFactoryBroydenFletcherGoldfarbShanno implements OptimizerF
 	@Override
 	public OptimizerInterface getOptimizer(DerivativeFunction objectiveFunction, double[] initialParameters,
 			double[] targetValues) {
-		return new BroydenFletcherGoldfarbShanno(initialParameters, targetValues[0], targetAccuracy, maxIterations, errorTolerance) {
+		return new BroydenFletcherGoldfarbShanno(initialParameters, targetValues[0], maxIterations, errorTolerance) {
 
 			private static final long serialVersionUID = -6683749522552374617L;
 
