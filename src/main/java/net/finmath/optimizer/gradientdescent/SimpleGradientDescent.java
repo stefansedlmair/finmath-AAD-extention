@@ -5,53 +5,40 @@ import java.util.concurrent.ExecutorService;
 import net.finmath.optimizer.SolverException;
 
 /**
- * Simple Gradient Descent Optimizer
+ * Simple Gradient Descent Optimizer with constant step size, i.e. the update rule is:
  * 
- * with varying step size:
- * <lu>
- * <li> if last step better than best result until now:
- * lambda<sub>k+1</sub> = lambda<sub>k</sub> / lambda<sub>Divisor</sub>,
- * </li>
- * <li> if last step worse than best result until now:
- * lambda<sub>k+1</sub>  = lambda<sub>k</sub>  * lambda<sub>Multiplicator</sub>,
- * </li>
- * </lu>
- * where lambda<sub>Divisor</sub> and lambda<sub>Divisor</sub> are greater than 1.0.
+ * <center> x<sub>k+1</sub> = x<sub>k</sub> - \lambda * \nabla f(x<sub>k</sub>) </center>
+ * for k=0,1,2,... until accuracy does not become better anymore.
+ * 
+ * @author Stefan Sedlmair
+ * @version 1.0
+ * 
+ * @see AbstractGradientDescentScalarOptimization
  * */
 public abstract class SimpleGradientDescent extends AbstractGradientDescentScalarOptimization {
 
+	private static final long serialVersionUID = -84822697392025037L;
+	
+	private final double fixedStepSize;	
+	
 	public SimpleGradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
 			int maxNumberOfIterations, double[] finiteDifferenceStepSizes, ExecutorService executor,
-			boolean allowWorsening) {
+			boolean allowWorsening, double fixedStepSize) {
 		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, finiteDifferenceStepSizes, executor,
 				allowWorsening);
+		
+		this.fixedStepSize = fixedStepSize;
 	}
 
 	public SimpleGradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
 			int maxNumberOfIterations) {
-		this(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, null, null, true);
-		}
+		this(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, null, null, false, 1E-3);
+	}
 	
-	private static final long serialVersionUID = -84822697392025037L;
-
-	private double	lambda				= 1E-2;
-	
-	private double	lambdaDivisor		= 1.3;
-	private double	lambdaMultiplicator	= 1.2;
-
-	
-	private double lastAccuracy = Double.POSITIVE_INFINITY;
 	
 	@Override
 	protected double getStepSize(double[] currentParameter) throws SolverException {
-
-		double stepSize = lambda;
-		
-		lambda = (currentAccuracy < lastAccuracy) ? lambda * lambdaMultiplicator : lambda / lambdaDivisor; 
-	
-		lastAccuracy = currentAccuracy;
-
-		return stepSize;
+		return fixedStepSize;
 	}
 	
 }
