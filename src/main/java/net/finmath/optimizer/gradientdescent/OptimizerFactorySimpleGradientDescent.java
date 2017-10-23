@@ -13,12 +13,12 @@ import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
  * @author Stefan Sedlmair
  *
  */
-public class OptimizerFactoryGradientDescent implements OptimizerFactoryInterface {
+public class OptimizerFactorySimpleGradientDescent implements OptimizerFactoryInterface {
 
 	private final int		maxIterations;
 	private final double	errorTolerance;
 	
-	public OptimizerFactoryGradientDescent(int maxIterations, double errorTolerance) {
+	public OptimizerFactorySimpleGradientDescent(int maxIterations, double errorTolerance) {
 		super();
 		this.maxIterations = maxIterations;
 		this.errorTolerance = errorTolerance;
@@ -45,7 +45,7 @@ public class OptimizerFactoryGradientDescent implements OptimizerFactoryInterfac
 	 */
 	@Override
 	public OptimizerInterface getOptimizer(ObjectiveFunction objectiveFunction, double[] initialParameters,	double[] lowerBound, double[] upperBound, double[] finiteDifferenceStepSize, double[] targetValues) {
-		return (new GradientDescent(initialParameters, targetValues[0], errorTolerance, maxIterations) {
+		return (new SimpleGradientDescent(initialParameters, targetValues[0], errorTolerance, maxIterations) {
 
 			private static final long serialVersionUID = -597832728090163557L;
 
@@ -61,7 +61,7 @@ public class OptimizerFactoryGradientDescent implements OptimizerFactoryInterfac
 	 */
 	@Override
 	public OptimizerInterface getOptimizer(DerivativeFunction objectiveFunction, double[] initialParameters, double[] lowerBound, double[] upperBound, double[] finiteDifferenceStepSizes, double[] targetValues) {
-		return (new GradientDescent(initialParameters, targetValues[0], errorTolerance, maxIterations) {
+		return (new SimpleGradientDescent(initialParameters, targetValues[0], errorTolerance, maxIterations) {
 
 			private static final long serialVersionUID = 8937061844543179013L;
 

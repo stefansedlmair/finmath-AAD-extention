@@ -18,16 +18,16 @@ import net.finmath.optimizer.SolverException;
  * </lu>
  * where lambda<sub>Divisor</sub> and lambda<sub>Divisor</sub> are greater than 1.0.
  * */
-public abstract class GradientDescent extends AbstractGradientDescentScalarOptimization {
+public abstract class SimpleGradientDescent extends AbstractGradientDescentScalarOptimization {
 
-	public GradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
+	public SimpleGradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
 			int maxNumberOfIterations, double[] finiteDifferenceStepSizes, ExecutorService executor,
 			boolean allowWorsening) {
 		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, finiteDifferenceStepSizes, executor,
 				allowWorsening);
 	}
 
-	public GradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
+	public SimpleGradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
 			int maxNumberOfIterations) {
 		this(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, null, null, true);
 		}
