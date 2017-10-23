@@ -48,9 +48,7 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 			rightSide = value - c1 * betaL * VectorAlgbra.innerProduct(derivative, derivative);
 			
 		} while((leftSide > rightSide || Double.isNaN(leftSide)) && l <= maxL);
-		
-		System.out.println("l = " + l);
-		
+				
 		return betaL;
 	}
 }
