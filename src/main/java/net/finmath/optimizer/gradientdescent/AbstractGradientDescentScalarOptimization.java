@@ -98,6 +98,7 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 
 		double stepSize = Double.NaN;
 		
+		// check accuracy with initial parameter set
 		currentValue = getValue(currentParameter);
 		currentAccuracy = Math.abs(currentValue - targetValue);
 		bestAccuracy = currentAccuracy;
