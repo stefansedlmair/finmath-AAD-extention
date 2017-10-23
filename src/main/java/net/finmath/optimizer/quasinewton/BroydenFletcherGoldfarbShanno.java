@@ -49,7 +49,7 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 		double wolfeLeft  = Double.NaN;
 		double wolfeRight = Double.NaN;
 		
-		double l = 0; 
+		double l = 3; // start small to avoid too large jumps 
 			
 		double[] parameterCandidate;
 		double stepSize = Double.NaN;
@@ -73,9 +73,7 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 			wolfeRight = c2 * VectorAlgbra.innerProduct(currentGradient, currentSearchDirection);
 			
 		} while(armijoLeft > armijoRight && wolfeLeft < wolfeRight && l <= maxL);
-		
-		System.out.println("l = " + (l-1));
-		
+				
 		return stepSize;
 	}
 	
@@ -108,6 +106,9 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 			// update value and accuracy
 			currentValue = getValue(currentParameter);
 			currentAccuracy = Math.abs(currentValue - targetValue);
+			
+			// increase number if iterations
+			numberOfIterations++;
 			
 			if(currentAccuracy < bestAccuracy){
 				
