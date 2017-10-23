@@ -62,7 +62,7 @@ import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.montecarlo.process.ProcessEulerScheme.Scheme;
 import net.finmath.optimizer.OptimizerFactoryInterface;
 import net.finmath.optimizer.SolverException;
-import net.finmath.optimizer.gradientdescent.OptimizerFactoryGradientDecentAmrijosRule;
+import net.finmath.optimizer.gradientdescent.OptimizerFactoryGradientDecentArmijosRule;
 import net.finmath.optimizer.gradientdescent.OptimizerFactoryGradientDescent;
 import net.finmath.optimizer.gradientdescent.OptimizerFactoryTGNU;
 import net.finmath.optimizer.quasinewton.OptimizerFactoryBroydenFletcherGoldfarbShanno;
@@ -105,7 +105,7 @@ public class ScalarLIBORMarketModelCalibrationTest {
 				new OptimizerFactoryTGNU(100 /*maxIterations*/, 1E-5 /*errorTolerance*/),
 				"TGNU"});
 		config.add(new Object[]{OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, 
-				new OptimizerFactoryGradientDecentAmrijosRule(100 /*maxIterations*/, 1E-5 /*errorTolerance*/),
+				new OptimizerFactoryGradientDecentArmijosRule(100 /*maxIterations*/, 1E-5 /*errorTolerance*/),
 				"GDA"});
 		config.add(new Object[]{OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, 
 				new OptimizerFactoryGradientDescent(100 /*maxIterations*/, 1E-5 /*errorTolerance*/),

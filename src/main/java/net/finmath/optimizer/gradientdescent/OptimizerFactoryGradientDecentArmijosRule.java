@@ -6,13 +6,13 @@ import net.finmath.optimizer.SolverException;
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
 
-public class OptimizerFactoryGradientDecentAmrijosRule implements OptimizerFactoryInterface {
+public class OptimizerFactoryGradientDecentArmijosRule implements OptimizerFactoryInterface {
 
 	private final int		maxIterations;
 	private final double	minAdvancePerStep;
 
 	
-	public OptimizerFactoryGradientDecentAmrijosRule(int maxIterations,double minAdvancePerStep) {
+	public OptimizerFactoryGradientDecentArmijosRule(int maxIterations,double minAdvancePerStep) {
 		super();
 		this.maxIterations = maxIterations;
 		this.minAdvancePerStep = minAdvancePerStep;
@@ -21,7 +21,7 @@ public class OptimizerFactoryGradientDecentAmrijosRule implements OptimizerFacto
 	@Override
 	public OptimizerInterface getOptimizer(ObjectiveFunction objectiveFunction, double[] initialParameters,
 			double[] targetValues) {
-		return new GradientDescentAmrijosRule(initialParameters, targetValues[0], minAdvancePerStep, maxIterations) {
+		return new GradientDescentArmijosRule(initialParameters, targetValues[0], minAdvancePerStep, maxIterations) {
 
 			private static final long serialVersionUID = 4815986388931167776L;
 
@@ -54,7 +54,7 @@ public class OptimizerFactoryGradientDecentAmrijosRule implements OptimizerFacto
 	@Override
 	public OptimizerInterface getOptimizer(DerivativeFunction objectiveFunction, double[] initialParameters,
 			double[] targetValues) {
-		return new GradientDescentAmrijosRule(initialParameters, targetValues[0], minAdvancePerStep, maxIterations) {
+		return new GradientDescentArmijosRule(initialParameters, targetValues[0], minAdvancePerStep, maxIterations) {
 
 			private static final long serialVersionUID = 4815986388931167776L;
 
