@@ -5,11 +5,11 @@ import java.util.concurrent.ExecutorService;
 import net.finmath.functions.VectorAlgbra;
 import net.finmath.optimizer.SolverException;
 
-public abstract class GradientDescentAmrijosRule extends AbstractGradientDescentScalarOptimization {
+public abstract class GradientDescentArmijosRule extends AbstractGradientDescentScalarOptimization {
 
 	private static final long serialVersionUID = -8770177009110584745L;
 
-	public GradientDescentAmrijosRule(
+	public GradientDescentArmijosRule(
 			double[] initialParameter, double targetValue, double errorTolerance,
 			int maxNumberOfIterations, 
 			double[] finiteDifferenceStepSizes, 
@@ -18,7 +18,7 @@ public abstract class GradientDescentAmrijosRule extends AbstractGradientDescent
 		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, finiteDifferenceStepSizes, executor, allowWorsening);
 	}
 	
-	public GradientDescentAmrijosRule(double[] initialParameters, double targetValue, double errorTolerance, int maxIterations) {
+	public GradientDescentArmijosRule(double[] initialParameters, double targetValue, double errorTolerance, int maxIterations) {
 		super(initialParameters, targetValue, errorTolerance, maxIterations, null, null, false);
 	}
 
@@ -48,9 +48,7 @@ public abstract class GradientDescentAmrijosRule extends AbstractGradientDescent
 			rightSide = value - c1 * betaL * VectorAlgbra.innerProduct(derivative, derivative);
 			
 		} while((leftSide > rightSide || Double.isNaN(leftSide)) && l <= maxL);
-		
-		System.out.println("l = " + l);
-		
+				
 		return betaL;
 	}
 }
