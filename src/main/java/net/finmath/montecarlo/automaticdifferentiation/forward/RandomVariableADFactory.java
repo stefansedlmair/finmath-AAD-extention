@@ -1089,14 +1089,9 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 			// partial derivative with respect to itself
 			partialDerivatives.put(id, factory.createRandomVariableNonDifferentiable(0.0, 1.0));
 			
-			// add id of lowest variable
-			for(OperatorTreeNode childTreeNode : this.childTreeNodes){
-				treeNodesToPropagte.put(childTreeNode.id, childTreeNode);
-				partialDerivatives.put(childTreeNode.id, childTreeNode.getPartialDerivative(this));
-			}
-			
-			if(!this.childTreeNodes.isEmpty() || factory.keepAllDerivativesOfOperatorTree) partialDerivatives.remove(id);
-						
+			// add id of this variable to propagate upwards
+			treeNodesToPropagte.put(id, this);
+									
 			while(!treeNodesToPropagte.isEmpty()){
 				
 				// get and remove smallest ID from treeNodesToPropagate
@@ -1133,6 +1128,8 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 				if(!parentOperatorTreeNode.childTreeNodes.isEmpty() || factory.keepAllDerivativesOfOperatorTree) partialDerivatives.remove(parentID); 
 				
 			}
+			
+			if(!this.childTreeNodes.isEmpty() || factory.keepAllDerivativesOfOperatorTree) partialDerivatives.remove(id);
 			
 			return partialDerivatives;
 		}
