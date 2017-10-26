@@ -47,8 +47,9 @@ import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProdu
 import net.finmath.montecarlo.interestrate.products.Swaption;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.montecarlo.process.ProcessEulerScheme.Scheme;
+import net.finmath.optimizer.OptimizerFactory;
+import net.finmath.optimizer.OptimizerFactory.OptimizerType;
 import net.finmath.optimizer.OptimizerFactoryInterface;
-import net.finmath.optimizer.gaussnewton.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
 import net.finmath.time.businessdaycalendar.BusinessdayCalendarExcludingTARGETHolidays;
@@ -85,8 +86,13 @@ public class LIBORMarketModelCalibrationTestAlternative {
 
 		Collection<Object[]> config = new ArrayList<>();
 		
-		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
-		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION});
+		int maxIterations = 100;
+		double errorTolerance = 1E-4;
+		
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION,
+				new OptimizerFactory(OptimizerType.LevenbergMarquardt, maxIterations, errorTolerance)});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION,
+				new OptimizerFactory(OptimizerType.LevenbergMarquardt, maxIterations, errorTolerance)});
 //		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.FINITE_DIFFERENCES});
 //		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.FINITE_DIFFERENCES});
 		
@@ -95,9 +101,12 @@ public class LIBORMarketModelCalibrationTestAlternative {
 
 	private final OptimizerSolverType solverType;
 	private final OptimizerDerivativeType derivativeType;
+	private final OptimizerFactoryInterface optimizerFactory;
+	
+	public LIBORMarketModelCalibrationTestAlternative(OptimizerSolverType solverType, OptimizerDerivativeType derivativeType, OptimizerFactoryInterface optimizerFactory) {
 
-	public LIBORMarketModelCalibrationTestAlternative(OptimizerSolverType solverType, OptimizerDerivativeType derivativeType) {
-
+		this.optimizerFactory = optimizerFactory;
+		
 		System.out.println(solverType + " - " + derivativeType);
 		
 		double simulationStart 		= 0.0;
@@ -159,8 +168,6 @@ public class LIBORMarketModelCalibrationTestAlternative {
 
 		// Create blended local volatility model with fixed parameter (0=lognormal, > 1 = almost a normal model).			
 		AbstractLIBORCovarianceModelParametric covarianceModelDisplaced = new DisplacedLocalVolatilityModel(randomVariableFactory, covarianceModelParametric, 1.0/0.25, false /* isCalibrateable */);
-
-		OptimizerFactoryInterface optimizerFactory = new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads);
 
 		// Set model properties
 		Map<String, Object> properties = new HashMap<String, Object>();

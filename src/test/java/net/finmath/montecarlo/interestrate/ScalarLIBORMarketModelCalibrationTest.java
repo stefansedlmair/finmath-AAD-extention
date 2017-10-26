@@ -60,12 +60,10 @@ import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModelPiec
 import net.finmath.montecarlo.interestrate.products.SwaptionSimple;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.montecarlo.process.ProcessEulerScheme.Scheme;
+import net.finmath.optimizer.OptimizerFactory;
+import net.finmath.optimizer.OptimizerFactory.OptimizerType;
 import net.finmath.optimizer.OptimizerFactoryInterface;
 import net.finmath.optimizer.SolverException;
-import net.finmath.optimizer.gradientdescent.OptimizerFactoryGradientDecentArmijosRule;
-import net.finmath.optimizer.gradientdescent.OptimizerFactorySimpleGradientDescent;
-import net.finmath.optimizer.gradientdescent.OptimizerFactoryTGNU;
-import net.finmath.optimizer.quasinewton.OptimizerFactoryBroydenFletcherGoldfarbShanno;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.ScheduleGenerator;
 import net.finmath.time.ScheduleInterface;
@@ -98,17 +96,20 @@ public class ScalarLIBORMarketModelCalibrationTest {
 
 		Collection<Object[]> config = new ArrayList<>();
 
+		int maxIterations = 100;
+		double errorTolerance = 1E-5;
+		
 		config.add(new Object[]{OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, 
-				new OptimizerFactoryBroydenFletcherGoldfarbShanno(100 /*maxIterations*/ ,1E-5 /*errorTolerance*/),
+				new OptimizerFactory(OptimizerType.BroydenFletcherGoldfarbShanno, maxIterations ,errorTolerance),
 				"BFGS"});
 		config.add(new Object[]{OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, 
-				new OptimizerFactoryTGNU(100 /*maxIterations*/, 1E-5 /*errorTolerance*/),
+				new OptimizerFactory(OptimizerType.TruncatedGaussNetwonForUnderdeterminedNSLP, maxIterations ,errorTolerance),
 				"TGNU"});
 		config.add(new Object[]{OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, 
-				new OptimizerFactoryGradientDecentArmijosRule(100 /*maxIterations*/, 1E-5 /*errorTolerance*/),
+				new OptimizerFactory(OptimizerType.GradientDescentArmijo, maxIterations ,errorTolerance),
 				"GDA"});
 		config.add(new Object[]{OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, 
-				new OptimizerFactorySimpleGradientDescent(100 /*maxIterations*/, 1E-5 /*errorTolerance*/),
+				new OptimizerFactory(OptimizerType.SimpleGradientDescent, maxIterations ,errorTolerance),
 				"GD"});
 
 		return config;

@@ -28,10 +28,10 @@ import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProdu
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.montecarlo.process.ProcessEulerScheme.Scheme;
 import net.finmath.optimizer.OptimizerFactoryInterface;
+import net.finmath.optimizer.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.optimizer.OptimizerInterface;
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
-import net.finmath.optimizer.gaussnewton.OptimizerFactoryLevenbergMarquardt;
 import net.finmath.optimizer.SolverException;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
@@ -317,6 +317,8 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 						System.out.println("AD - average calaculation time : " + (sumAD/numberOfParameters));
 						System.out.println("AD - total time for derivative : " + sumAD);
 						break;
+					default:
+						throw new UnknownError();
 					}
 					break;
 				case SKALAR:
