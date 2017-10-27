@@ -1,0 +1,1396 @@
+VECTOR - LevenbergMarquardt - FINITE_DIFFERENCES
+
+Calibrated parameters are:
+ 0.000
+ 0.004
+ 0.005
+ 0.006
+ 0.006
+ 0.004
+ 0.000
+ 0.005
+ 0.009
+ 0.000
+ 0.006
+ 0.006
+ 0.005
+ 0.003
+ 0.007
+ 0.000
+ 0.001
+ 0.004
+ 0.006
+ 0.005
+ 0.003
+ 0.000
+ 0.000
+ 0.006
+ 0.003
+ 0.005
+ 0.005
+ 0.003
+ 0.000
+ 0.009
+ 0.000
+ 0.003
+ 0.007
+ 0.004
+ 0.001
+ 0.005
+ 0.000
+ 0.010
+ 0.000
+ 0.006
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+
+Valuation on calibrated model:
+1Y	1Y	Model:  0.780%	 Target:  0.815%	 Deviation: -3.42253E-04
+1Y	2Y	Model:  1.471%	 Target:  1.450%	 Deviation:  2.10324E-04
+1Y	3Y	Model:  2.140%	 Target:  2.122%	 Deviation:  1.80084E-04
+1Y	4Y	Model:  2.798%	 Target:  2.806%	 Deviation: -7.63025E-05
+1Y	5Y	Model:  3.494%	 Target:  3.485%	 Deviation:  8.52399E-05
+1Y	6Y	Model:  4.160%	 Target:  4.147%	 Deviation:  1.28993E-04
+1Y	7Y	Model:  4.793%	 Target:  4.783%	 Deviation:  9.92023E-05
+1Y	8Y	Model:  5.394%	 Target:  5.387%	 Deviation:  6.13841E-05
+1Y	9Y	Model:  5.955%	 Target:  5.958%	 Deviation: -2.89198E-05
+1Y	10Y	Model:  6.455%	 Target:  6.492%	 Deviation: -3.76172E-04
+1Y	15Y	Model:  8.592%	 Target:  8.644%	 Deviation: -5.18356E-04
+1Y	20Y	Model:  10.128%	 Target:  10.060%	 Deviation:  6.76405E-04
+1Y	25Y	Model:  10.971%	 Target:  10.957%	 Deviation:  1.44013E-04
+1Y	30Y	Model:  11.492%	 Target:  11.516%	 Deviation: -2.42942E-04
+2Y	1Y	Model:  1.270%	 Target:  1.303%	 Deviation: -3.33375E-04
+2Y	2Y	Model:  2.276%	 Target:  2.275%	 Deviation:  8.12310E-06
+2Y	3Y	Model:  3.304%	 Target:  3.276%	 Deviation:  2.79925E-04
+2Y	4Y	Model:  4.328%	 Target:  4.274%	 Deviation:  5.46153E-04
+2Y	5Y	Model:  5.288%	 Target:  5.246%	 Deviation:  4.23281E-04
+2Y	6Y	Model:  6.196%	 Target:  6.177%	 Deviation:  1.88469E-04
+2Y	7Y	Model:  7.058%	 Target:  7.060%	 Deviation: -2.13035E-05
+2Y	8Y	Model:  7.871%	 Target:  7.892%	 Deviation: -2.15524E-04
+2Y	9Y	Model:  8.614%	 Target:  8.670%	 Deviation: -5.62086E-04
+2Y	10Y	Model:  9.303%	 Target:  9.395%	 Deviation: -9.12576E-04
+2Y	15Y	Model:  12.247%	 Target:  12.282%	 Deviation: -3.54698E-04
+2Y	20Y	Model:  14.251%	 Target:  14.145%	 Deviation:  1.05419E-03
+2Y	25Y	Model:  15.343%	 Target:  15.291%	 Deviation:  5.20174E-04
+2Y	30Y	Model:  16.104%	 Target:  15.991%	 Deviation:  1.12484E-03
+3Y	1Y	Model:  1.445%	 Target:  1.520%	 Deviation: -7.58314E-04
+3Y	2Y	Model:  2.545%	 Target:  2.596%	 Deviation: -5.06754E-04
+3Y	3Y	Model:  3.670%	 Target:  3.680%	 Deviation: -1.02600E-04
+3Y	4Y	Model:  4.750%	 Target:  4.753%	 Deviation: -3.48957E-05
+3Y	5Y	Model:  5.843%	 Target:  5.803%	 Deviation:  3.95088E-04
+3Y	6Y	Model:  6.896%	 Target:  6.822%	 Deviation:  7.36303E-04
+3Y	7Y	Model:  7.896%	 Target:  7.804%	 Deviation:  9.21874E-04
+3Y	8Y	Model:  8.825%	 Target:  8.743%	 Deviation:  8.20343E-04
+3Y	9Y	Model:  9.691%	 Target:  9.635%	 Deviation:  5.62263E-04
+3Y	10Y	Model:  10.492%	 Target:  10.475%	 Deviation:  1.71296E-04
+3Y	15Y	Model:  13.926%	 Target:  13.898%	 Deviation:  2.76498E-04
+3Y	20Y	Model:  16.140%	 Target:  16.134%	 Deviation:  6.14323E-05
+3Y	25Y	Model:  17.361%	 Target:  17.478%	 Deviation: -1.16759E-03
+3Y	30Y	Model:  18.168%	 Target:  18.256%	 Deviation: -8.87993E-04
+4Y	1Y	Model:  1.705%	 Target:  1.707%	 Deviation: -2.42290E-05
+4Y	2Y	Model:  2.917%	 Target:  2.891%	 Deviation:  2.61555E-04
+4Y	3Y	Model:  4.100%	 Target:  4.085%	 Deviation:  1.47119E-04
+4Y	4Y	Model:  5.302%	 Target:  5.272%	 Deviation:  2.93352E-04
+4Y	5Y	Model:  6.508%	 Target:  6.442%	 Deviation:  6.66852E-04
+4Y	6Y	Model:  7.661%	 Target:  7.584%	 Deviation:  7.70066E-04
+4Y	7Y	Model:  8.741%	 Target:  8.690%	 Deviation:  5.13765E-04
+4Y	8Y	Model:  9.756%	 Target:  9.748%	 Deviation:  7.86506E-05
+4Y	9Y	Model:  10.694%	 Target:  10.749%	 Deviation: -5.50413E-04
+4Y	10Y	Model:  11.566%	 Target:  11.686%	 Deviation: -1.20165E-03
+4Y	15Y	Model:  15.267%	 Target:  15.322%	 Deviation: -5.58323E-04
+4Y	20Y	Model:  17.485%	 Target:  17.541%	 Deviation: -5.59297E-04
+4Y	25Y	Model:  18.730%	 Target:  18.838%	 Deviation: -1.07421E-03
+4Y	30Y	Model:  19.492%	 Target:  19.582%	 Deviation: -9.05026E-04
+5Y	1Y	Model:  1.829%	 Target:  1.893%	 Deviation: -6.35511E-04
+5Y	2Y	Model:  3.083%	 Target:  3.187%	 Deviation: -1.03708E-03
+5Y	3Y	Model:  4.381%	 Target:  4.473%	 Deviation: -9.23472E-04
+5Y	4Y	Model:  5.693%	 Target:  5.737%	 Deviation: -4.39723E-04
+5Y	5Y	Model:  6.989%	 Target:  6.968%	 Deviation:  2.07271E-04
+5Y	6Y	Model:  8.211%	 Target:  8.159%	 Deviation:  5.22337E-04
+5Y	7Y	Model:  9.358%	 Target:  9.294%	 Deviation:  6.44400E-04
+5Y	8Y	Model:  10.418%	 Target:  10.364%	 Deviation:  5.45815E-04
+5Y	9Y	Model:  11.402%	 Target:  11.375%	 Deviation:  2.72063E-04
+5Y	10Y	Model:  12.321%	 Target:  12.328%	 Deviation: -6.41475E-05
+5Y	15Y	Model:  16.177%	 Target:  16.033%	 Deviation:  1.43680E-03
+5Y	20Y	Model:  18.344%	 Target:  18.273%	 Deviation:  7.14351E-04
+5Y	25Y	Model:  19.586%	 Target:  19.545%	 Deviation:  4.12197E-04
+5Y	30Y	Model:  20.295%	 Target:  20.230%	 Deviation:  6.47956E-04
+7Y	1Y	Model:  2.162%	 Target:  2.123%	 Deviation:  3.89636E-04
+7Y	2Y	Model:  3.539%	 Target:  3.521%	 Deviation:  1.81621E-04
+7Y	3Y	Model:  4.899%	 Target:  4.882%	 Deviation:  1.71143E-04
+7Y	4Y	Model:  6.218%	 Target:  6.199%	 Deviation:  1.86996E-04
+7Y	5Y	Model:  7.488%	 Target:  7.466%	 Deviation:  2.10746E-04
+7Y	6Y	Model:  8.675%	 Target:  8.680%	 Deviation: -4.75437E-05
+7Y	7Y	Model:  9.780%	 Target:  9.848%	 Deviation: -6.89554E-04
+7Y	8Y	Model:  10.809%	 Target:  10.957%	 Deviation: -1.47934E-03
+7Y	9Y	Model:  11.781%	 Target:  11.980%	 Deviation: -1.98552E-03
+7Y	10Y	Model:  12.703%	 Target:  12.928%	 Deviation: -2.24710E-03
+7Y	15Y	Model:  16.432%	 Target:  16.474%	 Deviation: -4.14829E-04
+7Y	20Y	Model:  18.421%	 Target:  18.412%	 Deviation:  8.73369E-05
+7Y	25Y	Model:  19.598%	 Target:  19.478%	 Deviation:  1.20661E-03
+7Y	30Y	Model:  20.155%	 Target:  20.023%	 Deviation:  1.31330E-03
+10Y	1Y	Model:  2.229%	 Target:  2.160%	 Deviation:  6.90659E-04
+10Y	2Y	Model:  3.593%	 Target:  3.534%	 Deviation:  5.95634E-04
+10Y	3Y	Model:  4.903%	 Target:  4.840%	 Deviation:  6.25159E-04
+10Y	4Y	Model:  6.163%	 Target:  6.106%	 Deviation:  5.72325E-04
+10Y	5Y	Model:  7.380%	 Target:  7.366%	 Deviation:  1.36113E-04
+10Y	6Y	Model:  8.542%	 Target:  8.547%	 Deviation: -4.40293E-05
+10Y	7Y	Model:  9.647%	 Target:  9.648%	 Deviation: -7.20065E-06
+10Y	8Y	Model:  10.696%	 Target:  10.676%	 Deviation:  1.98346E-04
+10Y	9Y	Model:  11.685%	 Target:  11.605%	 Deviation:  7.97594E-04
+10Y	10Y	Model:  12.608%	 Target:  12.494%	 Deviation:  1.14541E-03
+10Y	15Y	Model:  15.929%	 Target:  15.880%	 Deviation:  4.93967E-04
+10Y	20Y	Model:  17.678%	 Target:  17.765%	 Deviation: -8.72779E-04
+10Y	25Y	Model:  18.604%	 Target:  18.678%	 Deviation: -7.41793E-04
+15Y	1Y	Model:  2.034%	 Target:  2.030%	 Deviation:  3.45200E-05
+15Y	2Y	Model:  3.388%	 Target:  3.440%	 Deviation: -5.18957E-04
+15Y	3Y	Model:  4.740%	 Target:  4.828%	 Deviation: -8.81120E-04
+15Y	4Y	Model:  6.078%	 Target:  6.122%	 Deviation: -4.41754E-04
+15Y	5Y	Model:  7.375%	 Target:  7.273%	 Deviation:  1.01895E-03
+15Y	6Y	Model:  8.520%	 Target:  8.385%	 Deviation:  1.35554E-03
+15Y	7Y	Model:  9.529%	 Target:  9.488%	 Deviation:  4.14040E-04
+15Y	8Y	Model:  10.411%	 Target:  10.380%	 Deviation:  3.16701E-04
+15Y	9Y	Model:  11.189%	 Target:  11.161%	 Deviation:  2.73949E-04
+15Y	10Y	Model:  11.856%	 Target:  11.848%	 Deviation:  7.59427E-05
+15Y	15Y	Model:  14.329%	 Target:  14.339%	 Deviation: -9.50215E-05
+15Y	20Y	Model:  15.510%	 Target:  15.606%	 Deviation: -9.59245E-04
+20Y	1Y	Model:  2.029%	 Target:  1.976%	 Deviation:  5.26975E-04
+20Y	2Y	Model:  3.266%	 Target:  3.302%	 Deviation: -3.60492E-04
+20Y	3Y	Model:  4.396%	 Target:  4.477%	 Deviation: -8.08317E-04
+20Y	4Y	Model:  5.417%	 Target:  5.558%	 Deviation: -1.41197E-03
+20Y	5Y	Model:  6.358%	 Target:  6.504%	 Deviation: -1.46603E-03
+20Y	6Y	Model:  7.204%	 Target:  7.335%	 Deviation: -1.31423E-03
+20Y	7Y	Model:  7.966%	 Target:  8.087%	 Deviation: -1.20214E-03
+20Y	8Y	Model:  8.646%	 Target:  8.645%	 Deviation:  1.37839E-05
+20Y	9Y	Model:  9.251%	 Target:  9.137%	 Deviation:  1.14267E-03
+20Y	10Y	Model:  9.773%	 Target:  9.616%	 Deviation:  1.57064E-03
+20Y	15Y	Model:  11.577%	 Target:  11.478%	 Deviation:  9.87722E-04
+25Y	1Y	Model:  1.589%	 Target:  1.608%	 Deviation: -1.92910E-04
+25Y	2Y	Model:  2.510%	 Target:  2.520%	 Deviation: -9.98353E-05
+25Y	3Y	Model:  3.419%	 Target:  3.331%	 Deviation:  8.84186E-04
+25Y	4Y	Model:  4.263%	 Target:  4.123%	 Deviation:  1.39629E-03
+25Y	5Y	Model:  5.000%	 Target:  4.836%	 Deviation:  1.64268E-03
+25Y	6Y	Model:  5.683%	 Target:  5.564%	 Deviation:  1.19101E-03
+25Y	7Y	Model:  6.316%	 Target:  6.259%	 Deviation:  5.75586E-04
+25Y	8Y	Model:  6.891%	 Target:  6.996%	 Deviation: -1.05031E-03
+25Y	9Y	Model:  7.415%	 Target:  7.589%	 Deviation: -1.74946E-03
+25Y	10Y	Model:  7.867%	 Target:  8.031%	 Deviation: -1.63929E-03
+30Y	1Y	Model:  1.297%	 Target:  1.359%	 Deviation: -6.20561E-04
+30Y	2Y	Model:  2.132%	 Target:  2.089%	 Deviation:  4.34715E-04
+30Y	3Y	Model:  2.936%	 Target:  2.908%	 Deviation:  2.71558E-04
+30Y	4Y	Model:  3.654%	 Target:  3.787%	 Deviation: -1.32572E-03
+30Y	5Y	Model:  4.282%	 Target:  4.346%	 Deviation: -6.44635E-04
+30Y	6Y	Model:  4.868%	 Target:  4.766%	 Deviation:  1.02214E-03
+30Y	7Y	Model:  5.440%	 Target:  5.388%	 Deviation:  5.13882E-04
+30Y	8Y	Model:  5.946%	 Target:  5.892%	 Deviation:  5.40770E-04
+30Y	9Y	Model:  6.402%	 Target:  6.338%	 Deviation:  6.36877E-04
+Calibration of prices... 115.693s
+Number of Iterations.... 5
+Mean Deviation: 0.002%
+RMS Error.....: 0.077%
+__________________________________________________________________________________________
+
+VECTOR - LevenbergMarquardt - ALGORITHMIC_DIFFERENCIATION
+AD - average calaculation time : 1.577375
+AD - total time for derivative : 75.714
+AD - average calaculation time : 1.5763541666666665
+AD - total time for derivative : 75.66499999999999
+AD - average calaculation time : 1.589729166666667
+AD - total time for derivative : 76.30700000000002
+AD - average calaculation time : 1.5963541666666672
+AD - total time for derivative : 76.62500000000003
+AD - average calaculation time : 1.5804374999999997
+AD - total time for derivative : 75.86099999999999
+
+Calibrated parameters are:
+ 0.000
+ 0.004
+ 0.005
+ 0.006
+ 0.006
+ 0.003
+ 0.003
+ 0.005
+ 0.008
+ 0.000
+ 0.006
+ 0.006
+ 0.005
+ 0.003
+ 0.004
+ 0.000
+ 0.001
+ 0.004
+ 0.006
+ 0.005
+ 0.003
+ 0.000
+ 0.014
+ 0.000
+ 0.004
+ 0.005
+ 0.005
+ 0.002
+ 0.000
+ 0.018
+ 0.000
+ 0.003
+ 0.007
+ 0.004
+ 0.002
+ 0.005
+ 0.000
+ 0.013
+ 0.000
+ 0.006
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+
+Valuation on calibrated model:
+1Y	1Y	Model:  0.769%	 Target:  0.815%	 Deviation: -4.52650E-04
+1Y	2Y	Model:  1.466%	 Target:  1.450%	 Deviation:  1.62760E-04
+1Y	3Y	Model:  2.142%	 Target:  2.122%	 Deviation:  2.05919E-04
+1Y	4Y	Model:  2.806%	 Target:  2.806%	 Deviation:  1.82430E-06
+1Y	5Y	Model:  3.501%	 Target:  3.485%	 Deviation:  1.55007E-04
+1Y	6Y	Model:  4.166%	 Target:  4.147%	 Deviation:  1.86283E-04
+1Y	7Y	Model:  4.797%	 Target:  4.783%	 Deviation:  1.44588E-04
+1Y	8Y	Model:  5.397%	 Target:  5.387%	 Deviation:  9.55356E-05
+1Y	9Y	Model:  5.957%	 Target:  5.958%	 Deviation: -3.98733E-06
+1Y	10Y	Model:  6.457%	 Target:  6.492%	 Deviation: -3.55167E-04
+1Y	15Y	Model:  8.592%	 Target:  8.644%	 Deviation: -5.12371E-04
+1Y	20Y	Model:  10.117%	 Target:  10.060%	 Deviation:  5.67093E-04
+1Y	25Y	Model:  10.921%	 Target:  10.957%	 Deviation: -3.58890E-04
+1Y	30Y	Model:  11.531%	 Target:  11.516%	 Deviation:  1.52109E-04
+2Y	1Y	Model:  1.280%	 Target:  1.303%	 Deviation: -2.37800E-04
+2Y	2Y	Model:  2.278%	 Target:  2.275%	 Deviation:  2.72354E-05
+2Y	3Y	Model:  3.290%	 Target:  3.276%	 Deviation:  1.42397E-04
+2Y	4Y	Model:  4.300%	 Target:  4.274%	 Deviation:  2.58781E-04
+2Y	5Y	Model:  5.262%	 Target:  5.246%	 Deviation:  1.64545E-04
+2Y	6Y	Model:  6.174%	 Target:  6.177%	 Deviation: -3.01439E-05
+2Y	7Y	Model:  7.040%	 Target:  7.060%	 Deviation: -2.01423E-04
+2Y	8Y	Model:  7.857%	 Target:  7.892%	 Deviation: -3.55900E-04
+2Y	9Y	Model:  8.604%	 Target:  8.670%	 Deviation: -6.65300E-04
+2Y	10Y	Model:  9.296%	 Target:  9.395%	 Deviation: -9.87715E-04
+2Y	15Y	Model:  12.250%	 Target:  12.282%	 Deviation: -3.22212E-04
+2Y	20Y	Model:  14.244%	 Target:  14.145%	 Deviation:  9.89849E-04
+2Y	25Y	Model:  15.300%	 Target:  15.291%	 Deviation:  9.05474E-05
+2Y	30Y	Model:  16.105%	 Target:  15.991%	 Deviation:  1.14021E-03
+3Y	1Y	Model:  1.442%	 Target:  1.520%	 Deviation: -7.83794E-04
+3Y	2Y	Model:  2.534%	 Target:  2.596%	 Deviation: -6.22737E-04
+3Y	3Y	Model:  3.648%	 Target:  3.680%	 Deviation: -3.27502E-04
+3Y	4Y	Model:  4.733%	 Target:  4.753%	 Deviation: -1.98801E-04
+3Y	5Y	Model:  5.832%	 Target:  5.803%	 Deviation:  2.92368E-04
+3Y	6Y	Model:  6.890%	 Target:  6.822%	 Deviation:  6.82215E-04
+3Y	7Y	Model:  7.894%	 Target:  7.804%	 Deviation:  9.01670E-04
+3Y	8Y	Model:  8.827%	 Target:  8.743%	 Deviation:  8.36484E-04
+3Y	9Y	Model:  9.694%	 Target:  9.635%	 Deviation:  5.95625E-04
+3Y	10Y	Model:  10.497%	 Target:  10.475%	 Deviation:  2.21926E-04
+3Y	15Y	Model:  13.938%	 Target:  13.898%	 Deviation:  3.97174E-04
+3Y	20Y	Model:  16.136%	 Target:  16.134%	 Deviation:  2.61610E-05
+3Y	25Y	Model:  17.338%	 Target:  17.478%	 Deviation: -1.39234E-03
+3Y	30Y	Model:  18.188%	 Target:  18.256%	 Deviation: -6.80061E-04
+4Y	1Y	Model:  1.687%	 Target:  1.707%	 Deviation: -1.98188E-04
+4Y	2Y	Model:  2.891%	 Target:  2.891%	 Deviation:  1.76726E-06
+4Y	3Y	Model:  4.081%	 Target:  4.085%	 Deviation: -4.23717E-05
+4Y	4Y	Model:  5.289%	 Target:  5.272%	 Deviation:  1.60589E-04
+4Y	5Y	Model:  6.500%	 Target:  6.442%	 Deviation:  5.85371E-04
+4Y	6Y	Model:  7.656%	 Target:  7.584%	 Deviation:  7.27913E-04
+4Y	7Y	Model:  8.741%	 Target:  8.690%	 Deviation:  5.14671E-04
+4Y	8Y	Model:  9.758%	 Target:  9.748%	 Deviation:  9.26833E-05
+4Y	9Y	Model:  10.697%	 Target:  10.749%	 Deviation: -5.24422E-04
+4Y	10Y	Model:  11.569%	 Target:  11.686%	 Deviation: -1.16351E-03
+4Y	15Y	Model:  15.274%	 Target:  15.322%	 Deviation: -4.80740E-04
+4Y	20Y	Model:  17.476%	 Target:  17.541%	 Deviation: -6.51970E-04
+4Y	25Y	Model:  18.712%	 Target:  18.838%	 Deviation: -1.25182E-03
+4Y	30Y	Model:  19.512%	 Target:  19.582%	 Deviation: -7.06433E-04
+5Y	1Y	Model:  1.814%	 Target:  1.893%	 Deviation: -7.86464E-04
+5Y	2Y	Model:  3.077%	 Target:  3.187%	 Deviation: -1.09702E-03
+5Y	3Y	Model:  4.381%	 Target:  4.473%	 Deviation: -9.22255E-04
+5Y	4Y	Model:  5.696%	 Target:  5.737%	 Deviation: -4.06365E-04
+5Y	5Y	Model:  6.995%	 Target:  6.968%	 Deviation:  2.69498E-04
+5Y	6Y	Model:  8.219%	 Target:  8.159%	 Deviation:  6.01930E-04
+5Y	7Y	Model:  9.366%	 Target:  9.294%	 Deviation:  7.29185E-04
+5Y	8Y	Model:  10.427%	 Target:  10.364%	 Deviation:  6.36083E-04
+5Y	9Y	Model:  11.412%	 Target:  11.375%	 Deviation:  3.69935E-04
+5Y	10Y	Model:  12.332%	 Target:  12.328%	 Deviation:  3.98151E-05
+5Y	15Y	Model:  16.188%	 Target:  16.033%	 Deviation:  1.54482E-03
+5Y	20Y	Model:  18.340%	 Target:  18.273%	 Deviation:  6.72077E-04
+5Y	25Y	Model:  19.591%	 Target:  19.545%	 Deviation:  4.53175E-04
+5Y	30Y	Model:  20.315%	 Target:  20.230%	 Deviation:  8.48620E-04
+7Y	1Y	Model:  2.143%	 Target:  2.123%	 Deviation:  1.95125E-04
+7Y	2Y	Model:  3.530%	 Target:  3.521%	 Deviation:  9.89219E-05
+7Y	3Y	Model:  4.917%	 Target:  4.882%	 Deviation:  3.48334E-04
+7Y	4Y	Model:  6.240%	 Target:  6.199%	 Deviation:  4.09096E-04
+7Y	5Y	Model:  7.498%	 Target:  7.466%	 Deviation:  3.18063E-04
+7Y	6Y	Model:  8.670%	 Target:  8.680%	 Deviation: -1.02870E-04
+7Y	7Y	Model:  9.761%	 Target:  9.848%	 Deviation: -8.74929E-04
+7Y	8Y	Model:  10.779%	 Target:  10.957%	 Deviation: -1.78127E-03
+7Y	9Y	Model:  11.751%	 Target:  11.980%	 Deviation: -2.29373E-03
+7Y	10Y	Model:  12.675%	 Target:  12.928%	 Deviation: -2.53126E-03
+7Y	15Y	Model:  16.425%	 Target:  16.474%	 Deviation: -4.84920E-04
+7Y	20Y	Model:  18.423%	 Target:  18.412%	 Deviation:  1.13510E-04
+7Y	25Y	Model:  19.605%	 Target:  19.478%	 Deviation:  1.27592E-03
+7Y	30Y	Model:  20.121%	 Target:  20.023%	 Deviation:  9.76646E-04
+10Y	1Y	Model:  2.235%	 Target:  2.160%	 Deviation:  7.46094E-04
+10Y	2Y	Model:  3.613%	 Target:  3.534%	 Deviation:  7.95026E-04
+10Y	3Y	Model:  4.937%	 Target:  4.840%	 Deviation:  9.70597E-04
+10Y	4Y	Model:  6.193%	 Target:  6.106%	 Deviation:  8.73100E-04
+10Y	5Y	Model:  7.390%	 Target:  7.366%	 Deviation:  2.37743E-04
+10Y	6Y	Model:  8.538%	 Target:  8.547%	 Deviation: -8.32202E-05
+10Y	7Y	Model:  9.635%	 Target:  9.648%	 Deviation: -1.28435E-04
+10Y	8Y	Model:  10.684%	 Target:  10.676%	 Deviation:  7.19881E-05
+10Y	9Y	Model:  11.681%	 Target:  11.605%	 Deviation:  7.60025E-04
+10Y	10Y	Model:  12.621%	 Target:  12.494%	 Deviation:  1.27236E-03
+10Y	15Y	Model:  15.992%	 Target:  15.880%	 Deviation:  1.12622E-03
+10Y	20Y	Model:  17.706%	 Target:  17.765%	 Deviation: -5.92476E-04
+10Y	25Y	Model:  18.588%	 Target:  18.678%	 Deviation: -9.02108E-04
+15Y	1Y	Model:  2.076%	 Target:  2.030%	 Deviation:  4.53786E-04
+15Y	2Y	Model:  3.405%	 Target:  3.440%	 Deviation: -3.49075E-04
+15Y	3Y	Model:  4.743%	 Target:  4.828%	 Deviation: -8.49612E-04
+15Y	4Y	Model:  6.077%	 Target:  6.122%	 Deviation: -4.53197E-04
+15Y	5Y	Model:  7.368%	 Target:  7.273%	 Deviation:  9.49652E-04
+15Y	6Y	Model:  8.505%	 Target:  8.385%	 Deviation:  1.20105E-03
+15Y	7Y	Model:  9.519%	 Target:  9.488%	 Deviation:  3.16786E-04
+15Y	8Y	Model:  10.416%	 Target:  10.380%	 Deviation:  3.67922E-04
+15Y	9Y	Model:  11.201%	 Target:  11.161%	 Deviation:  3.98264E-04
+15Y	10Y	Model:  11.877%	 Target:  11.848%	 Deviation:  2.90302E-04
+15Y	15Y	Model:  14.323%	 Target:  14.339%	 Deviation: -1.58534E-04
+15Y	20Y	Model:  15.555%	 Target:  15.606%	 Deviation: -5.15640E-04
+20Y	1Y	Model:  2.059%	 Target:  1.976%	 Deviation:  8.21564E-04
+20Y	2Y	Model:  3.278%	 Target:  3.302%	 Deviation: -2.45706E-04
+20Y	3Y	Model:  4.397%	 Target:  4.477%	 Deviation: -7.97325E-04
+20Y	4Y	Model:  5.416%	 Target:  5.558%	 Deviation: -1.42074E-03
+20Y	5Y	Model:  6.368%	 Target:  6.504%	 Deviation: -1.36345E-03
+20Y	6Y	Model:  7.213%	 Target:  7.335%	 Deviation: -1.22359E-03
+20Y	7Y	Model:  7.974%	 Target:  8.087%	 Deviation: -1.12904E-03
+20Y	8Y	Model:  8.638%	 Target:  8.645%	 Deviation: -6.99799E-05
+20Y	9Y	Model:  9.228%	 Target:  9.137%	 Deviation:  9.05126E-04
+20Y	10Y	Model:  9.738%	 Target:  9.616%	 Deviation:  1.21991E-03
+20Y	15Y	Model:  11.560%	 Target:  11.478%	 Deviation:  8.17668E-04
+25Y	1Y	Model:  1.622%	 Target:  1.608%	 Deviation:  1.36857E-04
+25Y	2Y	Model:  2.515%	 Target:  2.520%	 Deviation: -5.68567E-05
+25Y	3Y	Model:  3.404%	 Target:  3.331%	 Deviation:  7.30916E-04
+25Y	4Y	Model:  4.232%	 Target:  4.123%	 Deviation:  1.09498E-03
+25Y	5Y	Model:  4.985%	 Target:  4.836%	 Deviation:  1.49261E-03
+25Y	6Y	Model:  5.681%	 Target:  5.564%	 Deviation:  1.16537E-03
+25Y	7Y	Model:  6.314%	 Target:  6.259%	 Deviation:  5.52912E-04
+25Y	8Y	Model:  6.897%	 Target:  6.996%	 Deviation: -9.89397E-04
+25Y	9Y	Model:  7.424%	 Target:  7.589%	 Deviation: -1.65676E-03
+25Y	10Y	Model:  7.885%	 Target:  8.031%	 Deviation: -1.46432E-03
+30Y	1Y	Model:  1.342%	 Target:  1.359%	 Deviation: -1.72986E-04
+30Y	2Y	Model:  2.146%	 Target:  2.089%	 Deviation:  5.71594E-04
+30Y	3Y	Model:  2.935%	 Target:  2.908%	 Deviation:  2.68150E-04
+30Y	4Y	Model:  3.650%	 Target:  3.787%	 Deviation: -1.36704E-03
+30Y	5Y	Model:  4.292%	 Target:  4.346%	 Deviation: -5.39314E-04
+30Y	6Y	Model:  4.875%	 Target:  4.766%	 Deviation:  1.08812E-03
+30Y	7Y	Model:  5.438%	 Target:  5.388%	 Deviation:  5.00418E-04
+30Y	8Y	Model:  5.952%	 Target:  5.892%	 Deviation:  6.01910E-04
+30Y	9Y	Model:  6.416%	 Target:  6.338%	 Deviation:  7.85287E-04
+Calibration of prices... 401.447s
+Number of Iterations.... 12
+Mean Deviation: 0.002%
+RMS Error.....: 0.078%
+__________________________________________________________________________________________
+
+VECTOR - LevenbergMarquardt - ADJOINT_ALGORITHMIC_DIFFERENCIATION
+
+Calibrated parameters are:
+ 0.000
+ 0.004
+ 0.005
+ 0.006
+ 0.006
+ 0.003
+ 0.003
+ 0.005
+ 0.008
+ 0.000
+ 0.006
+ 0.006
+ 0.005
+ 0.003
+ 0.004
+ 0.000
+ 0.001
+ 0.004
+ 0.006
+ 0.005
+ 0.003
+ 0.000
+ 0.014
+ 0.000
+ 0.004
+ 0.005
+ 0.005
+ 0.002
+ 0.000
+ 0.018
+ 0.000
+ 0.003
+ 0.007
+ 0.004
+ 0.002
+ 0.005
+ 0.000
+ 0.013
+ 0.000
+ 0.006
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+
+Valuation on calibrated model:
+1Y	1Y	Model:  0.769%	 Target:  0.815%	 Deviation: -4.52650E-04
+1Y	2Y	Model:  1.466%	 Target:  1.450%	 Deviation:  1.62760E-04
+1Y	3Y	Model:  2.142%	 Target:  2.122%	 Deviation:  2.05919E-04
+1Y	4Y	Model:  2.806%	 Target:  2.806%	 Deviation:  1.82430E-06
+1Y	5Y	Model:  3.501%	 Target:  3.485%	 Deviation:  1.55007E-04
+1Y	6Y	Model:  4.166%	 Target:  4.147%	 Deviation:  1.86283E-04
+1Y	7Y	Model:  4.797%	 Target:  4.783%	 Deviation:  1.44588E-04
+1Y	8Y	Model:  5.397%	 Target:  5.387%	 Deviation:  9.55356E-05
+1Y	9Y	Model:  5.957%	 Target:  5.958%	 Deviation: -3.98733E-06
+1Y	10Y	Model:  6.457%	 Target:  6.492%	 Deviation: -3.55167E-04
+1Y	15Y	Model:  8.592%	 Target:  8.644%	 Deviation: -5.12371E-04
+1Y	20Y	Model:  10.117%	 Target:  10.060%	 Deviation:  5.67093E-04
+1Y	25Y	Model:  10.921%	 Target:  10.957%	 Deviation: -3.58890E-04
+1Y	30Y	Model:  11.531%	 Target:  11.516%	 Deviation:  1.52109E-04
+2Y	1Y	Model:  1.280%	 Target:  1.303%	 Deviation: -2.37800E-04
+2Y	2Y	Model:  2.278%	 Target:  2.275%	 Deviation:  2.72354E-05
+2Y	3Y	Model:  3.290%	 Target:  3.276%	 Deviation:  1.42397E-04
+2Y	4Y	Model:  4.300%	 Target:  4.274%	 Deviation:  2.58781E-04
+2Y	5Y	Model:  5.262%	 Target:  5.246%	 Deviation:  1.64545E-04
+2Y	6Y	Model:  6.174%	 Target:  6.177%	 Deviation: -3.01439E-05
+2Y	7Y	Model:  7.040%	 Target:  7.060%	 Deviation: -2.01423E-04
+2Y	8Y	Model:  7.857%	 Target:  7.892%	 Deviation: -3.55900E-04
+2Y	9Y	Model:  8.604%	 Target:  8.670%	 Deviation: -6.65300E-04
+2Y	10Y	Model:  9.296%	 Target:  9.395%	 Deviation: -9.87715E-04
+2Y	15Y	Model:  12.250%	 Target:  12.282%	 Deviation: -3.22212E-04
+2Y	20Y	Model:  14.244%	 Target:  14.145%	 Deviation:  9.89849E-04
+2Y	25Y	Model:  15.300%	 Target:  15.291%	 Deviation:  9.05474E-05
+2Y	30Y	Model:  16.105%	 Target:  15.991%	 Deviation:  1.14021E-03
+3Y	1Y	Model:  1.442%	 Target:  1.520%	 Deviation: -7.83794E-04
+3Y	2Y	Model:  2.534%	 Target:  2.596%	 Deviation: -6.22737E-04
+3Y	3Y	Model:  3.648%	 Target:  3.680%	 Deviation: -3.27502E-04
+3Y	4Y	Model:  4.733%	 Target:  4.753%	 Deviation: -1.98801E-04
+3Y	5Y	Model:  5.832%	 Target:  5.803%	 Deviation:  2.92368E-04
+3Y	6Y	Model:  6.890%	 Target:  6.822%	 Deviation:  6.82215E-04
+3Y	7Y	Model:  7.894%	 Target:  7.804%	 Deviation:  9.01670E-04
+3Y	8Y	Model:  8.827%	 Target:  8.743%	 Deviation:  8.36484E-04
+3Y	9Y	Model:  9.694%	 Target:  9.635%	 Deviation:  5.95625E-04
+3Y	10Y	Model:  10.497%	 Target:  10.475%	 Deviation:  2.21926E-04
+3Y	15Y	Model:  13.938%	 Target:  13.898%	 Deviation:  3.97174E-04
+3Y	20Y	Model:  16.136%	 Target:  16.134%	 Deviation:  2.61610E-05
+3Y	25Y	Model:  17.338%	 Target:  17.478%	 Deviation: -1.39234E-03
+3Y	30Y	Model:  18.188%	 Target:  18.256%	 Deviation: -6.80061E-04
+4Y	1Y	Model:  1.687%	 Target:  1.707%	 Deviation: -1.98188E-04
+4Y	2Y	Model:  2.891%	 Target:  2.891%	 Deviation:  1.76726E-06
+4Y	3Y	Model:  4.081%	 Target:  4.085%	 Deviation: -4.23717E-05
+4Y	4Y	Model:  5.289%	 Target:  5.272%	 Deviation:  1.60589E-04
+4Y	5Y	Model:  6.500%	 Target:  6.442%	 Deviation:  5.85371E-04
+4Y	6Y	Model:  7.656%	 Target:  7.584%	 Deviation:  7.27913E-04
+4Y	7Y	Model:  8.741%	 Target:  8.690%	 Deviation:  5.14671E-04
+4Y	8Y	Model:  9.758%	 Target:  9.748%	 Deviation:  9.26833E-05
+4Y	9Y	Model:  10.697%	 Target:  10.749%	 Deviation: -5.24422E-04
+4Y	10Y	Model:  11.569%	 Target:  11.686%	 Deviation: -1.16351E-03
+4Y	15Y	Model:  15.274%	 Target:  15.322%	 Deviation: -4.80740E-04
+4Y	20Y	Model:  17.476%	 Target:  17.541%	 Deviation: -6.51970E-04
+4Y	25Y	Model:  18.712%	 Target:  18.838%	 Deviation: -1.25182E-03
+4Y	30Y	Model:  19.512%	 Target:  19.582%	 Deviation: -7.06433E-04
+5Y	1Y	Model:  1.814%	 Target:  1.893%	 Deviation: -7.86464E-04
+5Y	2Y	Model:  3.077%	 Target:  3.187%	 Deviation: -1.09702E-03
+5Y	3Y	Model:  4.381%	 Target:  4.473%	 Deviation: -9.22255E-04
+5Y	4Y	Model:  5.696%	 Target:  5.737%	 Deviation: -4.06365E-04
+5Y	5Y	Model:  6.995%	 Target:  6.968%	 Deviation:  2.69498E-04
+5Y	6Y	Model:  8.219%	 Target:  8.159%	 Deviation:  6.01930E-04
+5Y	7Y	Model:  9.366%	 Target:  9.294%	 Deviation:  7.29185E-04
+5Y	8Y	Model:  10.427%	 Target:  10.364%	 Deviation:  6.36083E-04
+5Y	9Y	Model:  11.412%	 Target:  11.375%	 Deviation:  3.69935E-04
+5Y	10Y	Model:  12.332%	 Target:  12.328%	 Deviation:  3.98151E-05
+5Y	15Y	Model:  16.188%	 Target:  16.033%	 Deviation:  1.54482E-03
+5Y	20Y	Model:  18.340%	 Target:  18.273%	 Deviation:  6.72077E-04
+5Y	25Y	Model:  19.591%	 Target:  19.545%	 Deviation:  4.53175E-04
+5Y	30Y	Model:  20.315%	 Target:  20.230%	 Deviation:  8.48620E-04
+7Y	1Y	Model:  2.143%	 Target:  2.123%	 Deviation:  1.95125E-04
+7Y	2Y	Model:  3.530%	 Target:  3.521%	 Deviation:  9.89219E-05
+7Y	3Y	Model:  4.917%	 Target:  4.882%	 Deviation:  3.48334E-04
+7Y	4Y	Model:  6.240%	 Target:  6.199%	 Deviation:  4.09096E-04
+7Y	5Y	Model:  7.498%	 Target:  7.466%	 Deviation:  3.18063E-04
+7Y	6Y	Model:  8.670%	 Target:  8.680%	 Deviation: -1.02870E-04
+7Y	7Y	Model:  9.761%	 Target:  9.848%	 Deviation: -8.74929E-04
+7Y	8Y	Model:  10.779%	 Target:  10.957%	 Deviation: -1.78127E-03
+7Y	9Y	Model:  11.751%	 Target:  11.980%	 Deviation: -2.29373E-03
+7Y	10Y	Model:  12.675%	 Target:  12.928%	 Deviation: -2.53126E-03
+7Y	15Y	Model:  16.425%	 Target:  16.474%	 Deviation: -4.84920E-04
+7Y	20Y	Model:  18.423%	 Target:  18.412%	 Deviation:  1.13510E-04
+7Y	25Y	Model:  19.605%	 Target:  19.478%	 Deviation:  1.27592E-03
+7Y	30Y	Model:  20.121%	 Target:  20.023%	 Deviation:  9.76646E-04
+10Y	1Y	Model:  2.235%	 Target:  2.160%	 Deviation:  7.46094E-04
+10Y	2Y	Model:  3.613%	 Target:  3.534%	 Deviation:  7.95026E-04
+10Y	3Y	Model:  4.937%	 Target:  4.840%	 Deviation:  9.70597E-04
+10Y	4Y	Model:  6.193%	 Target:  6.106%	 Deviation:  8.73100E-04
+10Y	5Y	Model:  7.390%	 Target:  7.366%	 Deviation:  2.37743E-04
+10Y	6Y	Model:  8.538%	 Target:  8.547%	 Deviation: -8.32202E-05
+10Y	7Y	Model:  9.635%	 Target:  9.648%	 Deviation: -1.28435E-04
+10Y	8Y	Model:  10.684%	 Target:  10.676%	 Deviation:  7.19881E-05
+10Y	9Y	Model:  11.681%	 Target:  11.605%	 Deviation:  7.60025E-04
+10Y	10Y	Model:  12.621%	 Target:  12.494%	 Deviation:  1.27236E-03
+10Y	15Y	Model:  15.992%	 Target:  15.880%	 Deviation:  1.12622E-03
+10Y	20Y	Model:  17.706%	 Target:  17.765%	 Deviation: -5.92476E-04
+10Y	25Y	Model:  18.588%	 Target:  18.678%	 Deviation: -9.02108E-04
+15Y	1Y	Model:  2.076%	 Target:  2.030%	 Deviation:  4.53786E-04
+15Y	2Y	Model:  3.405%	 Target:  3.440%	 Deviation: -3.49075E-04
+15Y	3Y	Model:  4.743%	 Target:  4.828%	 Deviation: -8.49612E-04
+15Y	4Y	Model:  6.077%	 Target:  6.122%	 Deviation: -4.53197E-04
+15Y	5Y	Model:  7.368%	 Target:  7.273%	 Deviation:  9.49652E-04
+15Y	6Y	Model:  8.505%	 Target:  8.385%	 Deviation:  1.20105E-03
+15Y	7Y	Model:  9.519%	 Target:  9.488%	 Deviation:  3.16786E-04
+15Y	8Y	Model:  10.416%	 Target:  10.380%	 Deviation:  3.67922E-04
+15Y	9Y	Model:  11.201%	 Target:  11.161%	 Deviation:  3.98264E-04
+15Y	10Y	Model:  11.877%	 Target:  11.848%	 Deviation:  2.90302E-04
+15Y	15Y	Model:  14.323%	 Target:  14.339%	 Deviation: -1.58534E-04
+15Y	20Y	Model:  15.555%	 Target:  15.606%	 Deviation: -5.15640E-04
+20Y	1Y	Model:  2.059%	 Target:  1.976%	 Deviation:  8.21564E-04
+20Y	2Y	Model:  3.278%	 Target:  3.302%	 Deviation: -2.45706E-04
+20Y	3Y	Model:  4.397%	 Target:  4.477%	 Deviation: -7.97325E-04
+20Y	4Y	Model:  5.416%	 Target:  5.558%	 Deviation: -1.42074E-03
+20Y	5Y	Model:  6.368%	 Target:  6.504%	 Deviation: -1.36345E-03
+20Y	6Y	Model:  7.213%	 Target:  7.335%	 Deviation: -1.22359E-03
+20Y	7Y	Model:  7.974%	 Target:  8.087%	 Deviation: -1.12904E-03
+20Y	8Y	Model:  8.638%	 Target:  8.645%	 Deviation: -6.99799E-05
+20Y	9Y	Model:  9.228%	 Target:  9.137%	 Deviation:  9.05126E-04
+20Y	10Y	Model:  9.738%	 Target:  9.616%	 Deviation:  1.21991E-03
+20Y	15Y	Model:  11.560%	 Target:  11.478%	 Deviation:  8.17668E-04
+25Y	1Y	Model:  1.622%	 Target:  1.608%	 Deviation:  1.36857E-04
+25Y	2Y	Model:  2.515%	 Target:  2.520%	 Deviation: -5.68567E-05
+25Y	3Y	Model:  3.404%	 Target:  3.331%	 Deviation:  7.30916E-04
+25Y	4Y	Model:  4.232%	 Target:  4.123%	 Deviation:  1.09498E-03
+25Y	5Y	Model:  4.985%	 Target:  4.836%	 Deviation:  1.49261E-03
+25Y	6Y	Model:  5.681%	 Target:  5.564%	 Deviation:  1.16537E-03
+25Y	7Y	Model:  6.314%	 Target:  6.259%	 Deviation:  5.52912E-04
+25Y	8Y	Model:  6.897%	 Target:  6.996%	 Deviation: -9.89397E-04
+25Y	9Y	Model:  7.424%	 Target:  7.589%	 Deviation: -1.65676E-03
+25Y	10Y	Model:  7.885%	 Target:  8.031%	 Deviation: -1.46432E-03
+30Y	1Y	Model:  1.342%	 Target:  1.359%	 Deviation: -1.72986E-04
+30Y	2Y	Model:  2.146%	 Target:  2.089%	 Deviation:  5.71594E-04
+30Y	3Y	Model:  2.935%	 Target:  2.908%	 Deviation:  2.68150E-04
+30Y	4Y	Model:  3.650%	 Target:  3.787%	 Deviation: -1.36704E-03
+30Y	5Y	Model:  4.292%	 Target:  4.346%	 Deviation: -5.39314E-04
+30Y	6Y	Model:  4.875%	 Target:  4.766%	 Deviation:  1.08812E-03
+30Y	7Y	Model:  5.438%	 Target:  5.388%	 Deviation:  5.00418E-04
+30Y	8Y	Model:  5.952%	 Target:  5.892%	 Deviation:  6.01910E-04
+30Y	9Y	Model:  6.416%	 Target:  6.338%	 Deviation:  7.85287E-04
+Calibration of prices... 643.663s
+Number of Iterations.... 12
+Mean Deviation: 0.002%
+RMS Error.....: 0.078%
+__________________________________________________________________________________________
+
+SKALAR - SimpleGradientDescent - ADJOINT_ALGORITHMIC_DIFFERENCIATION
+
+Calibrated parameters are:
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+
+Valuation on calibrated model:
+1Y	1Y	Model:  1.090%	 Target:  0.815%	 Deviation:  2.75186E-03
+1Y	2Y	Model:  1.771%	 Target:  1.450%	 Deviation:  3.20909E-03
+1Y	3Y	Model:  2.418%	 Target:  2.122%	 Deviation:  2.95993E-03
+1Y	4Y	Model:  3.032%	 Target:  2.806%	 Deviation:  2.25827E-03
+1Y	5Y	Model:  3.615%	 Target:  3.485%	 Deviation:  1.29991E-03
+1Y	6Y	Model:  4.169%	 Target:  4.147%	 Deviation:  2.23139E-04
+1Y	7Y	Model:  4.696%	 Target:  4.783%	 Deviation: -8.72261E-04
+1Y	8Y	Model:  5.195%	 Target:  5.387%	 Deviation: -1.92099E-03
+1Y	9Y	Model:  5.670%	 Target:  5.958%	 Deviation: -2.88055E-03
+1Y	10Y	Model:  6.120%	 Target:  6.492%	 Deviation: -3.72196E-03
+1Y	15Y	Model:  8.055%	 Target:  8.644%	 Deviation: -5.88449E-03
+1Y	20Y	Model:  9.553%	 Target:  10.060%	 Deviation: -5.06818E-03
+1Y	25Y	Model:  10.712%	 Target:  10.957%	 Deviation: -2.45446E-03
+1Y	30Y	Model:  11.602%	 Target:  11.516%	 Deviation:  8.59872E-04
+2Y	1Y	Model:  1.561%	 Target:  1.303%	 Deviation:  2.57203E-03
+2Y	2Y	Model:  2.534%	 Target:  2.275%	 Deviation:  2.58617E-03
+2Y	3Y	Model:  3.456%	 Target:  3.276%	 Deviation:  1.80063E-03
+2Y	4Y	Model:  4.331%	 Target:  4.274%	 Deviation:  5.69723E-04
+2Y	5Y	Model:  5.160%	 Target:  5.246%	 Deviation: -8.53987E-04
+2Y	6Y	Model:  5.946%	 Target:  6.177%	 Deviation: -2.30723E-03
+2Y	7Y	Model:  6.693%	 Target:  7.060%	 Deviation: -3.67287E-03
+2Y	8Y	Model:  7.402%	 Target:  7.892%	 Deviation: -4.90437E-03
+2Y	9Y	Model:  8.073%	 Target:  8.670%	 Deviation: -5.96935E-03
+2Y	10Y	Model:  8.711%	 Target:  9.395%	 Deviation: -6.83869E-03
+2Y	15Y	Model:  11.441%	 Target:  12.282%	 Deviation: -8.41286E-03
+2Y	20Y	Model:  13.522%	 Target:  14.145%	 Deviation: -6.23175E-03
+2Y	25Y	Model:  15.092%	 Target:  15.291%	 Deviation: -1.98856E-03
+2Y	30Y	Model:  16.270%	 Target:  15.991%	 Deviation:  2.78418E-03
+3Y	1Y	Model:  1.767%	 Target:  1.520%	 Deviation:  2.46832E-03
+3Y	2Y	Model:  2.876%	 Target:  2.596%	 Deviation:  2.80374E-03
+3Y	3Y	Model:  3.933%	 Target:  3.680%	 Deviation:  2.52380E-03
+3Y	4Y	Model:  4.938%	 Target:  4.753%	 Deviation:  1.84346E-03
+3Y	5Y	Model:  5.893%	 Target:  5.803%	 Deviation:  9.01730E-04
+3Y	6Y	Model:  6.802%	 Target:  6.822%	 Deviation: -2.01239E-04
+3Y	7Y	Model:  7.665%	 Target:  7.804%	 Deviation: -1.38957E-03
+3Y	8Y	Model:  8.487%	 Target:  8.743%	 Deviation: -2.56204E-03
+3Y	9Y	Model:  9.267%	 Target:  9.635%	 Deviation: -3.67543E-03
+3Y	10Y	Model:  10.008%	 Target:  10.475%	 Deviation: -4.67275E-03
+3Y	15Y	Model:  13.188%	 Target:  13.898%	 Deviation: -7.10680E-03
+3Y	20Y	Model:  15.599%	 Target:  16.134%	 Deviation: -5.34943E-03
+3Y	25Y	Model:  17.402%	 Target:  17.478%	 Deviation: -7.54089E-04
+3Y	30Y	Model:  18.722%	 Target:  18.256%	 Deviation:  4.65815E-03
+4Y	1Y	Model:  1.935%	 Target:  1.707%	 Deviation:  2.28135E-03
+4Y	2Y	Model:  3.149%	 Target:  2.891%	 Deviation:  2.58091E-03
+4Y	3Y	Model:  4.305%	 Target:  4.085%	 Deviation:  2.19977E-03
+4Y	4Y	Model:  5.405%	 Target:  5.272%	 Deviation:  1.32349E-03
+4Y	5Y	Model:  6.450%	 Target:  6.442%	 Deviation:  8.83455E-05
+4Y	6Y	Model:  7.444%	 Target:  7.584%	 Deviation: -1.39633E-03
+4Y	7Y	Model:  8.387%	 Target:  8.690%	 Deviation: -3.02311E-03
+4Y	8Y	Model:  9.283%	 Target:  9.748%	 Deviation: -4.65389E-03
+4Y	9Y	Model:  10.131%	 Target:  10.749%	 Deviation: -6.17948E-03
+4Y	10Y	Model:  10.935%	 Target:  11.686%	 Deviation: -7.50551E-03
+4Y	15Y	Model:  14.344%	 Target:  15.322%	 Deviation: -9.78563E-03
+4Y	20Y	Model:  16.891%	 Target:  17.541%	 Deviation: -6.50395E-03
+4Y	25Y	Model:  18.755%	 Target:  18.838%	 Deviation: -8.25645E-04
+4Y	30Y	Model:  20.081%	 Target:  19.582%	 Deviation:  4.98337E-03
+5Y	1Y	Model:  2.060%	 Target:  1.893%	 Deviation:  1.67511E-03
+5Y	2Y	Model:  3.351%	 Target:  3.187%	 Deviation:  1.63707E-03
+5Y	3Y	Model:  4.578%	 Target:  4.473%	 Deviation:  1.04378E-03
+5Y	4Y	Model:  5.744%	 Target:  5.737%	 Deviation:  7.86444E-05
+5Y	5Y	Model:  6.851%	 Target:  6.968%	 Deviation: -1.17345E-03
+5Y	6Y	Model:  7.901%	 Target:  8.159%	 Deviation: -2.57398E-03
+5Y	7Y	Model:  8.898%	 Target:  9.294%	 Deviation: -3.95554E-03
+5Y	8Y	Model:  9.842%	 Target:  10.364%	 Deviation: -5.21769E-03
+5Y	9Y	Model:  10.737%	 Target:  11.375%	 Deviation: -6.37542E-03
+5Y	10Y	Model:  11.585%	 Target:  12.328%	 Deviation: -7.43005E-03
+5Y	15Y	Model:  15.160%	 Target:  16.033%	 Deviation: -8.72652E-03
+5Y	20Y	Model:  17.787%	 Target:  18.273%	 Deviation: -4.86205E-03
+5Y	25Y	Model:  19.666%	 Target:  19.545%	 Deviation:  1.20636E-03
+5Y	30Y	Model:  20.973%	 Target:  20.230%	 Deviation:  7.43175E-03
+7Y	1Y	Model:  2.156%	 Target:  2.123%	 Deviation:  3.29064E-04
+7Y	2Y	Model:  3.503%	 Target:  3.521%	 Deviation: -1.75639E-04
+7Y	3Y	Model:  4.783%	 Target:  4.882%	 Deviation: -9.85692E-04
+7Y	4Y	Model:  6.001%	 Target:  6.199%	 Deviation: -1.98474E-03
+7Y	5Y	Model:  7.156%	 Target:  7.466%	 Deviation: -3.10776E-03
+7Y	6Y	Model:  8.251%	 Target:  8.680%	 Deviation: -4.29320E-03
+7Y	7Y	Model:  9.288%	 Target:  9.848%	 Deviation: -5.60331E-03
+7Y	8Y	Model:  10.270%	 Target:  10.957%	 Deviation: -6.87816E-03
+7Y	9Y	Model:  11.196%	 Target:  11.980%	 Deviation: -7.84031E-03
+7Y	10Y	Model:  12.070%	 Target:  12.928%	 Deviation: -8.58342E-03
+7Y	15Y	Model:  15.744%	 Target:  16.474%	 Deviation: -7.29343E-03
+7Y	20Y	Model:  18.411%	 Target:  18.412%	 Deviation: -9.34920E-06
+7Y	25Y	Model:  20.260%	 Target:  19.478%	 Deviation:  7.81795E-03
+7Y	30Y	Model:  21.490%	 Target:  20.023%	 Deviation:  1.46650E-02
+10Y	1Y	Model:  2.201%	 Target:  2.160%	 Deviation:  4.06030E-04
+10Y	2Y	Model:  3.581%	 Target:  3.534%	 Deviation:  4.73154E-04
+10Y	3Y	Model:  4.895%	 Target:  4.840%	 Deviation:  5.51615E-04
+10Y	4Y	Model:  6.144%	 Target:  6.106%	 Deviation:  3.78148E-04
+10Y	5Y	Model:  7.330%	 Target:  7.366%	 Deviation: -3.66538E-04
+10Y	6Y	Model:  8.452%	 Target:  8.547%	 Deviation: -9.49593E-04
+10Y	7Y	Model:  9.515%	 Target:  9.648%	 Deviation: -1.32395E-03
+10Y	8Y	Model:  10.520%	 Target:  10.676%	 Deviation: -1.56476E-03
+10Y	9Y	Model:  11.466%	 Target:  11.605%	 Deviation: -1.38847E-03
+10Y	10Y	Model:  12.356%	 Target:  12.494%	 Deviation: -1.37659E-03
+10Y	15Y	Model:  15.990%	 Target:  15.880%	 Deviation:  1.10124E-03
+10Y	20Y	Model:  18.478%	 Target:  17.765%	 Deviation:  7.12315E-03
+10Y	25Y	Model:  20.123%	 Target:  18.678%	 Deviation:  1.44515E-02
+15Y	1Y	Model:  2.138%	 Target:  2.030%	 Deviation:  1.07399E-03
+15Y	2Y	Model:  3.474%	 Target:  3.440%	 Deviation:  3.38585E-04
+15Y	3Y	Model:  4.738%	 Target:  4.828%	 Deviation: -9.01560E-04
+15Y	4Y	Model:  5.931%	 Target:  6.122%	 Deviation: -1.91552E-03
+15Y	5Y	Model:  7.054%	 Target:  7.273%	 Deviation: -2.18883E-03
+15Y	6Y	Model:  8.113%	 Target:  8.385%	 Deviation: -2.71357E-03
+15Y	7Y	Model:  9.109%	 Target:  9.488%	 Deviation: -3.79178E-03
+15Y	8Y	Model:  10.045%	 Target:  10.380%	 Deviation: -3.34227E-03
+15Y	9Y	Model:  10.924%	 Target:  11.161%	 Deviation: -2.37451E-03
+15Y	10Y	Model:  11.746%	 Target:  11.848%	 Deviation: -1.02066E-03
+15Y	15Y	Model:  15.075%	 Target:  14.339%	 Deviation:  7.36479E-03
+15Y	20Y	Model:  17.283%	 Target:  15.606%	 Deviation:  1.67692E-02
+20Y	1Y	Model:  1.884%	 Target:  1.976%	 Deviation: -9.18802E-04
+20Y	2Y	Model:  3.068%	 Target:  3.302%	 Deviation: -2.34536E-03
+20Y	3Y	Model:  4.193%	 Target:  4.477%	 Deviation: -2.84181E-03
+20Y	4Y	Model:  5.259%	 Target:  5.558%	 Deviation: -2.98912E-03
+20Y	5Y	Model:  6.266%	 Target:  6.504%	 Deviation: -2.37973E-03
+20Y	6Y	Model:  7.221%	 Target:  7.335%	 Deviation: -1.14384E-03
+20Y	7Y	Model:  8.116%	 Target:  8.087%	 Deviation:  2.97552E-04
+20Y	8Y	Model:  8.954%	 Target:  8.645%	 Deviation:  3.09442E-03
+20Y	9Y	Model:  9.739%	 Target:  9.137%	 Deviation:  6.01864E-03
+20Y	10Y	Model:  10.472%	 Target:  9.616%	 Deviation:  8.56133E-03
+20Y	15Y	Model:  13.376%	 Target:  11.478%	 Deviation:  1.89827E-02
+25Y	1Y	Model:  1.850%	 Target:  1.608%	 Deviation:  2.42019E-03
+25Y	2Y	Model:  2.993%	 Target:  2.520%	 Deviation:  4.72515E-03
+25Y	3Y	Model:  4.072%	 Target:  3.331%	 Deviation:  7.41653E-03
+25Y	4Y	Model:  5.083%	 Target:  4.123%	 Deviation:  9.59917E-03
+25Y	5Y	Model:  6.031%	 Target:  4.836%	 Deviation:  1.19485E-02
+25Y	6Y	Model:  6.918%	 Target:  5.564%	 Deviation:  1.35410E-02
+25Y	7Y	Model:  7.743%	 Target:  6.259%	 Deviation:  1.48409E-02
+25Y	8Y	Model:  8.504%	 Target:  6.996%	 Deviation:  1.50792E-02
+25Y	9Y	Model:  9.205%	 Target:  7.589%	 Deviation:  1.61540E-02
+25Y	10Y	Model:  9.859%	 Target:  8.031%	 Deviation:  1.82817E-02
+30Y	1Y	Model:  1.747%	 Target:  1.359%	 Deviation:  3.87784E-03
+30Y	2Y	Model:  2.828%	 Target:  2.089%	 Deviation:  7.39417E-03
+30Y	3Y	Model:  3.844%	 Target:  2.908%	 Deviation:  9.35183E-03
+30Y	4Y	Model:  4.815%	 Target:  3.787%	 Deviation:  1.02842E-02
+30Y	5Y	Model:  5.748%	 Target:  4.346%	 Deviation:  1.40144E-02
+30Y	6Y	Model:  6.630%	 Target:  4.766%	 Deviation:  1.86408E-02
+30Y	7Y	Model:  7.458%	 Target:  5.388%	 Deviation:  2.06951E-02
+30Y	8Y	Model:  8.224%	 Target:  5.892%	 Deviation:  2.33226E-02
+30Y	9Y	Model:  8.925%	 Target:  6.338%	 Deviation:  2.58691E-02
+Calibration of prices... 8.038s
+Number of Iterations.... 1
+Mean Deviation: 0.121%
+RMS Error.....: 0.705%
+__________________________________________________________________________________________
+
+SKALAR - GradientDescentArmijo - ADJOINT_ALGORITHMIC_DIFFERENCIATION
+
+Calibrated parameters are:
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+
+Valuation on calibrated model:
+1Y	1Y	Model:  1.089%	 Target:  0.815%	 Deviation:  2.74792E-03
+1Y	2Y	Model:  1.769%	 Target:  1.450%	 Deviation:  3.19451E-03
+1Y	3Y	Model:  2.415%	 Target:  2.122%	 Deviation:  2.93466E-03
+1Y	4Y	Model:  3.028%	 Target:  2.806%	 Deviation:  2.22185E-03
+1Y	5Y	Model:  3.610%	 Target:  3.485%	 Deviation:  1.24910E-03
+1Y	6Y	Model:  4.163%	 Target:  4.147%	 Deviation:  1.58349E-04
+1Y	7Y	Model:  4.688%	 Target:  4.783%	 Deviation: -9.50294E-04
+1Y	8Y	Model:  5.186%	 Target:  5.387%	 Deviation: -2.01157E-03
+1Y	9Y	Model:  5.660%	 Target:  5.958%	 Deviation: -2.98238E-03
+1Y	10Y	Model:  6.109%	 Target:  6.492%	 Deviation: -3.83228E-03
+1Y	15Y	Model:  8.041%	 Target:  8.644%	 Deviation: -6.03013E-03
+1Y	20Y	Model:  9.536%	 Target:  10.060%	 Deviation: -5.23696E-03
+1Y	25Y	Model:  10.694%	 Target:  10.957%	 Deviation: -2.62811E-03
+1Y	30Y	Model:  11.584%	 Target:  11.516%	 Deviation:  6.83959E-04
+2Y	1Y	Model:  1.560%	 Target:  1.303%	 Deviation:  2.56102E-03
+2Y	2Y	Model:  2.531%	 Target:  2.275%	 Deviation:  2.56116E-03
+2Y	3Y	Model:  3.452%	 Target:  3.276%	 Deviation:  1.76140E-03
+2Y	4Y	Model:  4.325%	 Target:  4.274%	 Deviation:  5.13739E-04
+2Y	5Y	Model:  5.153%	 Target:  5.246%	 Deviation: -9.28971E-04
+2Y	6Y	Model:  5.937%	 Target:  6.177%	 Deviation: -2.40037E-03
+2Y	7Y	Model:  6.682%	 Target:  7.060%	 Deviation: -3.78356E-03
+2Y	8Y	Model:  7.389%	 Target:  7.892%	 Deviation: -5.03085E-03
+2Y	9Y	Model:  8.059%	 Target:  8.670%	 Deviation: -6.10869E-03
+2Y	10Y	Model:  8.696%	 Target:  9.395%	 Deviation: -6.98887E-03
+2Y	15Y	Model:  11.422%	 Target:  12.282%	 Deviation: -8.60731E-03
+2Y	20Y	Model:  13.500%	 Target:  14.145%	 Deviation: -6.44986E-03
+2Y	25Y	Model:  15.070%	 Target:  15.291%	 Deviation: -2.21071E-03
+2Y	30Y	Model:  16.247%	 Target:  15.991%	 Deviation:  2.56184E-03
+3Y	1Y	Model:  1.765%	 Target:  1.520%	 Deviation:  2.44944E-03
+3Y	2Y	Model:  2.873%	 Target:  2.596%	 Deviation:  2.76503E-03
+3Y	3Y	Model:  3.927%	 Target:  3.680%	 Deviation:  2.46294E-03
+3Y	4Y	Model:  4.929%	 Target:  4.753%	 Deviation:  1.75852E-03
+3Y	5Y	Model:  5.882%	 Target:  5.803%	 Deviation:  7.90790E-04
+3Y	6Y	Model:  6.788%	 Target:  6.822%	 Deviation: -3.37021E-04
+3Y	7Y	Model:  7.649%	 Target:  7.804%	 Deviation: -1.54883E-03
+3Y	8Y	Model:  8.469%	 Target:  8.743%	 Deviation: -2.74219E-03
+3Y	9Y	Model:  9.247%	 Target:  9.635%	 Deviation: -3.87308E-03
+3Y	10Y	Model:  9.987%	 Target:  10.475%	 Deviation: -4.88530E-03
+3Y	15Y	Model:  13.160%	 Target:  13.898%	 Deviation: -7.38363E-03
+3Y	20Y	Model:  15.568%	 Target:  16.134%	 Deviation: -5.65725E-03
+3Y	25Y	Model:  17.371%	 Target:  17.478%	 Deviation: -1.06370E-03
+3Y	30Y	Model:  18.692%	 Target:  18.256%	 Deviation:  4.35174E-03
+4Y	1Y	Model:  1.933%	 Target:  1.707%	 Deviation:  2.25556E-03
+4Y	2Y	Model:  3.144%	 Target:  2.891%	 Deviation:  2.52959E-03
+4Y	3Y	Model:  4.297%	 Target:  4.085%	 Deviation:  2.12080E-03
+4Y	4Y	Model:  5.394%	 Target:  5.272%	 Deviation:  1.21487E-03
+4Y	5Y	Model:  6.436%	 Target:  6.442%	 Deviation: -5.08138E-05
+4Y	6Y	Model:  7.427%	 Target:  7.584%	 Deviation: -1.56448E-03
+4Y	7Y	Model:  8.368%	 Target:  8.690%	 Deviation: -3.21784E-03
+4Y	8Y	Model:  9.261%	 Target:  9.748%	 Deviation: -4.87110E-03
+4Y	9Y	Model:  10.107%	 Target:  10.749%	 Deviation: -6.41644E-03
+4Y	10Y	Model:  10.910%	 Target:  11.686%	 Deviation: -7.75942E-03
+4Y	15Y	Model:  14.311%	 Target:  15.322%	 Deviation: -1.01105E-02
+4Y	20Y	Model:  16.856%	 Target:  17.541%	 Deviation: -6.85699E-03
+4Y	25Y	Model:  18.720%	 Target:  18.838%	 Deviation: -1.17721E-03
+4Y	30Y	Model:  20.046%	 Target:  19.582%	 Deviation:  4.63911E-03
+5Y	1Y	Model:  2.057%	 Target:  1.893%	 Deviation:  1.64096E-03
+5Y	2Y	Model:  3.344%	 Target:  3.187%	 Deviation:  1.57251E-03
+5Y	3Y	Model:  4.568%	 Target:  4.473%	 Deviation:  9.46331E-04
+5Y	4Y	Model:  5.731%	 Target:  5.737%	 Deviation: -5.19587E-05
+5Y	5Y	Model:  6.835%	 Target:  6.968%	 Deviation: -1.33732E-03
+5Y	6Y	Model:  7.882%	 Target:  8.159%	 Deviation: -2.76839E-03
+5Y	7Y	Model:  8.876%	 Target:  9.294%	 Deviation: -4.17707E-03
+5Y	8Y	Model:  9.817%	 Target:  10.364%	 Deviation: -5.46443E-03
+5Y	9Y	Model:  10.710%	 Target:  11.375%	 Deviation: -6.64419E-03
+5Y	10Y	Model:  11.556%	 Target:  12.328%	 Deviation: -7.71743E-03
+5Y	15Y	Model:  15.124%	 Target:  16.033%	 Deviation: -9.08963E-03
+5Y	20Y	Model:  17.748%	 Target:  18.273%	 Deviation: -5.24530E-03
+5Y	25Y	Model:  19.628%	 Target:  19.545%	 Deviation:  8.29368E-04
+5Y	30Y	Model:  20.936%	 Target:  20.230%	 Deviation:  7.06539E-03
+7Y	1Y	Model:  2.152%	 Target:  2.123%	 Deviation:  2.85960E-04
+7Y	2Y	Model:  3.495%	 Target:  3.521%	 Deviation: -2.50429E-04
+7Y	3Y	Model:  4.773%	 Target:  4.882%	 Deviation: -1.09315E-03
+7Y	4Y	Model:  5.987%	 Target:  6.199%	 Deviation: -2.12375E-03
+7Y	5Y	Model:  7.139%	 Target:  7.466%	 Deviation: -3.27608E-03
+7Y	6Y	Model:  8.231%	 Target:  8.680%	 Deviation: -4.48749E-03
+7Y	7Y	Model:  9.266%	 Target:  9.848%	 Deviation: -5.82233E-03
+7Y	8Y	Model:  10.246%	 Target:  10.957%	 Deviation: -7.11860E-03
+7Y	9Y	Model:  11.170%	 Target:  11.980%	 Deviation: -8.09999E-03
+7Y	10Y	Model:  12.042%	 Target:  12.928%	 Deviation: -8.86138E-03
+7Y	15Y	Model:  15.710%	 Target:  16.474%	 Deviation: -7.63921E-03
+7Y	20Y	Model:  18.376%	 Target:  18.412%	 Deviation: -3.65460E-04
+7Y	25Y	Model:  20.224%	 Target:  19.478%	 Deviation:  7.46713E-03
+7Y	30Y	Model:  21.456%	 Target:  20.023%	 Deviation:  1.43285E-02
+10Y	1Y	Model:  2.196%	 Target:  2.160%	 Deviation:  3.60411E-04
+10Y	2Y	Model:  3.573%	 Target:  3.534%	 Deviation:  3.96799E-04
+10Y	3Y	Model:  4.885%	 Target:  4.840%	 Deviation:  4.45852E-04
+10Y	4Y	Model:  6.131%	 Target:  6.106%	 Deviation:  2.44685E-04
+10Y	5Y	Model:  7.314%	 Target:  7.366%	 Deviation: -5.25933E-04
+10Y	6Y	Model:  8.433%	 Target:  8.547%	 Deviation: -1.13404E-03
+10Y	7Y	Model:  9.495%	 Target:  9.648%	 Deviation: -1.53025E-03
+10Y	8Y	Model:  10.497%	 Target:  10.676%	 Deviation: -1.79183E-03
+10Y	9Y	Model:  11.442%	 Target:  11.605%	 Deviation: -1.63413E-03
+10Y	10Y	Model:  12.330%	 Target:  12.494%	 Deviation: -1.63849E-03
+10Y	15Y	Model:  15.960%	 Target:  15.880%	 Deviation:  8.03571E-04
+10Y	20Y	Model:  18.448%	 Target:  17.765%	 Deviation:  6.82567E-03
+10Y	25Y	Model:  20.094%	 Target:  18.678%	 Deviation:  1.41579E-02
+15Y	1Y	Model:  2.134%	 Target:  2.030%	 Deviation:  1.03844E-03
+15Y	2Y	Model:  3.468%	 Target:  3.440%	 Deviation:  2.80192E-04
+15Y	3Y	Model:  4.730%	 Target:  4.828%	 Deviation: -9.81650E-04
+15Y	4Y	Model:  5.920%	 Target:  6.122%	 Deviation: -2.01700E-03
+15Y	5Y	Model:  7.042%	 Target:  7.273%	 Deviation: -2.31230E-03
+15Y	6Y	Model:  8.099%	 Target:  8.385%	 Deviation: -2.85484E-03
+15Y	7Y	Model:  9.093%	 Target:  9.488%	 Deviation: -3.94965E-03
+15Y	8Y	Model:  10.028%	 Target:  10.380%	 Deviation: -3.51485E-03
+15Y	9Y	Model:  10.905%	 Target:  11.161%	 Deviation: -2.56064E-03
+15Y	10Y	Model:  11.727%	 Target:  11.848%	 Deviation: -1.21568E-03
+15Y	15Y	Model:  15.053%	 Target:  14.339%	 Deviation:  7.13705E-03
+15Y	20Y	Model:  17.262%	 Target:  15.606%	 Deviation:  1.65531E-02
+20Y	1Y	Model:  1.881%	 Target:  1.976%	 Deviation: -9.51113E-04
+20Y	2Y	Model:  3.062%	 Target:  3.302%	 Deviation: -2.39832E-03
+20Y	3Y	Model:  4.185%	 Target:  4.477%	 Deviation: -2.91330E-03
+20Y	4Y	Model:  5.250%	 Target:  5.558%	 Deviation: -3.07732E-03
+20Y	5Y	Model:  6.256%	 Target:  6.504%	 Deviation: -2.48582E-03
+20Y	6Y	Model:  7.209%	 Target:  7.335%	 Deviation: -1.26441E-03
+20Y	7Y	Model:  8.103%	 Target:  8.087%	 Deviation:  1.63753E-04
+20Y	8Y	Model:  8.940%	 Target:  8.645%	 Deviation:  2.95032E-03
+20Y	9Y	Model:  9.723%	 Target:  9.137%	 Deviation:  5.86124E-03
+20Y	10Y	Model:  10.456%	 Target:  9.616%	 Deviation:  8.39559E-03
+20Y	15Y	Model:  13.358%	 Target:  11.478%	 Deviation:  1.88035E-02
+25Y	1Y	Model:  1.847%	 Target:  1.608%	 Deviation:  2.39195E-03
+25Y	2Y	Model:  2.988%	 Target:  2.520%	 Deviation:  4.67776E-03
+25Y	3Y	Model:  4.066%	 Target:  3.331%	 Deviation:  7.35030E-03
+25Y	4Y	Model:  5.075%	 Target:  4.123%	 Deviation:  9.51823E-03
+25Y	5Y	Model:  6.021%	 Target:  4.836%	 Deviation:  1.18501E-02
+25Y	6Y	Model:  6.907%	 Target:  5.564%	 Deviation:  1.34296E-02
+25Y	7Y	Model:  7.730%	 Target:  6.259%	 Deviation:  1.47174E-02
+25Y	8Y	Model:  8.491%	 Target:  6.996%	 Deviation:  1.49494E-02
+25Y	9Y	Model:  9.191%	 Target:  7.589%	 Deviation:  1.60172E-02
+25Y	10Y	Model:  9.845%	 Target:  8.031%	 Deviation:  1.81378E-02
+30Y	1Y	Model:  1.743%	 Target:  1.359%	 Deviation:  3.84136E-03
+30Y	2Y	Model:  2.823%	 Target:  2.089%	 Deviation:  7.33795E-03
+30Y	3Y	Model:  3.835%	 Target:  2.908%	 Deviation:  9.26876E-03
+30Y	4Y	Model:  4.805%	 Target:  3.787%	 Deviation:  1.01831E-02
+30Y	5Y	Model:  5.734%	 Target:  4.346%	 Deviation:  1.38800E-02
+30Y	6Y	Model:  6.616%	 Target:  4.766%	 Deviation:  1.84968E-02
+30Y	7Y	Model:  7.442%	 Target:  5.388%	 Deviation:  2.05367E-02
+30Y	8Y	Model:  8.208%	 Target:  5.892%	 Deviation:  2.31604E-02
+30Y	9Y	Model:  8.908%	 Target:  6.338%	 Deviation:  2.57053E-02
+Calibration of prices... 12.429s
+Number of Iterations.... 1
+Mean Deviation: 0.105%
+RMS Error.....: 0.704%
+__________________________________________________________________________________________
+
+SKALAR - TruncatedGaussNetwonForUnderdeterminedNSLP - ADJOINT_ALGORITHMIC_DIFFERENCIATION
+
+Calibrated parameters are:
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+
+Valuation on calibrated model:
+1Y	1Y	Model:  1.088%	 Target:  0.815%	 Deviation:  2.73636E-03
+1Y	2Y	Model:  1.765%	 Target:  1.450%	 Deviation:  3.15178E-03
+1Y	3Y	Model:  2.408%	 Target:  2.122%	 Deviation:  2.86055E-03
+1Y	4Y	Model:  3.017%	 Target:  2.806%	 Deviation:  2.11509E-03
+1Y	5Y	Model:  3.595%	 Target:  3.485%	 Deviation:  1.10012E-03
+1Y	6Y	Model:  4.144%	 Target:  4.147%	 Deviation: -3.16096E-05
+1Y	7Y	Model:  4.665%	 Target:  4.783%	 Deviation: -1.17908E-03
+1Y	8Y	Model:  5.160%	 Target:  5.387%	 Deviation: -2.27716E-03
+1Y	9Y	Model:  5.630%	 Target:  5.958%	 Deviation: -3.28093E-03
+1Y	10Y	Model:  6.077%	 Target:  6.492%	 Deviation: -4.15575E-03
+1Y	15Y	Model:  7.998%	 Target:  8.644%	 Deviation: -6.45718E-03
+1Y	20Y	Model:  9.487%	 Target:  10.060%	 Deviation: -5.73188E-03
+1Y	25Y	Model:  10.643%	 Target:  10.957%	 Deviation: -3.13733E-03
+1Y	30Y	Model:  11.533%	 Target:  11.516%	 Deviation:  1.68080E-04
+2Y	1Y	Model:  1.556%	 Target:  1.303%	 Deviation:  2.52873E-03
+2Y	2Y	Model:  2.524%	 Target:  2.275%	 Deviation:  2.48789E-03
+2Y	3Y	Model:  3.441%	 Target:  3.276%	 Deviation:  1.64640E-03
+2Y	4Y	Model:  4.309%	 Target:  4.274%	 Deviation:  3.49598E-04
+2Y	5Y	Model:  5.131%	 Target:  5.246%	 Deviation: -1.14882E-03
+2Y	6Y	Model:  5.910%	 Target:  6.177%	 Deviation: -2.67326E-03
+2Y	7Y	Model:  6.650%	 Target:  7.060%	 Deviation: -4.10799E-03
+2Y	8Y	Model:  7.352%	 Target:  7.892%	 Deviation: -5.40170E-03
+2Y	9Y	Model:  8.019%	 Target:  8.670%	 Deviation: -6.51723E-03
+2Y	10Y	Model:  8.652%	 Target:  9.395%	 Deviation: -7.42888E-03
+2Y	15Y	Model:  11.364%	 Target:  12.282%	 Deviation: -9.17757E-03
+2Y	20Y	Model:  13.436%	 Target:  14.145%	 Deviation: -7.08957E-03
+2Y	25Y	Model:  15.005%	 Target:  15.291%	 Deviation: -2.86206E-03
+2Y	30Y	Model:  16.182%	 Target:  15.991%	 Deviation:  1.90984E-03
+3Y	1Y	Model:  1.760%	 Target:  1.520%	 Deviation:  2.39409E-03
+3Y	2Y	Model:  2.861%	 Target:  2.596%	 Deviation:  2.65153E-03
+3Y	3Y	Model:  3.909%	 Target:  3.680%	 Deviation:  2.28451E-03
+3Y	4Y	Model:  4.904%	 Target:  4.753%	 Deviation:  1.50951E-03
+3Y	5Y	Model:  5.850%	 Target:  5.803%	 Deviation:  4.65532E-04
+3Y	6Y	Model:  6.749%	 Target:  6.822%	 Deviation: -7.35119E-04
+3Y	7Y	Model:  7.603%	 Target:  7.804%	 Deviation: -2.01545E-03
+3Y	8Y	Model:  8.416%	 Target:  8.743%	 Deviation: -3.27037E-03
+3Y	9Y	Model:  9.189%	 Target:  9.635%	 Deviation: -4.45262E-03
+3Y	10Y	Model:  9.924%	 Target:  10.475%	 Deviation: -5.50853E-03
+3Y	15Y	Model:  13.079%	 Target:  13.898%	 Deviation: -8.19559E-03
+3Y	20Y	Model:  15.478%	 Target:  16.134%	 Deviation: -6.56034E-03
+3Y	25Y	Model:  17.280%	 Target:  17.478%	 Deviation: -1.97201E-03
+3Y	30Y	Model:  18.602%	 Target:  18.256%	 Deviation:  3.45345E-03
+4Y	1Y	Model:  1.925%	 Target:  1.707%	 Deviation:  2.17996E-03
+4Y	2Y	Model:  3.129%	 Target:  2.891%	 Deviation:  2.37912E-03
+4Y	3Y	Model:  4.274%	 Target:  4.085%	 Deviation:  1.88936E-03
+4Y	4Y	Model:  5.362%	 Target:  5.272%	 Deviation:  8.96508E-04
+4Y	5Y	Model:  6.396%	 Target:  6.442%	 Deviation: -4.58812E-04
+4Y	6Y	Model:  7.378%	 Target:  7.584%	 Deviation: -2.05748E-03
+4Y	7Y	Model:  8.311%	 Target:  8.690%	 Deviation: -3.78882E-03
+4Y	8Y	Model:  9.197%	 Target:  9.748%	 Deviation: -5.50803E-03
+4Y	9Y	Model:  10.038%	 Target:  10.749%	 Deviation: -7.11118E-03
+4Y	10Y	Model:  10.835%	 Target:  11.686%	 Deviation: -8.50403E-03
+4Y	15Y	Model:  14.216%	 Target:  15.322%	 Deviation: -1.10635E-02
+4Y	20Y	Model:  16.752%	 Target:  17.541%	 Deviation: -7.89315E-03
+4Y	25Y	Model:  18.617%	 Target:  18.838%	 Deviation: -2.20931E-03
+4Y	30Y	Model:  19.945%	 Target:  19.582%	 Deviation:  3.62832E-03
+5Y	1Y	Model:  2.047%	 Target:  1.893%	 Deviation:  1.54100E-03
+5Y	2Y	Model:  3.325%	 Target:  3.187%	 Deviation:  1.38324E-03
+5Y	3Y	Model:  4.539%	 Target:  4.473%	 Deviation:  6.60858E-04
+5Y	4Y	Model:  5.693%	 Target:  5.737%	 Deviation: -4.34870E-04
+5Y	5Y	Model:  6.787%	 Target:  6.968%	 Deviation: -1.81783E-03
+5Y	6Y	Model:  7.825%	 Target:  8.159%	 Deviation: -3.33843E-03
+5Y	7Y	Model:  8.811%	 Target:  9.294%	 Deviation: -4.82669E-03
+5Y	8Y	Model:  9.745%	 Target:  10.364%	 Deviation: -6.18629E-03
+5Y	9Y	Model:  10.632%	 Target:  11.375%	 Deviation: -7.43245E-03
+5Y	10Y	Model:  11.472%	 Target:  12.328%	 Deviation: -8.56011E-03
+5Y	15Y	Model:  15.018%	 Target:  16.033%	 Deviation: -1.01553E-02
+5Y	20Y	Model:  17.636%	 Target:  18.273%	 Deviation: -6.37009E-03
+5Y	25Y	Model:  19.517%	 Target:  19.545%	 Deviation: -2.77889E-04
+5Y	30Y	Model:  20.829%	 Target:  20.230%	 Deviation:  5.98925E-03
+7Y	1Y	Model:  2.139%	 Target:  2.123%	 Deviation:  1.59725E-04
+7Y	2Y	Model:  3.474%	 Target:  3.521%	 Deviation: -4.69363E-04
+7Y	3Y	Model:  4.741%	 Target:  4.882%	 Deviation: -1.40801E-03
+7Y	4Y	Model:  5.946%	 Target:  6.199%	 Deviation: -2.53116E-03
+7Y	5Y	Model:  7.090%	 Target:  7.466%	 Deviation: -3.76968E-03
+7Y	6Y	Model:  8.174%	 Target:  8.680%	 Deviation: -5.05688E-03
+7Y	7Y	Model:  9.202%	 Target:  9.848%	 Deviation: -6.46472E-03
+7Y	8Y	Model:  10.175%	 Target:  10.957%	 Deviation: -7.82372E-03
+7Y	9Y	Model:  11.094%	 Target:  11.980%	 Deviation: -8.86140E-03
+7Y	10Y	Model:  11.960%	 Target:  12.928%	 Deviation: -9.67502E-03
+7Y	15Y	Model:  15.608%	 Target:  16.474%	 Deviation: -8.65369E-03
+7Y	20Y	Model:  18.271%	 Target:  18.412%	 Deviation: -1.40906E-03
+7Y	25Y	Model:  20.122%	 Target:  19.478%	 Deviation:  6.43943E-03
+7Y	30Y	Model:  21.358%	 Target:  20.023%	 Deviation:  1.33416E-02
+10Y	1Y	Model:  2.183%	 Target:  2.160%	 Deviation:  2.26822E-04
+10Y	2Y	Model:  3.551%	 Target:  3.534%	 Deviation:  1.73080E-04
+10Y	3Y	Model:  4.854%	 Target:  4.840%	 Deviation:  1.35796E-04
+10Y	4Y	Model:  6.092%	 Target:  6.106%	 Deviation: -1.46604E-04
+10Y	5Y	Model:  7.267%	 Target:  7.366%	 Deviation: -9.93519E-04
+10Y	6Y	Model:  8.379%	 Target:  8.547%	 Deviation: -1.67478E-03
+10Y	7Y	Model:  9.434%	 Target:  9.648%	 Deviation: -2.13522E-03
+10Y	8Y	Model:  10.431%	 Target:  10.676%	 Deviation: -2.45683E-03
+10Y	9Y	Model:  11.370%	 Target:  11.605%	 Deviation: -2.35408E-03
+10Y	10Y	Model:  12.253%	 Target:  12.494%	 Deviation: -2.40639E-03
+10Y	15Y	Model:  15.873%	 Target:  15.880%	 Deviation: -7.15733E-05
+10Y	20Y	Model:  18.360%	 Target:  17.765%	 Deviation:  5.95061E-03
+10Y	25Y	Model:  20.008%	 Target:  18.678%	 Deviation:  1.32960E-02
+15Y	1Y	Model:  2.124%	 Target:  2.030%	 Deviation:  9.34154E-04
+15Y	2Y	Model:  3.451%	 Target:  3.440%	 Deviation:  1.08991E-04
+15Y	3Y	Model:  4.706%	 Target:  4.828%	 Deviation: -1.21595E-03
+15Y	4Y	Model:  5.891%	 Target:  6.122%	 Deviation: -2.31509E-03
+15Y	5Y	Model:  7.006%	 Target:  7.273%	 Deviation: -2.67375E-03
+15Y	6Y	Model:  8.058%	 Target:  8.385%	 Deviation: -3.26930E-03
+15Y	7Y	Model:  9.046%	 Target:  9.488%	 Deviation: -4.41331E-03
+15Y	8Y	Model:  9.977%	 Target:  10.380%	 Deviation: -4.02226E-03
+15Y	9Y	Model:  10.850%	 Target:  11.161%	 Deviation: -3.10770E-03
+15Y	10Y	Model:  11.670%	 Target:  11.848%	 Deviation: -1.78940E-03
+15Y	15Y	Model:  14.986%	 Target:  14.339%	 Deviation:  6.47233E-03
+15Y	20Y	Model:  17.198%	 Target:  15.606%	 Deviation:  1.59161E-02
+20Y	1Y	Model:  1.872%	 Target:  1.976%	 Deviation: -1.04601E-03
+20Y	2Y	Model:  3.047%	 Target:  3.302%	 Deviation: -2.55390E-03
+20Y	3Y	Model:  4.164%	 Target:  4.477%	 Deviation: -3.12341E-03
+20Y	4Y	Model:  5.224%	 Target:  5.558%	 Deviation: -3.33664E-03
+20Y	5Y	Model:  6.225%	 Target:  6.504%	 Deviation: -2.79764E-03
+20Y	6Y	Model:  7.173%	 Target:  7.335%	 Deviation: -1.61906E-03
+20Y	7Y	Model:  8.064%	 Target:  8.087%	 Deviation: -2.26511E-04
+20Y	8Y	Model:  8.898%	 Target:  8.645%	 Deviation:  2.52897E-03
+20Y	9Y	Model:  9.677%	 Target:  9.137%	 Deviation:  5.39848E-03
+20Y	10Y	Model:  10.407%	 Target:  9.616%	 Deviation:  7.90758E-03
+20Y	15Y	Model:  13.306%	 Target:  11.478%	 Deviation:  1.82746E-02
+25Y	1Y	Model:  1.839%	 Target:  1.608%	 Deviation:  2.31033E-03
+25Y	2Y	Model:  2.974%	 Target:  2.520%	 Deviation:  4.53948E-03
+25Y	3Y	Model:  4.046%	 Target:  3.331%	 Deviation:  7.15597E-03
+25Y	4Y	Model:  5.051%	 Target:  4.123%	 Deviation:  9.28019E-03
+25Y	5Y	Model:  5.992%	 Target:  4.836%	 Deviation:  1.15609E-02
+25Y	6Y	Model:  6.874%	 Target:  5.564%	 Deviation:  1.31019E-02
+25Y	7Y	Model:  7.694%	 Target:  6.259%	 Deviation:  1.43544E-02
+25Y	8Y	Model:  8.453%	 Target:  6.996%	 Deviation:  1.45710E-02
+25Y	9Y	Model:  9.151%	 Target:  7.589%	 Deviation:  1.56168E-02
+25Y	10Y	Model:  9.803%	 Target:  8.031%	 Deviation:  1.77146E-02
+30Y	1Y	Model:  1.732%	 Target:  1.359%	 Deviation:  3.73456E-03
+30Y	2Y	Model:  2.806%	 Target:  2.089%	 Deviation:  7.17311E-03
+30Y	3Y	Model:  3.813%	 Target:  2.908%	 Deviation:  9.04516E-03
+30Y	4Y	Model:  4.776%	 Target:  3.787%	 Deviation:  9.88678E-03
+30Y	5Y	Model:  5.695%	 Target:  4.346%	 Deviation:  1.34862E-02
+30Y	6Y	Model:  6.574%	 Target:  4.766%	 Deviation:  1.80751E-02
+30Y	7Y	Model:  7.395%	 Target:  5.388%	 Deviation:  2.00722E-02
+30Y	8Y	Model:  8.161%	 Target:  5.892%	 Deviation:  2.26842E-02
+30Y	9Y	Model:  8.860%	 Target:  6.338%	 Deviation:  2.52244E-02
+Calibration of prices... 7.784s
+Number of Iterations.... 1
+Mean Deviation: 0.059%
+RMS Error.....: 0.705%
+__________________________________________________________________________________________
+
+SKALAR - BroydenFletcherGoldfarbShanno - ADJOINT_ALGORITHMIC_DIFFERENCIATION
+
+Calibrated parameters are:
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+ 0.005
+
+Valuation on calibrated model:
+1Y	1Y	Model:  1.090%	 Target:  0.815%	 Deviation:  2.75186E-03
+1Y	2Y	Model:  1.771%	 Target:  1.450%	 Deviation:  3.20909E-03
+1Y	3Y	Model:  2.418%	 Target:  2.122%	 Deviation:  2.95993E-03
+1Y	4Y	Model:  3.032%	 Target:  2.806%	 Deviation:  2.25827E-03
+1Y	5Y	Model:  3.615%	 Target:  3.485%	 Deviation:  1.29991E-03
+1Y	6Y	Model:  4.169%	 Target:  4.147%	 Deviation:  2.23139E-04
+1Y	7Y	Model:  4.696%	 Target:  4.783%	 Deviation: -8.72261E-04
+1Y	8Y	Model:  5.195%	 Target:  5.387%	 Deviation: -1.92099E-03
+1Y	9Y	Model:  5.670%	 Target:  5.958%	 Deviation: -2.88055E-03
+1Y	10Y	Model:  6.120%	 Target:  6.492%	 Deviation: -3.72196E-03
+1Y	15Y	Model:  8.055%	 Target:  8.644%	 Deviation: -5.88449E-03
+1Y	20Y	Model:  9.553%	 Target:  10.060%	 Deviation: -5.06818E-03
+1Y	25Y	Model:  10.712%	 Target:  10.957%	 Deviation: -2.45446E-03
+1Y	30Y	Model:  11.602%	 Target:  11.516%	 Deviation:  8.59872E-04
+2Y	1Y	Model:  1.561%	 Target:  1.303%	 Deviation:  2.57203E-03
+2Y	2Y	Model:  2.534%	 Target:  2.275%	 Deviation:  2.58617E-03
+2Y	3Y	Model:  3.456%	 Target:  3.276%	 Deviation:  1.80063E-03
+2Y	4Y	Model:  4.331%	 Target:  4.274%	 Deviation:  5.69723E-04
+2Y	5Y	Model:  5.160%	 Target:  5.246%	 Deviation: -8.53987E-04
+2Y	6Y	Model:  5.946%	 Target:  6.177%	 Deviation: -2.30723E-03
+2Y	7Y	Model:  6.693%	 Target:  7.060%	 Deviation: -3.67287E-03
+2Y	8Y	Model:  7.402%	 Target:  7.892%	 Deviation: -4.90437E-03
+2Y	9Y	Model:  8.073%	 Target:  8.670%	 Deviation: -5.96935E-03
+2Y	10Y	Model:  8.711%	 Target:  9.395%	 Deviation: -6.83869E-03
+2Y	15Y	Model:  11.441%	 Target:  12.282%	 Deviation: -8.41286E-03
+2Y	20Y	Model:  13.522%	 Target:  14.145%	 Deviation: -6.23175E-03
+2Y	25Y	Model:  15.092%	 Target:  15.291%	 Deviation: -1.98856E-03
+2Y	30Y	Model:  16.270%	 Target:  15.991%	 Deviation:  2.78418E-03
+3Y	1Y	Model:  1.767%	 Target:  1.520%	 Deviation:  2.46832E-03
+3Y	2Y	Model:  2.876%	 Target:  2.596%	 Deviation:  2.80374E-03
+3Y	3Y	Model:  3.933%	 Target:  3.680%	 Deviation:  2.52380E-03
+3Y	4Y	Model:  4.938%	 Target:  4.753%	 Deviation:  1.84346E-03
+3Y	5Y	Model:  5.893%	 Target:  5.803%	 Deviation:  9.01730E-04
+3Y	6Y	Model:  6.802%	 Target:  6.822%	 Deviation: -2.01239E-04
+3Y	7Y	Model:  7.665%	 Target:  7.804%	 Deviation: -1.38957E-03
+3Y	8Y	Model:  8.487%	 Target:  8.743%	 Deviation: -2.56204E-03
+3Y	9Y	Model:  9.267%	 Target:  9.635%	 Deviation: -3.67543E-03
+3Y	10Y	Model:  10.008%	 Target:  10.475%	 Deviation: -4.67275E-03
+3Y	15Y	Model:  13.188%	 Target:  13.898%	 Deviation: -7.10680E-03
+3Y	20Y	Model:  15.599%	 Target:  16.134%	 Deviation: -5.34943E-03
+3Y	25Y	Model:  17.402%	 Target:  17.478%	 Deviation: -7.54089E-04
+3Y	30Y	Model:  18.722%	 Target:  18.256%	 Deviation:  4.65815E-03
+4Y	1Y	Model:  1.935%	 Target:  1.707%	 Deviation:  2.28135E-03
+4Y	2Y	Model:  3.149%	 Target:  2.891%	 Deviation:  2.58091E-03
+4Y	3Y	Model:  4.305%	 Target:  4.085%	 Deviation:  2.19977E-03
+4Y	4Y	Model:  5.405%	 Target:  5.272%	 Deviation:  1.32349E-03
+4Y	5Y	Model:  6.450%	 Target:  6.442%	 Deviation:  8.83455E-05
+4Y	6Y	Model:  7.444%	 Target:  7.584%	 Deviation: -1.39633E-03
+4Y	7Y	Model:  8.387%	 Target:  8.690%	 Deviation: -3.02311E-03
+4Y	8Y	Model:  9.283%	 Target:  9.748%	 Deviation: -4.65389E-03
+4Y	9Y	Model:  10.131%	 Target:  10.749%	 Deviation: -6.17948E-03
+4Y	10Y	Model:  10.935%	 Target:  11.686%	 Deviation: -7.50551E-03
+4Y	15Y	Model:  14.344%	 Target:  15.322%	 Deviation: -9.78563E-03
+4Y	20Y	Model:  16.891%	 Target:  17.541%	 Deviation: -6.50395E-03
+4Y	25Y	Model:  18.755%	 Target:  18.838%	 Deviation: -8.25645E-04
+4Y	30Y	Model:  20.081%	 Target:  19.582%	 Deviation:  4.98337E-03
+5Y	1Y	Model:  2.060%	 Target:  1.893%	 Deviation:  1.67511E-03
+5Y	2Y	Model:  3.351%	 Target:  3.187%	 Deviation:  1.63707E-03
+5Y	3Y	Model:  4.578%	 Target:  4.473%	 Deviation:  1.04378E-03
+5Y	4Y	Model:  5.744%	 Target:  5.737%	 Deviation:  7.86444E-05
+5Y	5Y	Model:  6.851%	 Target:  6.968%	 Deviation: -1.17345E-03
+5Y	6Y	Model:  7.901%	 Target:  8.159%	 Deviation: -2.57398E-03
+5Y	7Y	Model:  8.898%	 Target:  9.294%	 Deviation: -3.95554E-03
+5Y	8Y	Model:  9.842%	 Target:  10.364%	 Deviation: -5.21769E-03
+5Y	9Y	Model:  10.737%	 Target:  11.375%	 Deviation: -6.37542E-03
+5Y	10Y	Model:  11.585%	 Target:  12.328%	 Deviation: -7.43005E-03
+5Y	15Y	Model:  15.160%	 Target:  16.033%	 Deviation: -8.72652E-03
+5Y	20Y	Model:  17.787%	 Target:  18.273%	 Deviation: -4.86205E-03
+5Y	25Y	Model:  19.666%	 Target:  19.545%	 Deviation:  1.20636E-03
+5Y	30Y	Model:  20.973%	 Target:  20.230%	 Deviation:  7.43175E-03
+7Y	1Y	Model:  2.156%	 Target:  2.123%	 Deviation:  3.29064E-04
+7Y	2Y	Model:  3.503%	 Target:  3.521%	 Deviation: -1.75639E-04
+7Y	3Y	Model:  4.783%	 Target:  4.882%	 Deviation: -9.85692E-04
+7Y	4Y	Model:  6.001%	 Target:  6.199%	 Deviation: -1.98474E-03
+7Y	5Y	Model:  7.156%	 Target:  7.466%	 Deviation: -3.10776E-03
+7Y	6Y	Model:  8.251%	 Target:  8.680%	 Deviation: -4.29320E-03
+7Y	7Y	Model:  9.288%	 Target:  9.848%	 Deviation: -5.60331E-03
+7Y	8Y	Model:  10.270%	 Target:  10.957%	 Deviation: -6.87816E-03
+7Y	9Y	Model:  11.196%	 Target:  11.980%	 Deviation: -7.84031E-03
+7Y	10Y	Model:  12.070%	 Target:  12.928%	 Deviation: -8.58342E-03
+7Y	15Y	Model:  15.744%	 Target:  16.474%	 Deviation: -7.29343E-03
+7Y	20Y	Model:  18.411%	 Target:  18.412%	 Deviation: -9.34920E-06
+7Y	25Y	Model:  20.260%	 Target:  19.478%	 Deviation:  7.81795E-03
+7Y	30Y	Model:  21.490%	 Target:  20.023%	 Deviation:  1.46650E-02
+10Y	1Y	Model:  2.201%	 Target:  2.160%	 Deviation:  4.06030E-04
+10Y	2Y	Model:  3.581%	 Target:  3.534%	 Deviation:  4.73154E-04
+10Y	3Y	Model:  4.895%	 Target:  4.840%	 Deviation:  5.51615E-04
+10Y	4Y	Model:  6.144%	 Target:  6.106%	 Deviation:  3.78148E-04
+10Y	5Y	Model:  7.330%	 Target:  7.366%	 Deviation: -3.66538E-04
+10Y	6Y	Model:  8.452%	 Target:  8.547%	 Deviation: -9.49593E-04
+10Y	7Y	Model:  9.515%	 Target:  9.648%	 Deviation: -1.32395E-03
+10Y	8Y	Model:  10.520%	 Target:  10.676%	 Deviation: -1.56476E-03
+10Y	9Y	Model:  11.466%	 Target:  11.605%	 Deviation: -1.38847E-03
+10Y	10Y	Model:  12.356%	 Target:  12.494%	 Deviation: -1.37659E-03
+10Y	15Y	Model:  15.990%	 Target:  15.880%	 Deviation:  1.10124E-03
+10Y	20Y	Model:  18.478%	 Target:  17.765%	 Deviation:  7.12315E-03
+10Y	25Y	Model:  20.123%	 Target:  18.678%	 Deviation:  1.44515E-02
+15Y	1Y	Model:  2.138%	 Target:  2.030%	 Deviation:  1.07399E-03
+15Y	2Y	Model:  3.474%	 Target:  3.440%	 Deviation:  3.38585E-04
+15Y	3Y	Model:  4.738%	 Target:  4.828%	 Deviation: -9.01560E-04
+15Y	4Y	Model:  5.931%	 Target:  6.122%	 Deviation: -1.91552E-03
+15Y	5Y	Model:  7.054%	 Target:  7.273%	 Deviation: -2.18883E-03
+15Y	6Y	Model:  8.113%	 Target:  8.385%	 Deviation: -2.71357E-03
+15Y	7Y	Model:  9.109%	 Target:  9.488%	 Deviation: -3.79178E-03
+15Y	8Y	Model:  10.045%	 Target:  10.380%	 Deviation: -3.34227E-03
+15Y	9Y	Model:  10.924%	 Target:  11.161%	 Deviation: -2.37451E-03
+15Y	10Y	Model:  11.746%	 Target:  11.848%	 Deviation: -1.02066E-03
+15Y	15Y	Model:  15.075%	 Target:  14.339%	 Deviation:  7.36479E-03
+15Y	20Y	Model:  17.283%	 Target:  15.606%	 Deviation:  1.67692E-02
+20Y	1Y	Model:  1.884%	 Target:  1.976%	 Deviation: -9.18802E-04
+20Y	2Y	Model:  3.068%	 Target:  3.302%	 Deviation: -2.34536E-03
+20Y	3Y	Model:  4.193%	 Target:  4.477%	 Deviation: -2.84181E-03
+20Y	4Y	Model:  5.259%	 Target:  5.558%	 Deviation: -2.98912E-03
+20Y	5Y	Model:  6.266%	 Target:  6.504%	 Deviation: -2.37973E-03
+20Y	6Y	Model:  7.221%	 Target:  7.335%	 Deviation: -1.14384E-03
+20Y	7Y	Model:  8.116%	 Target:  8.087%	 Deviation:  2.97552E-04
+20Y	8Y	Model:  8.954%	 Target:  8.645%	 Deviation:  3.09442E-03
+20Y	9Y	Model:  9.739%	 Target:  9.137%	 Deviation:  6.01864E-03
+20Y	10Y	Model:  10.472%	 Target:  9.616%	 Deviation:  8.56133E-03
+20Y	15Y	Model:  13.376%	 Target:  11.478%	 Deviation:  1.89827E-02
+25Y	1Y	Model:  1.850%	 Target:  1.608%	 Deviation:  2.42019E-03
+25Y	2Y	Model:  2.993%	 Target:  2.520%	 Deviation:  4.72515E-03
+25Y	3Y	Model:  4.072%	 Target:  3.331%	 Deviation:  7.41653E-03
+25Y	4Y	Model:  5.083%	 Target:  4.123%	 Deviation:  9.59917E-03
+25Y	5Y	Model:  6.031%	 Target:  4.836%	 Deviation:  1.19485E-02
+25Y	6Y	Model:  6.918%	 Target:  5.564%	 Deviation:  1.35410E-02
+25Y	7Y	Model:  7.743%	 Target:  6.259%	 Deviation:  1.48409E-02
+25Y	8Y	Model:  8.504%	 Target:  6.996%	 Deviation:  1.50792E-02
+25Y	9Y	Model:  9.205%	 Target:  7.589%	 Deviation:  1.61540E-02
+25Y	10Y	Model:  9.859%	 Target:  8.031%	 Deviation:  1.82817E-02
+30Y	1Y	Model:  1.747%	 Target:  1.359%	 Deviation:  3.87784E-03
+30Y	2Y	Model:  2.828%	 Target:  2.089%	 Deviation:  7.39417E-03
+30Y	3Y	Model:  3.844%	 Target:  2.908%	 Deviation:  9.35183E-03
+30Y	4Y	Model:  4.815%	 Target:  3.787%	 Deviation:  1.02842E-02
+30Y	5Y	Model:  5.748%	 Target:  4.346%	 Deviation:  1.40144E-02
+30Y	6Y	Model:  6.630%	 Target:  4.766%	 Deviation:  1.86408E-02
+30Y	7Y	Model:  7.458%	 Target:  5.388%	 Deviation:  2.06951E-02
+30Y	8Y	Model:  8.224%	 Target:  5.892%	 Deviation:  2.33226E-02
+30Y	9Y	Model:  8.925%	 Target:  6.338%	 Deviation:  2.58691E-02
+Calibration of prices... 7.82s
+Number of Iterations.... 1
+Mean Deviation: 0.121%
+RMS Error.....: 0.705%
+__________________________________________________________________________________________
+
