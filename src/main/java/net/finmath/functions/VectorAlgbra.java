@@ -4,6 +4,7 @@
 package net.finmath.functions;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 /**
  * @author Stefan Sedlmair
@@ -70,10 +71,7 @@ public class VectorAlgbra {
 	
 	public static double innerProduct(double[] x, double[] y){
 		sameLength(x, y);
-		double dotProduct = 0;
-		for(int i=0; i < x.length; i++)
-			dotProduct += x[i]*y[i];
-		return dotProduct;
+		return IntStream.range(0, x.length).mapToDouble(i -> x[i] * y[i]).sum();
 	}
 	
 	public static double normL2(double[] x){
@@ -82,25 +80,22 @@ public class VectorAlgbra {
 	
 	public static double[][] outerProduct(double[] x, double[] y){
 		double[][] outerProduct = new double[x.length][y.length];
-		for(int i=0; i < x.length; i++)
-			for(int j = 0; j < y.length; j++)
-				outerProduct[i][j] = x[i]*y[j];
+		IntStream.range(0, y.length)
+		        .forEach(i -> Arrays.parallelSetAll(outerProduct[i], j -> x[j] * y[i]));
 		return outerProduct;
 	}
 	
 	public static double[] add(double[] x, double[] y){
 		sameLength(x, y);
-		double[] z = x.clone();
-		for(int i=0; i < x.length; i++)
-			z[i] += y[i];
+		double[] z = new double[x.length];
+		Arrays.parallelSetAll(z, i -> x[i] + y[i]);
 		return z;
 	}
 	
 	public static double[] subtract(double[] x, double[] y){
 		sameLength(x, y);
-		double[] z = x.clone();
-		for(int i=0; i < x.length; i++)
-			z[i] -= y[i];
+		double[] z = new double[x.length];
+		Arrays.parallelSetAll(z, i -> x[i] - y[i]);
 		return z;
 	}
 	
@@ -108,11 +103,11 @@ public class VectorAlgbra {
 		if(numberOfColumns(A) != numberOfColumns(B) || numberOfRows(A) != numberOfRows(B)) 
 			throw new IllegalArgumentException("Dimension mismatch!");
 
-		double[][] C = A.clone();
-		for(int i = 0; i < numberOfRows(A); i++)
-			for(int j = 0; j < numberOfColumns(A); j++)
-				C[j][i] += B[j][i];
-		return C;
+		double[][] res = new double[numberOfRows(A)][numberOfColumns(A)];
+		IntStream.range(0, numberOfRows(A))
+		        .forEach(i -> Arrays.parallelSetAll(res[i], j -> A[i][j] + B[i][j]));
+		return res;
+
 	}
 		
 	public static double[][] subtract(double[][] A, double[][] B){
@@ -132,9 +127,8 @@ public class VectorAlgbra {
 	
 	public static double[] hadamardProduct(double[] x, double[] y){
 		sameLength(x, y);
-		double[] z = x.clone();
-		for(int i=0; i < x.length; i++)
-			z[i] *= y[i];
+		double[] z = new double[x.length];
+		Arrays.parallelSetAll(z, i -> x[i] * y[i]);
 		return z;
 	}
 
@@ -165,5 +159,9 @@ public class VectorAlgbra {
 		double[] diagEntries = new double[matrixDimension];
 		Arrays.fill(diagEntries, diagEntry);
 		return getDiagonalMatrix(diagEntries);
+	}
+	
+	public static double getAverage(double[] vector){
+		return Arrays.stream(vector).average().getAsDouble();
 	}
 }
