@@ -42,8 +42,10 @@ import net.finmath.marketdata.model.curves.ForwardCurveFromDiscountCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.marketdata.products.AnalyticProductInterface;
 import net.finmath.marketdata.products.Swap;
+import net.finmath.marketdata.products.SwapAnnuity;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotionInterface;
+import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.RandomVariableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.automaticdifferentiation.forward.RandomVariableADFactory;
@@ -99,10 +101,10 @@ public class LIBORMarketModelCalibrationTest {
 		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.LevenbergMarquardt});
 		
 		// scalar valued calibration
-//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.SimpleGradientDescent});
-//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.GradientDescentArmijo});
-//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.TruncatedGaussNetwonForUnderdeterminedNSLP});
-//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.BroydenFletcherGoldfarbShanno});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.SimpleGradientDescent});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.GradientDescentArmijo});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.TruncatedGaussNetwonForUnderdeterminedNSLP});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.BroydenFletcherGoldfarbShanno});
 		
 		return config;
 	}	
@@ -113,17 +115,26 @@ public class LIBORMarketModelCalibrationTest {
 	private final OptimizerFactoryInterface optimizerFactory;
 	private final AbstractRandomVariableFactory randomVariableFactory;
 
+	private final ValueUnit valueUnit;
+	
 	public LIBORMarketModelCalibrationTest(OptimizerSolverType solverType, OptimizerDerivativeType derivativeType, OptimizerType optimizerType) {
+		// define how derivatives are calculated
 		this.solverType = solverType;
 		this.derivativeType = derivativeType;
 		
+		// optimizer settings
 		int maxIterations = 100;
 		double errorTolerance = 1E-4;		
 		
+		// 
 		this.optimizerFactory = new OptimizerFactory(optimizerType, maxIterations, errorTolerance);
+		
+		// select for which values the LMM should be calibrated
+		this.valueUnit = ValueUnit.VALUE;
 		
 		System.out.println(solverType + " - " + optimizerType + " - " + derivativeType + "\n");
 		
+		// define the random variable factory
 		Map<String, Object> randomVariableFactoryProperties = new HashMap<>();
 		randomVariableFactoryProperties.put("isGradientRetainsLeafNodesOnly", true);
 
@@ -153,21 +164,38 @@ public class LIBORMarketModelCalibrationTest {
 		swapTenor[numberOfPeriods] = exerciseDate + numberOfPeriods * swapPeriodLength;
 
 //		// Swaptions swap rate
-//		double swaprate = moneyness + getParSwaprate(forwardCurve, discountCurve, swapTenor);
 
 //		// Set swap rates for each period
 //		double[] swaprates = new double[numberOfPeriods];
 //		Arrays.fill(swaprates, swaprate);
+
+		AbstractLIBORMonteCarloProduct swaptionMonteCarlo = new ATMSwaption(swapTenor, valueUnit);
 
 		/*
 		 * We use Monte-Carlo calibration on implied volatility.
 		 * Alternatively you may change here to Monte-Carlo valuation on price or
 		 * use an analytic approximation formula, etc.
 		 */
-		AbstractLIBORMonteCarloProduct swaptionMonteCarlo = new ATMSwaption(swapTenor, valueUnit);
+		CalibrationItem calibrationItem = null;
+		switch(valueUnit) {
+		case VALUE:
+			double swaprate = moneyness + getParSwaprate(forwardCurve, discountCurve, swapTenor);
+			double swapannuity = SwapAnnuity.getSwapAnnuity(new TimeDiscretization(swapTenor), discountCurve);
+			double targetPrice = AnalyticFormulas.bachelierOptionValue(
+					new RandomVariable(swaprate),
+					new RandomVariable(targetVolatility), swapTenor[0], swaprate, 
+					new RandomVariable(swapannuity)).doubleValue();
+			calibrationItem  = new CalibrationItem(swaptionMonteCarlo, targetPrice, weight);
+			break;
+		case INTEGRATEDNORMALVARIANCE:
+			targetVolatility = targetVolatility * targetVolatility * swapTenor[0];
+		case NORMALVOLATILITY:
+			calibrationItem = new CalibrationItem(swaptionMonteCarlo, targetVolatility, weight);
+			break;
+		default:
+			throw new UnsupportedOperationException();
+		}
 		
-		CalibrationItem calibrationItem = new CalibrationItem(swaptionMonteCarlo, targetVolatility, weight);
-
 		return calibrationItem;
 	}
 
@@ -249,7 +277,7 @@ public class LIBORMarketModelCalibrationTest {
 
 			double	weight = 1.0;
 
-			calibrationItems.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, forwardCurve, discountCurve, ValueUnit.NORMALVOLATILITY));
+			calibrationItems.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, forwardCurve, discountCurve, valueUnit));
 
 			calibrationItemNames.add(atmExpiries[i]+"\t"+atmTenors[i]);
 		}
