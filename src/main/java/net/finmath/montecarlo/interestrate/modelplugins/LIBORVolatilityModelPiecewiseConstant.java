@@ -149,12 +149,12 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 	private static final double scalingParameter = 100.0;
 	
 	public static RandomVariableInterface parameterTransform(RandomVariableInterface parameter){
-		return parameter.mult(scalingParameter).exp().add(1.0).log().div(scalingParameter);
-//		return parameter.floor(0.0);
+//		return parameter.mult(scalingParameter).exp().add(1.0).log().div(scalingParameter);
+		return parameter.floor(0.0);
 	}
 	
 	public static double parameterTransformInverse(double volatility){
-		return Math.log(Math.exp(volatility * scalingParameter) - 1.0) /scalingParameter;
-//		return volatility;
+//		return Math.log(Math.exp(volatility * scalingParameter) - 1.0) /scalingParameter;
+		return volatility;
 	}
 }

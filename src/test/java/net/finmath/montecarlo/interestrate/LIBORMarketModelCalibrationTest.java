@@ -99,10 +99,10 @@ public class LIBORMarketModelCalibrationTest {
 		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.LevenbergMarquardt});
 		
 		// scalar valued calibration
-		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.SimpleGradientDescent});
-		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.GradientDescentArmijo});
-		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.TruncatedGaussNetwonForUnderdeterminedNSLP});
-		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.BroydenFletcherGoldfarbShanno});
+//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.SimpleGradientDescent});
+//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.GradientDescentArmijo});
+//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.TruncatedGaussNetwonForUnderdeterminedNSLP});
+//		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.BroydenFletcherGoldfarbShanno});
 		
 		return config;
 	}	
@@ -192,7 +192,7 @@ public class LIBORMarketModelCalibrationTest {
 		/*
 		 * Calibration test
 		 */
-		System.out.println("Calibration to Swaptions.\n");
+		System.out.println("Calibration to ATM Swaptions.\n");
 
 		/*
 		 * Calibration of rate curves
