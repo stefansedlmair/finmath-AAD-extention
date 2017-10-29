@@ -28,17 +28,20 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, finiteDifferenceStepSizes, executor, false);
 		
 		this.convergenceTolerance = 0.0;
-		this.hessianInverse = VectorAlgbra.getDiagonalMatrix(1.0, initialParameter.length);
+		this.alpha			= 1E-1;
+		this.minL = -(-1 + (int) Math.log10(VectorAlgbra.getAverage(initialParameter)));
+		this.hessianInverse = VectorAlgbra.getDiagonalMatrix(initialParameter);
 	}
 		
 	public BroydenFletcherGoldfarbShanno(double[] initialParameters, double targetValue, int maxIterations, double errorTolerance) {
 		this(initialParameters, targetValue, errorTolerance, maxIterations, null, null);
 	}
 
-	private final double alpha				= 1E-1;	/* no good value suggested */
+	private final double alpha;
 	private final double c1					= 1E-4; /* for linear problems (see p39 in Numerical Optimization) */
 	private final double c2					= 9E-1; /* 0 < c1 < c2 < 1*/
 	
+	private final int minL;
 	private final int maxL 					= 10;
 
 
@@ -49,7 +52,7 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 		double wolfeLeft  = Double.NaN;
 		double wolfeRight = Double.NaN;
 		
-		double l = 3; // start small to avoid too large jumps 
+		double l = minL;
 			
 		double[] parameterCandidate;
 		double stepSize = Double.NaN;
@@ -64,7 +67,6 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 			armijoRight = currentValue - c1 * stepSize * VectorAlgbra.innerProduct(currentGradient, currentGradient);
 			
 			// don't check Wolfe Condition if Armijo's condition is not fulfilled anyway
-			// NOTE: computational cost of Wolfe condition ~50x higher than Armijo's condition
 			if(armijoLeft > armijoRight) continue;
 			
 			double[] candidateGradient = getDerivative(parameterCandidate); 

@@ -2,12 +2,13 @@ package net.finmath.optimizer.gradientdescent;
 
 import java.util.concurrent.ExecutorService;
 
+import net.finmath.functions.VectorAlgbra;
 import net.finmath.optimizer.SolverException;
 
 /**
  * Simple Gradient Descent Optimizer with constant step size, i.e. the update rule is:
  * 
- * <center> x<sub>k+1</sub> = x<sub>k</sub> - \lambda * \nabla f(x<sub>k</sub>) </center>
+ * <center> x<sub>k+1</sub> = x<sub>k</sub> - &lambda * &nabla f(x<sub>k</sub>) </center>
  * for k=0,1,2,... until accuracy does not become better anymore.
  * 
  * @author Stefan Sedlmair
@@ -32,7 +33,7 @@ public abstract class SimpleGradientDescent extends AbstractGradientDescentScala
 
 	public SimpleGradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
 			int maxNumberOfIterations) {
-		this(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, null, null, false, 1E-3);
+		this(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, null, null, false, VectorAlgbra.getAverage(initialParameter) * 1E-1);
 	}
 	
 	
