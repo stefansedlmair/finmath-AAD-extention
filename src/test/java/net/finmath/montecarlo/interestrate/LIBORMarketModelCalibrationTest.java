@@ -42,7 +42,6 @@ import net.finmath.marketdata.model.curves.ForwardCurveFromDiscountCurve;
 import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.marketdata.products.AnalyticProductInterface;
 import net.finmath.marketdata.products.Swap;
-import net.finmath.marketdata.products.SwapAnnuity;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.RandomVariableFactory;
@@ -58,7 +57,9 @@ import net.finmath.montecarlo.interestrate.modelplugins.LIBORCorrelationModelExp
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORCovarianceModelFromVolatilityAndCorrelation;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModel;
 import net.finmath.montecarlo.interestrate.modelplugins.LIBORVolatilityModelPiecewiseConstant;
-import net.finmath.montecarlo.interestrate.products.SwaptionSimple;
+import net.finmath.montecarlo.interestrate.products.ATMSwaption;
+import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
+import net.finmath.montecarlo.interestrate.products.Caplet.ValueUnit;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
 import net.finmath.montecarlo.process.ProcessEulerScheme.Scheme;
 import net.finmath.optimizer.OptimizerFactory;
@@ -87,24 +88,21 @@ public class LIBORMarketModelCalibrationTest {
 	private static DecimalFormat formatterParam		= new DecimalFormat(" #0.000;-#0.000", new DecimalFormatSymbols(Locale.ENGLISH));
 	private static DecimalFormat formatterDeviation	= new DecimalFormat(" 0.00000E00;-0.00000E00", new DecimalFormatSymbols(Locale.ENGLISH));
 
-	@Parameters(name="{0}-{1}")
+	@Parameters(name="{0}-{2}-{1}")
 	public static Collection<Object[]> data() {
 
 		Collection<Object[]> config = new ArrayList<>();
 		
-		int maxIterations = 100;
-		double errorTolerance = 1E-4;
-		
 		// vector valued calibration
-		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.FINITE_DIFFERENCES, new OptimizerFactory(OptimizerType.LevenbergMarquardt, maxIterations, errorTolerance)});
-		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ALGORITHMIC_DIFFERENCIATION, new OptimizerFactory(OptimizerType.LevenbergMarquardt, maxIterations, errorTolerance)});
-		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, new OptimizerFactory(OptimizerType.LevenbergMarquardt, maxIterations, errorTolerance)});
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.FINITE_DIFFERENCES, OptimizerType.LevenbergMarquardt});
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ALGORITHMIC_DIFFERENCIATION, OptimizerType.LevenbergMarquardt});
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.LevenbergMarquardt});
 		
 		// scalar valued calibration
-		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, new OptimizerFactory(OptimizerType.SimpleGradientDescent, maxIterations, errorTolerance)});
-		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, new OptimizerFactory(OptimizerType.GradientDescentArmijo, maxIterations, errorTolerance)});
-		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, new OptimizerFactory(OptimizerType.TruncatedGaussNetwonForUnderdeterminedNSLP, maxIterations, errorTolerance)});
-		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, new OptimizerFactory(OptimizerType.BroydenFletcherGoldfarbShanno, maxIterations, errorTolerance)});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.SimpleGradientDescent});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.GradientDescentArmijo});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.TruncatedGaussNetwonForUnderdeterminedNSLP});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.BroydenFletcherGoldfarbShanno});
 		
 		return config;
 	}	
@@ -115,13 +113,17 @@ public class LIBORMarketModelCalibrationTest {
 	private final OptimizerFactoryInterface optimizerFactory;
 	private final AbstractRandomVariableFactory randomVariableFactory;
 
-	public LIBORMarketModelCalibrationTest(OptimizerSolverType solverType, OptimizerDerivativeType derivativeType, OptimizerFactoryInterface optimizerFactory) {
+	public LIBORMarketModelCalibrationTest(OptimizerSolverType solverType, OptimizerDerivativeType derivativeType, OptimizerType optimizerType) {
 		this.solverType = solverType;
 		this.derivativeType = derivativeType;
-		this.optimizerFactory = optimizerFactory;
-
-//		System.out.println(solverType + derivativeType + "\n");
-
+		
+		int maxIterations = 100;
+		double errorTolerance = 1E-4;		
+		
+		this.optimizerFactory = new OptimizerFactory(optimizerType, maxIterations, errorTolerance);
+		
+		System.out.println(solverType + " - " + optimizerType + " - " + derivativeType + "\n");
+		
 		Map<String, Object> randomVariableFactoryProperties = new HashMap<>();
 		randomVariableFactoryProperties.put("isGradientRetainsLeafNodesOnly", true);
 
@@ -137,7 +139,7 @@ public class LIBORMarketModelCalibrationTest {
 		}
 	}
 
-	private CalibrationItem createCalibrationItem(double weight, double exerciseDate, double swapPeriodLength, int numberOfPeriods, double moneyness, double targetVolatility, String targetVolatilityType, ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve) throws CalculationException {
+	private CalibrationItem createCalibrationItem(double weight, double exerciseDate, double swapPeriodLength, int numberOfPeriods, double moneyness, double targetVolatility, ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, ValueUnit valueUnit) throws CalculationException {
 
 		double[]	fixingDates			= new double[numberOfPeriods];
 		double[]	paymentDates		= new double[numberOfPeriods];
@@ -150,29 +152,21 @@ public class LIBORMarketModelCalibrationTest {
 		}
 		swapTenor[numberOfPeriods] = exerciseDate + numberOfPeriods * swapPeriodLength;
 
-		// Swaptions swap rate
-		double swaprate = moneyness + getParSwaprate(forwardCurve, discountCurve, swapTenor);
+//		// Swaptions swap rate
+//		double swaprate = moneyness + getParSwaprate(forwardCurve, discountCurve, swapTenor);
 
-		// Set swap rates for each period
-		double[] swaprates = new double[numberOfPeriods];
-		Arrays.fill(swaprates, swaprate);
+//		// Set swap rates for each period
+//		double[] swaprates = new double[numberOfPeriods];
+//		Arrays.fill(swaprates, swaprate);
 
 		/*
 		 * We use Monte-Carlo calibration on implied volatility.
 		 * Alternatively you may change here to Monte-Carlo valuation on price or
 		 * use an analytic approximation formula, etc.
 		 */
-		SwaptionSimple swaptionMonteCarlo = new SwaptionSimple(swaprate, swapTenor, SwaptionSimple.ValueUnit.valueOf(targetVolatilityType));
-
-		CalibrationItem calibrationItem = null;
-		if(targetVolatilityType.equals("VALUE")) {
-			double targetValuePrice = AnalyticFormulas.bachelierOptionValue(swaprate, targetVolatility, fixingDates[0], swaprate, SwapAnnuity.getSwapAnnuity(new TimeDiscretization(swapTenor), discountCurve));
-			calibrationItem = new CalibrationItem(swaptionMonteCarlo, targetValuePrice, weight);
-		}
-		else if(targetVolatilityType.equals("VOLATILITYNORMAL")) {
-			calibrationItem = new CalibrationItem(swaptionMonteCarlo, targetVolatility, weight);
-		}
-		else throw new UnsupportedOperationException();
+		AbstractLIBORMonteCarloProduct swaptionMonteCarlo = new ATMSwaption(swapTenor, valueUnit);
+		
+		CalibrationItem calibrationItem = new CalibrationItem(swaptionMonteCarlo, targetVolatility, weight);
 
 		return calibrationItem;
 	}
@@ -190,11 +184,6 @@ public class LIBORMarketModelCalibrationTest {
 		final int seed				= 1234;
 		final int numberOfPaths		= (int) 1E3;
 		final int numberOfFactors	= 1;
-
-		// Optimizer Settings
-		Double accuracy = new Double(1E-4);	// Lower accuracy to reduce runtime of the unit test
-		int maxIterations = 100;
-		int numberOfThreads = 2;
 
 		//------------------------------------------------------------------------------------------
 
@@ -230,8 +219,6 @@ public class LIBORMarketModelCalibrationTest {
 		 */
 		ArrayList<String>					calibrationItemNames		= new ArrayList<String>();
 		final ArrayList<CalibrationItem>	calibrationItems			= new ArrayList<CalibrationItem>();
-		final ArrayList<CalibrationItem>	calibrationVolaItems		= new ArrayList<CalibrationItem>();
-
 
 		double	swapPeriodLength	= 0.5;
 
@@ -262,8 +249,7 @@ public class LIBORMarketModelCalibrationTest {
 
 			double	weight = 1.0;
 
-			calibrationItems.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, "VALUE", forwardCurve, discountCurve));
-			calibrationVolaItems.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, "VOLATILITYNORMAL", forwardCurve, discountCurve));
+			calibrationItems.add(createCalibrationItem(weight, exercise, swapPeriodLength, numberOfPeriods, moneyness, targetVolatility, forwardCurve, discountCurve, ValueUnit.NORMALVOLATILITY));
 
 			calibrationItemNames.add(atmExpiries[i]+"\t"+atmTenors[i]);
 		}
@@ -286,8 +272,7 @@ public class LIBORMarketModelCalibrationTest {
 
 		/* volatility model from piecewise constant interpolated matrix */
 		TimeDiscretizationInterface volatilitySurfaceDiscretization = new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0, 40.0); 
-		double[] initialVolatility = new double[] { 0.50 / 100 };
-//		double[] initialVolatility = new double[] { Math.log(Math.exp(0.50 / 100) - 1.0) };
+		double[] initialVolatility = new double[] { LIBORVolatilityModelPiecewiseConstant.parameterTransformInverse(0.50 / 100) };
 		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory, timeDiscretization, liborPeriodDiscretization, volatilitySurfaceDiscretization, volatilitySurfaceDiscretization, initialVolatility, true);
 
 		//		/* volatility model from given matrix */
@@ -325,7 +310,6 @@ public class LIBORMarketModelCalibrationTest {
 
 		// Set calibration properties (should use our brownianMotion for calibration - needed to have to right correlation).
 		Map<String, Object> calibrationParameters = new HashMap<String, Object>();
-		calibrationParameters.put("accuracy", accuracy);
 		calibrationParameters.put("brownianMotion", brownianMotion);
 		calibrationParameters.put("optimizerFactory", optimizerFactory);
 		calibrationParameters.put("parameterStep", new Double(1E-4));
@@ -388,37 +372,10 @@ public class LIBORMarketModelCalibrationTest {
 		double averageDeviation = deviationSum/calibrationItems.size();
 		System.out.println("Mean Deviation:" + formatterValue.format(averageDeviation));
 		System.out.println("RMS Error.....:" + formatterValue.format(Math.sqrt(deviationSquaredSum/calibrationItems.size())));
-		System.out.println("------------------------------------------------------------------------------------------\n");
-		
-		//-----------------------------------------------------------------------------------------------------------------------------
-		// normally a LMM would be calibrated for its implied normal volatilies, so this is going to be tested here!
-		
-		System.out.println("\nValuation on calibrated normal volatilites:");
-		double volaDeviationSum			= 0.0;
-		double volaDeviationSquaredSum	= 0.0;
-		for (int i = 0; i < calibrationItems.size(); i++) {
-			CalibrationItem calibrationItem = calibrationVolaItems.get(i);
-			try {
-				double valueModel = calibrationItem.calibrationProduct.getValue(simulationCalibrated);
-				double valueTarget = calibrationItem.calibrationTargetValue;
-				double error = valueModel-valueTarget;
-				volaDeviationSum += error;
-				volaDeviationSquaredSum += error*error;
-				System.out.println(calibrationItemNames.get(i) + "\t" + "Model: " + formatterValue.format(valueModel) + "\t Target: " + formatterValue.format(valueTarget) + "\t Deviation: " + formatterDeviation.format(valueModel-valueTarget));// + "\t" + calibrationProduct.toString());
-			}
-			catch(Exception e) {
-			}
-		}
-
-		double averageVolaDeviation = volaDeviationSum/calibrationVolaItems.size();
-		System.out.println("Mean Deviation:" + formatterValue.format(averageVolaDeviation));
-		System.out.println("RMS Error.....:" + formatterValue.format(Math.sqrt(volaDeviationSquaredSum/calibrationVolaItems.size())));
 		System.out.println("__________________________________________________________________________________________\n");
 
 		// evaluate the two deviation averages
-		Assert.assertEquals(0.0, averageDeviation, 1E-2);
-		Assert.assertEquals(0.0, averageVolaDeviation, 1E-2);
-
+		Assert.assertEquals(0.0, averageDeviation, 1E-4);
 	}
 
 	public AnalyticModelInterface getCalibratedCurve() throws SolverException {
