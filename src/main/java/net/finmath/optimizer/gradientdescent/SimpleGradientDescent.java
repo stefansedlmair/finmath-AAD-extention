@@ -33,7 +33,7 @@ public abstract class SimpleGradientDescent extends AbstractGradientDescentScala
 
 	public SimpleGradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
 			int maxNumberOfIterations) {
-		this(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, null, null, false, VectorAlgbra.getAverage(initialParameter) * 1E-1);
+		this(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, null, null, false, Math.abs(VectorAlgbra.getAverage(initialParameter) * 1E-1));
 	}
 	
 	
