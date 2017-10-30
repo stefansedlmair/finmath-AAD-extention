@@ -258,9 +258,9 @@ public class LIBORMarketModelVegaTest {
 
 				gradientDifferences.put(key, diff);
 				
-				System.out.println(key + "\t\t" + formatterValue.format(aad.getAverage()) + 
-										 "\t\t" + formatterValue.format(fd.getAverage()) + 
-										 "\t\t" + formatterValue.format(diff.getAverage()));
+//				System.out.println(key + "\t\t" + formatterValue.format(aad.getAverage()) + 
+//										 "\t\t" + formatterValue.format(fd.getAverage()) + 
+//										 "\t\t" + formatterValue.format(diff.getAverage()));
 		}
 		
 		System.out.println();
