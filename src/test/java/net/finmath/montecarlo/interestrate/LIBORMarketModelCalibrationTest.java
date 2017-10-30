@@ -87,7 +87,7 @@ import net.finmath.time.daycount.DayCountConvention_ACT_365;
 public class LIBORMarketModelCalibrationTest {
 
 	private static DecimalFormat formatterValue		= new DecimalFormat(" ##0.000%;-##0.000%", new DecimalFormatSymbols(Locale.ENGLISH));
-	private static DecimalFormat formatterParam		= new DecimalFormat(" #0.000;-#0.000", new DecimalFormatSymbols(Locale.ENGLISH));
+	private static DecimalFormat formatterParam		= new DecimalFormat(" #0.00000;-#0.00000", new DecimalFormatSymbols(Locale.ENGLISH));
 	private static DecimalFormat formatterDeviation	= new DecimalFormat(" 0.00000E00;-0.00000E00", new DecimalFormatSymbols(Locale.ENGLISH));
 
 	@Parameters(name="{0}-{2}-{1}")
@@ -130,7 +130,7 @@ public class LIBORMarketModelCalibrationTest {
 		this.optimizerFactory = new OptimizerFactory(optimizerType, maxIterations, errorTolerance);
 		
 		// select for which values the LMM should be calibrated
-		this.valueUnit = ValueUnit.VALUE;
+		this.valueUnit = ValueUnit.NORMALVOLATILITY;
 		
 		System.out.println(solverType + " - " + optimizerType + " - " + derivativeType + "\n");
 		
@@ -155,7 +155,6 @@ public class LIBORMarketModelCalibrationTest {
 		double[]	fixingDates			= new double[numberOfPeriods];
 		double[]	paymentDates		= new double[numberOfPeriods];
 		double[]	swapTenor			= new double[numberOfPeriods + 1];
-
 		for (int periodStartIndex = 0; periodStartIndex < numberOfPeriods; periodStartIndex++) {
 			fixingDates[periodStartIndex] = exerciseDate + periodStartIndex * swapPeriodLength;
 			paymentDates[periodStartIndex] = exerciseDate + (periodStartIndex + 1) * swapPeriodLength;
@@ -300,7 +299,7 @@ public class LIBORMarketModelCalibrationTest {
 
 		/* volatility model from piecewise constant interpolated matrix */
 		TimeDiscretizationInterface volatilitySurfaceDiscretization = new TimeDiscretization(0.00, 1.0, 2.0, 5.0, 10.0, 20.0, 30.0, 40.0); 
-		double[] initialVolatility = new double[] { LIBORVolatilityModelPiecewiseConstant.parameterTransformInverse(0.50 / 100) };
+		double[] initialVolatility = new double[] { 0.50 / 100 };
 		LIBORVolatilityModel volatilityModel = new LIBORVolatilityModelPiecewiseConstant(randomVariableFactory, timeDiscretization, liborPeriodDiscretization, volatilitySurfaceDiscretization, volatilitySurfaceDiscretization, initialVolatility, true);
 
 		//		/* volatility model from given matrix */
@@ -369,9 +368,9 @@ public class LIBORMarketModelCalibrationTest {
 
 		System.out.println("\nCalibrated parameters are:");
 		AbstractLIBORCovarianceModelParametric calibratedCovarianceModel = (AbstractLIBORCovarianceModelParametric) ((LIBORMarketModel) liborMarketModelCalibrated).getCovarianceModel();
-		RandomVariableInterface[] param = calibratedCovarianceModel.getParameterAsRandomVariable();
-		for (RandomVariableInterface p : param) 
-			System.out.println(formatterParam.format(LIBORVolatilityModelPiecewiseConstant.parameterTransform(p).doubleValue()));
+		double[] param = calibratedCovarianceModel.getParameter();
+		for (double p : param) 
+			System.out.println(formatterParam.format(p));
 
 		ProcessEulerScheme process = new ProcessEulerScheme(brownianMotion);
 		LIBORModelMonteCarloSimulationInterface simulationCalibrated = new LIBORModelMonteCarloSimulation(liborMarketModelCalibrated, process);
