@@ -1,1 +1,5 @@
 language: java
+
+env:
+  global:
+    JAVA_OPTS=-mx5G
