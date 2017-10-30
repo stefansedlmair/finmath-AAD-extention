@@ -112,7 +112,7 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 
 				// calculate the parameter update characteristic for gradient descent algorithms
 				currentParameter = VectorAlgbra.subtract(currentParameter, VectorAlgbra.scalarProduct(stepSize, getDerivative(currentParameter)));
-				System.out.println(Arrays.toString(currentParameter));
+
 				// evaluate the new parameter set
 				currentValue = getValue(currentParameter);
 
@@ -128,7 +128,7 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 					bestParameter = currentParameter.clone();
 					bestAccuracy = currentAccuracy;
 
-					// if advance is too slow break
+					// if advance is too slow => break
 					if(lastAccuracy - currentAccuracy < errorTolerance)
 						break;
 

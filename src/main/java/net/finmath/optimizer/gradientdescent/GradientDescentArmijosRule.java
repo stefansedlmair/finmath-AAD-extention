@@ -17,9 +17,11 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 			boolean allowWorsening) {
 		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, finiteDifferenceStepSizes, executor, allowWorsening);
 		
-		this.minL = -(-1 + (int) Math.log10(VectorAlgbra.getAverage(initialParameter)));
-		
-		this.alpha = 1E-1;
+		this.maxStepSize = Math.abs(Math.log10(VectorAlgbra.getAverage(initialParameter)));
+		this.minStepSize = maxStepSize * 1E-10;
+				
+		this.alpha = 5.0;
+		this.c1 = 1E-4; /* for linear problems (see p39 in Numerical Optimization) */
 	}
 	
 	public GradientDescentArmijosRule(double[] initialParameters, double targetValue, double errorTolerance, int maxIterations) {
@@ -27,34 +29,33 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 	}
 
 	private final double alpha;
-	private final double c1					= 1E-4; /* for linear problems (see p39 in Numerical Optimization) */
+	private final double c1;
 	
-	private final int minL;
-	private final int maxL 					= 10;
+	private final double maxStepSize;
+	private final double minStepSize;
 
 	@Override
 	protected double getStepSize(double[] parameter) throws SolverException {
 		double leftSide, rightSide ;
-		double l = minL; 
 
 		double[] derivative = getDerivative(parameter);
 		double 	 value = getValue(parameter);
 		
 		double[] newPossibleParameter;
-		double betaL = Double.NaN;
+		double stepSize = maxStepSize * alpha;
 		
 		do{
-			betaL = Math.pow(alpha, l++);
+			stepSize /= alpha;
 			
-			newPossibleParameter = VectorAlgbra.subtract(parameter, VectorAlgbra.scalarProduct(betaL, derivative));
+			newPossibleParameter = VectorAlgbra.subtract(parameter, VectorAlgbra.scalarProduct(stepSize, derivative));
 			
 			leftSide = getValue(newPossibleParameter);
 						
-			rightSide = value - c1 * betaL * VectorAlgbra.innerProduct(derivative, derivative);
+			rightSide = value - c1 * stepSize * VectorAlgbra.innerProduct(derivative, derivative);
 			
-		} while((leftSide > rightSide || Double.isNaN(leftSide)) && l <= maxL);
+		} while((leftSide > rightSide || Double.isNaN(leftSide)) && stepSize > minStepSize);
 				
-		return betaL;
+		return stepSize;
 	}
 }
 
