@@ -33,7 +33,7 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 		this.hessianInverse = VectorAlgbra.getDiagonalMatrix(initialParameter);
 	}
 		
-	public BroydenFletcherGoldfarbShanno(double[] initialParameters, double targetValue, int maxIterations, double errorTolerance) {
+	public BroydenFletcherGoldfarbShanno(double[] initialParameters, double targetValue, double errorTolerance, int maxIterations) {
 		this(initialParameters, targetValue, errorTolerance, maxIterations, null, null);
 	}
 
