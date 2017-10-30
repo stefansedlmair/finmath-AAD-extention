@@ -17,7 +17,7 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 			boolean allowWorsening) {
 		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, finiteDifferenceStepSizes, executor, allowWorsening);
 		
-		this.maxStepSize = Math.abs(Math.log10(VectorAlgbra.getAverage(initialParameter)));
+		this.maxStepSize = Math.abs(VectorAlgbra.getAverage(initialParameter));
 		this.minStepSize = maxStepSize * 1E-10;
 				
 		this.alpha = 5.0;
