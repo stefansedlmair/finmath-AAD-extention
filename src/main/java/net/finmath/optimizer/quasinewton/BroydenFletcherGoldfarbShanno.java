@@ -28,9 +28,15 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, finiteDifferenceStepSizes, executor, false);
 		
 		this.convergenceTolerance = 0.0;
-		this.alpha			= 1E-1;
-		this.minL = -(-1 + (int) Math.log10(VectorAlgbra.getAverage(initialParameter)));
-		this.hessianInverse = VectorAlgbra.getDiagonalMatrix(initialParameter);
+		this.alpha = 5.0;
+		
+		this.c1 = 1E-4; /* for linear problems (see p39 in Numerical Optimization) */
+		this.c2 = 9E-1; /* 0 < c1 < c2 < 1*/
+				
+		this.maxStepSize = Math.abs(VectorAlgbra.getAverage(initialParameter));
+		this.minStepSize = maxStepSize * 1E-10;
+		
+		this.hessianInverse = VectorAlgbra.getDiagonalMatrix(1.0, initialParameter.length);
 	}
 		
 	public BroydenFletcherGoldfarbShanno(double[] initialParameters, double targetValue, double errorTolerance, int maxIterations) {
@@ -38,43 +44,46 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 	}
 
 	private final double alpha;
-	private final double c1					= 1E-4; /* for linear problems (see p39 in Numerical Optimization) */
-	private final double c2					= 9E-1; /* 0 < c1 < c2 < 1*/
+	private final double c1; 
+	private final double c2; 
 	
-	private final int minL;
-	private final int maxL 					= 10;
+	private final double maxStepSize;
+	private final double minStepSize;
 
 
 	@Override
 	protected double getStepSize(double[] parameter) throws SolverException {
 
-		double armijoLeft, armijoRight;
-		double wolfeLeft  = Double.NaN;
-		double wolfeRight = Double.NaN;
-		
-		double l = minL;
+		boolean armijoCondition, wolfeCondition;
 			
 		double[] parameterCandidate;
-		double stepSize = Double.NaN;
+		double stepSize = maxStepSize * alpha;
 		
 		do{
 			// try step size candidate
-			stepSize = Math.pow(alpha, l++);
+			stepSize /= alpha;
 			
 			parameterCandidate = VectorAlgbra.add(parameter, VectorAlgbra.scalarProduct(stepSize, currentSearchDirection));
 			
-			armijoLeft = getValue(parameterCandidate);
-			armijoRight = currentValue - c1 * stepSize * VectorAlgbra.innerProduct(currentGradient, currentGradient);
+			// calculate both sides of the equation for Armijos Condition
+			double armijoLeft = getValue(parameterCandidate);
+			double armijoRight = currentValue - c1 * stepSize * VectorAlgbra.innerProduct(currentGradient, currentGradient);
+			armijoCondition = (armijoLeft <= armijoRight);
 			
-			// don't check Wolfe Condition if Armijo's condition is not fulfilled anyway
-			if(armijoLeft > armijoRight) continue;
+			// if Armijo's sufficient descent condition not fulfilled continue
+			if(!armijoCondition) {
+				wolfeCondition = false;
+				continue;
+			}
 			
-			double[] candidateGradient = getDerivative(parameterCandidate); 
+			double[] gradientCandidate = getDerivative(parameterCandidate); 
 			
-			wolfeLeft = VectorAlgbra.innerProduct(candidateGradient, currentSearchDirection);
-			wolfeRight = c2 * VectorAlgbra.innerProduct(currentGradient, currentSearchDirection);
+			// calculate both sides of the equation for the Wolfe Condition
+			double wolfeLeft = VectorAlgbra.innerProduct(gradientCandidate, currentSearchDirection);
+			double wolfeRight = c2 * VectorAlgbra.innerProduct(currentGradient, currentSearchDirection);			
+			wolfeCondition = (wolfeLeft >= wolfeRight);
 			
-		} while(armijoLeft > armijoRight && wolfeLeft < wolfeRight && l <= maxL);
+		} while( !(armijoCondition && wolfeCondition) && (stepSize > minStepSize));
 				
 		return stepSize;
 	}
