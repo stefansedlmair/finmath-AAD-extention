@@ -60,6 +60,12 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 		double stepSize = maxStepSize * alpha;
 		
 		do{
+			// check if #iterations < max #iterations
+			if(isDone()) break;
+			
+			// increase number if iterations; each line search is considered one iteration
+			numberOfIterations++;
+			
 			// try step size candidate
 			stepSize /= alpha;
 			
@@ -117,9 +123,6 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 			// update value and accuracy
 			currentValue = getValue(currentParameter);
 			currentAccuracy = Math.abs(currentValue - targetValue);
-			
-			// increase number if iterations
-			numberOfIterations++;
 			
 			if(currentAccuracy < bestAccuracy){
 				

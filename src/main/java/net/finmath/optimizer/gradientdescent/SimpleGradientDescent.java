@@ -39,6 +39,10 @@ public abstract class SimpleGradientDescent extends AbstractGradientDescentScala
 	
 	@Override
 	protected double getStepSize(double[] currentParameter) throws SolverException {
+		
+		// increase number if iterations
+		numberOfIterations++;
+		
 		return fixedStepSize;
 	}
 	

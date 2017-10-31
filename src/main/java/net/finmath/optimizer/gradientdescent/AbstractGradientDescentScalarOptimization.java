@@ -120,9 +120,6 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 				double lastAccuracy = currentAccuracy;
 				currentAccuracy = Math.abs(currentValue - targetValue);
 
-				// increase iteration 
-				numberOfIterations++;
-
 				// store best result
 				if(currentAccuracy < bestAccuracy){			
 					bestParameter = currentParameter.clone();

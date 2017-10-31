@@ -36,6 +36,9 @@ public abstract class TruncatedGaussNewtonForUnterdetNSLP extends  AbstractGradi
 	@Override
 	protected double getStepSize(double[] parameter) throws SolverException {
 		
+		// increase number of Iterations
+		numberOfIterations++;
+		
 		double value = getValue(parameter);
 		double[] derivative = getDerivative(parameter);
 		

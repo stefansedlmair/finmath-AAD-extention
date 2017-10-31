@@ -45,6 +45,11 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 		double stepSize = maxStepSize * alpha;
 		
 		do{
+			if(isDone()) break;
+			
+			// count each line search as iteration
+			numberOfIterations++;		
+			
 			stepSize /= alpha;
 			
 			newPossibleParameter = VectorAlgbra.subtract(parameter, VectorAlgbra.scalarProduct(stepSize, derivative));
@@ -54,7 +59,7 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 			rightSide = value - c1 * stepSize * VectorAlgbra.innerProduct(derivative, derivative);
 			
 		} while((leftSide > rightSide || Double.isNaN(leftSide)) && stepSize > minStepSize);
-				
+		
 		return stepSize;
 	}
 }
