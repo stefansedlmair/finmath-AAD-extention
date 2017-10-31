@@ -116,15 +116,19 @@ public class LIBORMarketModelCalibrationTest {
 	private final AbstractRandomVariableFactory randomVariableFactory;
 
 	private final ValueUnit valueUnit;
+	private final int numberOfPaths;
 	
 	public LIBORMarketModelCalibrationTest(OptimizerSolverType solverType, OptimizerDerivativeType derivativeType, OptimizerType optimizerType) {
+		
+		this.numberOfPaths = (int) 1E3;
+		
 		// define how derivatives are calculated
 		this.solverType = solverType;
 		this.derivativeType = derivativeType;
 		
 		// optimizer settings
-		int maxIterations = 100;
-		double errorTolerance = 1E-4;		
+		int maxIterations = 20;
+		double errorTolerance = 0.0;		
 		
 		// 
 		this.optimizerFactory = new OptimizerFactory(optimizerType, maxIterations, errorTolerance);
@@ -148,6 +152,13 @@ public class LIBORMarketModelCalibrationTest {
 		default:
 			this.randomVariableFactory = new RandomVariableFactory();
 		}
+		
+		// print current configuration
+		System.out.println("Value Unit.............." + valueUnit);
+		System.out.println("max #Iterations........." + maxIterations);
+		System.out.println("errorTolerance.........." + errorTolerance);
+		System.out.println("#Paths.................." + numberOfPaths);
+		
 	}
 
 	private CalibrationItem createCalibrationItem(double weight, double exerciseDate, double swapPeriodLength, int numberOfPeriods, double moneyness, double targetVolatility, ForwardCurveInterface forwardCurve, DiscountCurveInterface discountCurve, ValueUnit valueUnit) throws CalculationException {
@@ -209,7 +220,7 @@ public class LIBORMarketModelCalibrationTest {
 
 		// Simulation Settings
 		final int seed				= 1234;
-		final int numberOfPaths		= (int) 1E3;
+		final int numberOfPaths		= this.numberOfPaths;
 		final int numberOfFactors	= 1;
 
 		//------------------------------------------------------------------------------------------
