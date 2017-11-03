@@ -325,11 +325,11 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 					// get the root-mean-square error of the calibration for every path
 					RandomVariableInterface errorRMS = null;
 					for(int i = 0; i < numberOfCalibrationProducts; i++) {
-							RandomVariableInterface error = currentCalibratedPrices[i].sub(calibrationTargetValues[i]);
+							RandomVariableInterface error = currentCalibratedPrices[i].average().sub(calibrationTargetValues[i]);
 							errorRMS = (errorRMS == null) ? error.squared() : errorRMS.addProduct(error, error);
 					}
-//					errorRMS = errorRMS.div(numberOfCalibrationProducts).sqrt();
-					errorRMS = errorRMS.sqrt();
+					errorRMS = errorRMS.div(numberOfCalibrationProducts).sqrt();
+//					errorRMS = errorRMS.sqrt();
 							
 					// take gradient of the mean-square-error (here AAD should bring the most improvement!)
 					Map<Long, RandomVariableInterface> gradient = ((RandomVariableDifferentiableInterface) errorRMS).getGradient();
