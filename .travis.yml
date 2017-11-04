@@ -1,1 +1,4 @@
 language: java
+
+env:
+- MAVEN_OPTS="-Xmx15g -Xms15g"
