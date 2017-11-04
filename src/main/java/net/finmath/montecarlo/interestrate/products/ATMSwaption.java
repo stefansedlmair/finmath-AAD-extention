@@ -9,7 +9,7 @@ import net.finmath.marketdata.model.curves.ForwardCurveInterface;
 import net.finmath.marketdata.products.Swap;
 import net.finmath.marketdata.products.SwapAnnuity;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulationInterface;
-import net.finmath.montecarlo.interestrate.products.Caplet.ValueUnit;
+import net.finmath.montecarlo.interestrate.products.SwaptionSimple.ValueUnit;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.RegularSchedule;
 import net.finmath.time.TimeDiscretization;
@@ -54,7 +54,7 @@ public class ATMSwaption extends AbstractLIBORMonteCarloProduct {
 		switch (valueUnit) {
 		case VALUE:
 			return optionValue;
-		case NORMALVOLATILITY:
+		case VOLATILITYNORMAL:
 			return getImpliedBachelierOptionVolatility(optionValue, optionMaturity, swapAnnuity);
 		case INTEGRATEDNORMALVARIANCE:
 			return getImpliedBachelierOptionVolatility(optionValue, optionMaturity, swapAnnuity).squared().mult(optionMaturity);
@@ -68,7 +68,7 @@ public class ATMSwaption extends AbstractLIBORMonteCarloProduct {
 	 * 	@see net.finmath.functions.AnalyticFormulas.bachelierOptionImpliedVolatility(double, double, double, double, double)
 	 * */
 	public RandomVariableInterface getImpliedBachelierOptionVolatility(RandomVariableInterface optionValue, double optionMaturity, double swapAnnuity){
-		return optionValue.div(Math.sqrt(optionMaturity / Math.PI / 2.0)).div(swapAnnuity);
+		return optionValue.average().div(Math.sqrt(optionMaturity / Math.PI / 2.0)).div(swapAnnuity);
 	}
 	
 }
