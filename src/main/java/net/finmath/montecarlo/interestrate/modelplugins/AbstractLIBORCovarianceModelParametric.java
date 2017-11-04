@@ -12,6 +12,7 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
@@ -170,22 +171,13 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 	 */
 	public AbstractLIBORCovarianceModelParametric getCloneCalibrated(final LIBORMarketModelInterface calibrationModel, final AbstractLIBORMonteCarloProduct[] calibrationProducts, final double[] calibrationTargetValues, double[] calibrationWeights, Map<String,Object> calibrationParameters) throws CalculationException {
 		
-		/*
-		 * We allow for 2 simultaneous calibration models.
-		 * Note: In the case of a Monte-Carlo calibration, the memory requirement is that of
-		 * one model with 2 times the number of paths. In the case of an analytic calibration
-		 * memory requirement is not the limiting factor.
-		 */
-		final int numberOfThreads = 2;
-		final ExecutorService executor = null;
-		
-		//int numberOfThreadsForProductValuation = 2 * Math.max(2, Runtime.getRuntime().availableProcessors());
-		//Executors.newFixedThreadPool(numberOfThreads);//numberOfThreadsForProductValuation);
-		
 		double[] initialParameters = this.getParameter();
 				
+		// if nothing to calibrate return the same model
+		if(initialParameters == null) return this;
+		
 		int numberOfCalibrationProducts = calibrationProducts.length;
-		int numberOfParameters = initialParameters.length;
+		int numberOfParameters 			= initialParameters.length;
 		
 		if(numberOfCalibrationProducts != calibrationTargetValues.length) throw new IllegalArgumentException("Each calibration product has to have a target value!");
 		
@@ -195,6 +187,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 		final int 						numberOfPaths		= (int)calibrationParameters.getOrDefault(		"numberOfPaths", 		2000);
 		final int 						seed				= (int)calibrationParameters.getOrDefault(		"seed", 				31415);
 		final int 						maxIterations		= (int)calibrationParameters.getOrDefault(		"maxIterations", 		400);
+		final int 						numberOfThreads 	= (int)calibrationParameters.getOrDefault(		"numberOfThreads", 		2);
 		final double					parameterStepValue	= (double)calibrationParameters.getOrDefault(	"parameterStep", 		1E-4);
 		final double					accuracy			= (double)calibrationParameters.getOrDefault(	"accuracy", 			1E-7);
 		final Scheme 					processScheme		= (Scheme)calibrationParameters.getOrDefault(	"scheme",  				Scheme.EULER_FUNCTIONAL);
@@ -206,7 +199,9 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 		final OptimizerFactoryInterface optimizerFactory 	= (OptimizerFactoryInterface)calibrationParameters.getOrDefault("optimizerFactory", new OptimizerFactoryLevenbergMarquardt(maxIterations, accuracy, numberOfThreads));
 
 		final double[] parameterStep = initialzeDoubleArray(parameterStepValue, numberOfParameters);
-				
+
+		final ExecutorService executor = (ExecutorService)calibrationParameters.getOrDefault("executor", (numberOfThreads > 1) ? Executors.newFixedThreadPool(numberOfThreads) : null);
+		
 		DerivativeFunction calibrationErrorExtended = new DerivativeFunction() {
 			
 			// avoid calculating the products twice with the same parameters
@@ -217,18 +212,13 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 			private void updateCalibratedPriceStorage(double[] parameters){
 				// if parameters are the same do not calculate the prices again
 				if(!Arrays.equals(currentParameters, parameters)){
-					
-//					long start = System.currentTimeMillis();
-					
+						
 					currentParameters = parameters.clone();
 					currentCalibrationCovarianceModel = AbstractLIBORCovarianceModelParametric.this.getCloneWithModifiedParameters(currentParameters);
 				
 					currentCalibratedPrices = 
 						getFutureValuesFromParameters(currentCalibrationCovarianceModel, calibrationModel, brownianMotion, calibrationProducts, 
 														numberOfCalibrationProducts, executor, calibrationTargetValues, processScheme);
-//					long end = System.currentTimeMillis();
-					
-//					System.out.println("calculation time of product values :" + ((end - start)/1E3));
 				}
 			}
 			
@@ -274,48 +264,85 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 					case ADJOINT_ALGORITHMIC_DIFFERENCIATION:
 						long[] keys = currentCalibrationCovarianceModel.getParameterID();					
 
-						double sumAAD = 0.0;
-						
+						ArrayList<Future<Map<Long, RandomVariableInterface>>> derivativeFutureAAD = new ArrayList<>(numberOfCalibrationProducts);
+												
 						for(int productIndex=0; productIndex < numberOfCalibrationProducts; productIndex++) {
-							RandomVariableInterface calibratedPrice = currentCalibratedPrices[productIndex];
-							
-							long start = System.currentTimeMillis();
-							
-							Map<Long, RandomVariableInterface> gradient = ((RandomVariableDifferentiableInterface) calibratedPrice).getGradient();
+							final RandomVariableInterface calibratedPrice = currentCalibratedPrices[productIndex];
 
-							long end = System.currentTimeMillis();
-							sumAAD += (end - start)/1E3;
+							Callable<Map<Long, RandomVariableInterface>> worker = new Callable<Map<Long,RandomVariableInterface>>() {
+								
+								@Override
+								public Map<Long, RandomVariableInterface> call() throws Exception {
+									Map<Long, RandomVariableInterface> gradient = ((RandomVariableDifferentiableInterface) calibratedPrice).getGradient();
+									// only the averages of the derivatives are needed!
+									gradient.replaceAll((k, v) -> v.average());
+									return gradient;
+								}
+							};
+							
+							if(executor != null){
+								Future<Map<Long, RandomVariableInterface>> gradientFuture = executor.submit(worker);
+								derivativeFutureAAD.add(gradientFuture);
+							} else {
+								FutureTask<Map<Long, RandomVariableInterface>> gradientFutureTask = new FutureTask<>(worker);
+								gradientFutureTask.run();
+								derivativeFutureAAD.add(gradientFutureTask);
+							}
+						}
 
-							// request the ids of the parameters from the calibrated model
+						// request the ids of the parameters from the calibrated model
+						for(int productIndex=0; productIndex < numberOfCalibrationProducts; productIndex++) {
+							Map<Long, RandomVariableInterface> gradient = null;
+							try { gradient = derivativeFutureAAD.get(productIndex).get();} catch (InterruptedException | ExecutionException e) {e.printStackTrace();}
+							
 							for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) 
 								// do not stop the optimizer when derivative is not found. Set default to zero.
-								derivatives[parameterIndex][productIndex] = gradient.getOrDefault(keys[parameterIndex], zero).getAverage();
+								derivatives[parameterIndex][productIndex] = gradient.getOrDefault(keys[parameterIndex], zero).doubleValue();
 						}	
-						
-						System.out.println("AAD - average calaculation time : " + (sumAAD/numberOfCalibrationProducts));
-						System.out.println("AAD - total time for derivative : " + sumAAD);
 						break;
+						
 					case ALGORITHMIC_DIFFERENCIATION:
 						RandomVariableInterface[] parameterRandomVariables = currentCalibrationCovarianceModel.getParameterAsRandomVariable();
-						
-						double sumAD = 0.0;
+											
+						ArrayList<Future<Map<Long, RandomVariableInterface>>> derivativeFutureAD = new ArrayList<>(numberOfParameters);
+
+						for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) {
+							
+							final RandomVariableAD parameter = (RandomVariableAD) parameterRandomVariables[parameterIndex];
+							
+							Callable<Map<Long, RandomVariableInterface>> worker = new Callable<Map<Long,RandomVariableInterface>>() {
+								
+								@Override
+								public Map<Long, RandomVariableInterface> call() throws Exception {
+									Map<Long, RandomVariableInterface> partialDerivatives =  parameter.getAllPartialDerivatives();
+									// only the averages of the derivatives are needed!
+									partialDerivatives.replaceAll((k, v) -> v.average());
+									return partialDerivatives;
+								}
+							};
+							
+							if(executor != null){
+								Future<Map<Long, RandomVariableInterface>> gradientFuture = executor.submit(worker);
+								derivativeFutureAD.add(gradientFuture);
+							} else {
+								FutureTask<Map<Long, RandomVariableInterface>> gradientFutureTask = new FutureTask<>(worker);
+								gradientFutureTask.run();
+								derivativeFutureAD.add(gradientFutureTask);
+							}
+						}					
 						
 						for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) {
 							
-							long start = System.currentTimeMillis();
+							Map<Long, RandomVariableInterface> partialDerivatives = null;
+							try { partialDerivatives = derivativeFutureAD.get(parameterIndex).get();} catch (InterruptedException | ExecutionException e) {e.printStackTrace();	}
 							
-							Map<Long, RandomVariableInterface> partialDerivatives = ((RandomVariableAD) parameterRandomVariables[parameterIndex]).getAllPartialDerivatives();
-							
-							long end = System.currentTimeMillis();
-							sumAD += (end - start)/1E3;
 							for(int productIndex = 0; productIndex < numberOfCalibrationProducts; productIndex++) {
+								
 								long productID = ((RandomVariableDifferentiableInterface) currentCalibratedPrices[productIndex]).getID();
-								derivatives[parameterIndex][productIndex] = partialDerivatives.getOrDefault(productID, zero).getAverage();
+								
+								derivatives[parameterIndex][productIndex] = partialDerivatives.getOrDefault(productID, zero).doubleValue();
 							}
 						}
-						
-						System.out.println("AD - average calaculation time : " + (sumAD/numberOfParameters));
-						System.out.println("AD - total time for derivative : " + sumAD);
 						break;
 					default:
 						throw new UnknownError();
@@ -329,7 +356,6 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 							errorRMS = (errorRMS == null) ? error.squared() : errorRMS.addProduct(error, error);
 					}
 					errorRMS = errorRMS.div(numberOfCalibrationProducts).sqrt();
-//					errorRMS = errorRMS.sqrt();
 							
 					// take gradient of the mean-square-error (here AAD should bring the most improvement!)
 					Map<Long, RandomVariableInterface> gradient = ((RandomVariableDifferentiableInterface) errorRMS).getGradient();
