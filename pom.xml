@@ -42,7 +42,7 @@
   		<artifactId>
   			finmath-lib-automaticdifferentiation-extensions
   		</artifactId>
-  		<version>0.8.0</version>
+  		<version>0.8.2</version>
   	</dependency>
   	<dependency>
   		<groupId>junit</groupId>
