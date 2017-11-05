@@ -17,10 +17,11 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 			boolean allowWorsening) {
 		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, finiteDifferenceStepSizes, executor, allowWorsening);
 		
-		this.maxStepSize = Math.abs(VectorAlgbra.getAverage(initialParameter));
-		this.minStepSize = maxStepSize * 1E-10;
+		this.maxStepSize = Math.abs(VectorAlgbra.getAverage(initialParameter)) * 10;
+		this.minStepSize = maxStepSize * 1E-12;
+		this.lastStepSize = maxStepSize;
 				
-		this.alpha = 5.0;
+		this.alpha = 2.0;
 		this.c1 = 1E-4; /* for linear problems (see p39 in Numerical Optimization) */
 	}
 	
@@ -33,18 +34,22 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 	
 	private final double maxStepSize;
 	private final double minStepSize;
+	private double lastStepSize;
 
 	@Override
 	protected double getStepSize(double[] parameter) throws SolverException {
 		double leftSide, rightSide ;
 
 		double[] derivative = getDerivative(parameter);
+		double derivativeL2Squared = VectorAlgbra.innerProduct(derivative, derivative);
 		double 	 value = getValue(parameter);
 		
-		double[] newPossibleParameter;
-		double stepSize = maxStepSize * alpha;
+		double stepSize = Math.min(lastStepSize*alpha, maxStepSize);
 		
-		do{
+		// Loop will decrease step size before testing.
+		stepSize *= alpha;
+		boolean isStepSizeNeedsAdjustment = true;
+		while(isStepSizeNeedsAdjustment) {
 			if(isDone()) break;
 			
 			// count each line search as iteration
@@ -52,14 +57,15 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 			
 			stepSize /= alpha;
 			
-			newPossibleParameter = VectorAlgbra.subtract(parameter, VectorAlgbra.scalarProduct(stepSize, derivative));
+			double[] newPossibleParameter = VectorAlgbra.subtract(parameter, VectorAlgbra.scalarProduct(stepSize, derivative));
 			
-			leftSide = getValue(newPossibleParameter);
-						
-			rightSide = value - c1 * stepSize * VectorAlgbra.innerProduct(derivative, derivative);
-			
-		} while((leftSide > rightSide || Double.isNaN(leftSide)) && stepSize > minStepSize);
+			leftSide = getValue(newPossibleParameter);						
+			rightSide = value + c1 * stepSize * derivativeL2Squared;
+
+			isStepSizeNeedsAdjustment = (leftSide > rightSide || Double.isNaN(leftSide)) && stepSize > minStepSize;
+		};
 		
+		lastStepSize = stepSize;
 		return stepSize;
 	}
 }
