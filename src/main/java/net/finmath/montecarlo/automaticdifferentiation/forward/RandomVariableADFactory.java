@@ -849,7 +849,7 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 			this.id = indexOfNextRandomVariable.getAndIncrement();
 			this.operatorType = operatorType;
 			
-			// children are always empty at first
+			// children are always empty
 			this.childTreeNodes = Collections.synchronizedList(new ArrayList<OperatorTreeNode>());
 								
 			// factory
@@ -1103,10 +1103,10 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 				// \frac{\partial f}{\partial x} | has to exist by construction!
 				RandomVariableInterface parentPartialDerivtivWRTLeaf = partialDerivatives.get(parentID);
 				
-				//for(OperatorTreeNode childTreeNode : parentOperatorTreeNode.childTreeNodes){
-				for(int childIndex = 0; childIndex < parentOperatorTreeNode.childTreeNodes.size(); childIndex++){
-				    OperatorTreeNode childTreeNode = parentOperatorTreeNode.childTreeNodes.get(childIndex);
-				
+				List<OperatorTreeNode> childTreeNodes = parentOperatorTreeNode.childTreeNodes;
+				for(int i = 0; i<childTreeNodes.size(); i++) {
+					OperatorTreeNode childTreeNode = childTreeNodes.get(i);
+					
 					Long childID = childTreeNode.id;
 					
 					// \frac{\partial F}{\partial f}
@@ -1127,11 +1127,11 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 				
 				// if not defined otherwise delete parent after derivative has been propagated upwards to children
 				// if no children existed leave if it for the results
-				if(!parentOperatorTreeNode.childTreeNodes.isEmpty() || factory.keepAllDerivativesOfOperatorTree) partialDerivatives.remove(parentID); 
+				if(!parentOperatorTreeNode.childTreeNodes.isEmpty() && !factory.keepAllDerivativesOfOperatorTree) partialDerivatives.remove(parentID); 
 				
 			}
 			
-			if(!this.childTreeNodes.isEmpty() || factory.keepAllDerivativesOfOperatorTree) partialDerivatives.remove(id);
+			if(!this.childTreeNodes.isEmpty() && !factory.keepAllDerivativesOfOperatorTree) partialDerivatives.remove(id);
 			
 			return partialDerivatives;
 		}
