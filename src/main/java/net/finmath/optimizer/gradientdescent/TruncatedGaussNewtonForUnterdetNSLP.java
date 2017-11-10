@@ -1,6 +1,6 @@
 package net.finmath.optimizer.gradientdescent;
 
-import java.util.concurrent.ExecutorService;
+import java.util.Map;
 
 import net.finmath.functions.VectorAlgbra;
 import net.finmath.optimizer.SolverException;
@@ -20,17 +20,14 @@ public abstract class TruncatedGaussNewtonForUnterdetNSLP extends  AbstractGradi
 	
 	private static final long serialVersionUID = 7043579549858250182L;
 
-	public TruncatedGaussNewtonForUnterdetNSLP(double[] initialParameter, double targetValue, double errorTolerance,
-			int maxNumberOfIterations, 
-			double[] finiteDifferenceStepSizes, 
-			ExecutorService executor) {
-		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations,	finiteDifferenceStepSizes, 
-				executor, false);
+	private TruncatedGaussNewtonForUnterdetNSLP(double[] initialParameter, double targetValue, double errorTolerance,
+			int maxNumberOfIterations, long maxRunTime) {
+		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations,	maxRunTime, null, null, errorTolerance <= 0.0);
 	}
 
 	public TruncatedGaussNewtonForUnterdetNSLP(double[] initialParameters, double targetValue, double errorTolerance,
 			int maxIterations) {
-		this(initialParameters, targetValue, errorTolerance, maxIterations, null, null);
+		this(initialParameters, targetValue, errorTolerance, maxIterations, Long.MAX_VALUE);
 	}
 
 	@Override
@@ -42,7 +39,51 @@ public abstract class TruncatedGaussNewtonForUnterdetNSLP extends  AbstractGradi
 		double value = getValue(parameter);
 		double[] derivative = getDerivative(parameter);
 		
+		System.out.println(numberOfIterations + ";" + (System.currentTimeMillis() - startTimeInMilliSeconds));
+		
 		return value / VectorAlgbra.innerProduct(derivative, derivative);
 	}
+	
+	public TruncatedGaussNewtonForUnterdetNSLP clone(){
+		TruncatedGaussNewtonForUnterdetNSLP thisOptimizer = this;
+		
+		TruncatedGaussNewtonForUnterdetNSLP clone = new TruncatedGaussNewtonForUnterdetNSLP(currentParameter, targetValue, errorTolerance,
+				maxNumberOfIterations) {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void setValues(double[] parameters, double[] values) throws SolverException {
+				thisOptimizer.setValues(parameters, values);
+			}
+		};
+		return clone;
+	}
+	
+	public TruncatedGaussNewtonForUnterdetNSLP cloneWithModifiedParameters(Map<String, Object> properties){
+		
+		TruncatedGaussNewtonForUnterdetNSLP thisOptimizer = this;
+
+		TruncatedGaussNewtonForUnterdetNSLP clone = new TruncatedGaussNewtonForUnterdetNSLP(currentParameter, targetValue, errorTolerance,
+				maxNumberOfIterations) {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void setValues(double[] parameters, double[] values) throws SolverException {
+				thisOptimizer.setValues(parameters, values);
+			}
+
+			@Override
+			public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
+				thisOptimizer.setDerivatives(parameters, derivatives);
+			}
+		};
+
+		// collect properties
+		clone.setProperties(properties, thisOptimizer);
+			
+		return clone;	
+	}	
 }
 

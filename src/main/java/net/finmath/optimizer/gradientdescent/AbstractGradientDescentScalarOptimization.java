@@ -5,6 +5,8 @@ package net.finmath.optimizer.gradientdescent;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -35,31 +37,35 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 
 	private static final long serialVersionUID = -2563916306695472945L;
 
-	protected final double 	errorTolerance;
-	protected 	    double 	currentAccuracy			= Double.POSITIVE_INFINITY;
-	protected 	    double 	bestAccuracy 			= Double.POSITIVE_INFINITY;
-	protected       int 	numberOfIterations		= 0;
-	protected final int 	maxNumberOfIterations;
+	protected double 	errorTolerance;
+	protected double 	currentAccuracy				= Double.POSITIVE_INFINITY;
+	protected double 	bestAccuracy 				= Double.POSITIVE_INFINITY;
+	protected int		numberOfIterations			= 0;
 
-	protected 		double[] finiteDifferenceStepSizes;
+	protected int 		maxNumberOfIterations;
+	protected long		startTimeInMilliSeconds;
+	protected long 		maxRunTimeInMilliSeconds;
+	
+	protected double[] finiteDifferenceStepSizes;
 
-	protected 	    double[] bestParameter;
-	protected 	    double[] currentParameter;
+	protected double[] bestParameter;
+	protected double[] currentParameter;
 
-	protected 	    double   currentValue;
-	protected final double   targetValue;
+	protected double   currentValue;
+	protected double   targetValue;
 
-	protected final boolean allowWorsening;
+	protected boolean 	allowWorsening;
 
-	protected 		ExecutorService executor;
-	protected 		boolean			executorShutdownWhenDone;
-
-	public AbstractGradientDescentScalarOptimization(double[] initialParameter, double targetValue, double errorTolerance, int maxNumberOfIterations, double[] finiteDifferenceStepSizes, ExecutorService executor, boolean allowWorsening) {
+	protected ExecutorService 	executor;
+	protected boolean			executorShutdownWhenDone;
+	
+	public AbstractGradientDescentScalarOptimization(double[] initialParameter, double targetValue, double errorTolerance, int maxNumberOfIterations, long 	maxRunTimeInMilliSeconds, double[] finiteDifferenceStepSizes, ExecutorService executor, boolean allowWorsening) {
 		this.bestParameter = initialParameter;
 		this.currentParameter = initialParameter;
 
 		this.targetValue = targetValue;
 		this.maxNumberOfIterations = maxNumberOfIterations;
+		this.maxRunTimeInMilliSeconds = maxRunTimeInMilliSeconds;
 
 		this.errorTolerance = errorTolerance;
 		this.finiteDifferenceStepSizes = finiteDifferenceStepSizes;
@@ -106,6 +112,8 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 			currentAccuracy = Math.abs(currentValue - targetValue);
 			bestAccuracy = currentAccuracy;
 
+			startTimeInMilliSeconds = System.currentTimeMillis();
+			
 			while(!isDone()){
 				// get step size for this gradient descent algorithm
 				stepSize = getStepSize(currentParameter);
@@ -119,7 +127,9 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 				// update accuracy and store last one to see advance
 				double lastAccuracy = currentAccuracy;
 				currentAccuracy = Math.abs(currentValue - targetValue);
-
+				
+				System.out.println(numberOfIterations + ";" + (System.currentTimeMillis() - startTimeInMilliSeconds) + ";" + currentAccuracy);
+				
 				// store best result
 				if(currentAccuracy < bestAccuracy){			
 					bestParameter = currentParameter.clone();
@@ -180,10 +190,12 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 	}
 
 	protected boolean isDone(){
-		return 	maxNumberOfIterations <= numberOfIterations
+		return 	(maxNumberOfIterations <= getIterations())
+				||
+				(maxRunTimeInMilliSeconds <= (System.currentTimeMillis() - startTimeInMilliSeconds))
 				||
 				/*if optimizer is not allowed to get worse over time currentAccuracy always has to be equal to bestAccuracy */
-				allowWorsening ? false : currentAccuracy != bestAccuracy
+				(allowWorsening ? false : currentAccuracy != bestAccuracy)
 				||
 				Double.isNaN(currentValue)
 				||
@@ -273,25 +285,24 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 		}
 	}
 
-	public OptimizerInterface setFiniteDifferenceParameters(double[] finiteDifferenceStepSize, ExecutorService executor, boolean executorShutdownWhenDone) {
-		if(isDone()) throw new IllegalArgumentException("Solver has already run!");
-
-		AbstractGradientDescentScalarOptimization clone = this.clone();
-		clone.finiteDifferenceStepSizes = finiteDifferenceStepSize.clone();
-		clone.executor 					= executor;
-		clone.executorShutdownWhenDone  = executorShutdownWhenDone;
-		return clone;
+	public abstract OptimizerInterface cloneWithModifiedParameters(Map<String, Object> properties);
+	
+	protected void setProperties(Map<String, Object> properties, AbstractGradientDescentScalarOptimization cloneFather){
+		this.targetValue 				= (double) 		properties.getOrDefault("targetValue",				cloneFather.targetValue);
+		this.errorTolerance 			= (double) 		properties.getOrDefault("errorTolerance",			cloneFather.errorTolerance);
+		this.maxNumberOfIterations		= (int) 		properties.getOrDefault("maxNumberOfIterations", 	cloneFather.maxNumberOfIterations);
+		this.maxRunTimeInMilliSeconds 	= (long) 		properties.getOrDefault("maxRunTimeInMillis", 		cloneFather.maxRunTimeInMilliSeconds);
+		this.finiteDifferenceStepSizes 	= (double[]) 	properties.getOrDefault("finiteDifferenceStepSizes", cloneFather.finiteDifferenceStepSizes);
+		double[] initialParameter 		= (double[]) 	properties.getOrDefault("initialParameters", 		cloneFather.currentParameter);
+		this.currentParameter 			= initialParameter.clone();
+		this.bestParameter 				= initialParameter.clone();
+		this.executorShutdownWhenDone	= (boolean) 	properties.getOrDefault("executorShutdownWhenDone",	cloneFather.executorShutdownWhenDone);
+		this.allowWorsening 			= (boolean) 	properties.getOrDefault("allowWorsening",			cloneFather.allowWorsening);
+		this.executor 					= (ExecutorService) properties.getOrDefault("executor",				cloneFather.executor);
 	}
-
-	public AbstractGradientDescentScalarOptimization clone() {
-		AbstractGradientDescentScalarOptimization superClone = null;
-		try {
-			superClone = (AbstractGradientDescentScalarOptimization) super.clone();
-		} catch (CloneNotSupportedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return superClone;
+	
+	@Override
+	public Object clone() throws CloneNotSupportedException {
+		return cloneWithModifiedParameters(new HashMap<>());
 	}
 }

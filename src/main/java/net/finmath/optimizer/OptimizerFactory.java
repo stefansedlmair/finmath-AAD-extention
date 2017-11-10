@@ -28,30 +28,29 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 
 	private final int		maxIterations;
 	private final double	errorTolerance;
-	private final int		maxThreads;
-
-	private final ExecutorService executor;
-	private final boolean 		  executorShutdownWhenDone;
 	
 	private final OptimizerType 		optimizerType;
 	private final Map<String, Object> 	properties; 
 
-	public OptimizerFactory(OptimizerType optimizerType, int maxIterations, double errorTolerance, int maxThreads, Map<String, Object> properties, boolean executorShutdownWhenDone) {
+    public OptimizerFactory(OptimizerType optimizerType, int maxIterations, double errorTolerance, ExecutorService executor, Map<String, Object> properties, boolean executorShutdownWhenDone) {
 		super();
 		this.maxIterations 	= maxIterations;
 		this.errorTolerance = errorTolerance;
-		this.maxThreads 	= maxThreads;
 
-		this.executorShutdownWhenDone = executorShutdownWhenDone;
-		this.executor = (maxThreads > 1) ? Executors.newFixedThreadPool(maxThreads) : null;
-
-		
 		this.optimizerType 	= optimizerType;
-		this.properties 	= properties;
+		this.properties 	= (properties == null) ? new HashMap<>() : properties;
+		
+		this.properties.put("executor", executor);
+		this.properties.put("executorShutdownWhenDone", executorShutdownWhenDone);
+		
+	}
+
+	public OptimizerFactory(OptimizerType optimizerType, int maxIterations, double errorTolerance, int maxThreads, Map<String, Object> properties, boolean executorShutdownWhenDone) {
+		this(optimizerType, maxIterations, errorTolerance, (maxThreads > 1) ? Executors.newFixedThreadPool(maxThreads) : null , properties, executorShutdownWhenDone);
 	}
 
 	public OptimizerFactory(OptimizerType optimizerType, int maxIterations, double errorTolerance) {
-		this(optimizerType, maxIterations, errorTolerance, 2 /*maxThreads*/ ,new HashMap<>(), true);
+		this(optimizerType, maxIterations, errorTolerance, 2 /*maxThreads*/ , null, true);
 	}
 
 	/* (non-Javadoc)
@@ -78,6 +77,10 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 	public OptimizerInterface getOptimizer(ObjectiveFunction objectiveFunction, double[] initialParameters,	double[] lowerBound, double[] upperBound, double[] parameterStep, double[] targetValues) {
 		OptimizerInterface optimizer = null;
 
+		properties.put("lowerBound",lowerBound);
+		properties.put("upperBound",upperBound);
+		properties.put("finiteDifferenceStepSizes",parameterStep);
+		
 		switch (optimizerType) {
 		case BroydenFletcherGoldfarbShanno:
 			if(targetValues.length > 1) throw new IllegalArgumentException();
@@ -89,7 +92,7 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				public void setValues(double[] parameters, double[] values) throws SolverException {
 					objectiveFunction.setValues(parameters, values);
 				}
-			}).setFiniteDifferenceParameters(parameterStep, executor, executorShutdownWhenDone);
+			}).cloneWithModifiedParameters(properties);
 			break;
 		case GradientDescentArmijo:
 			if(targetValues.length > 1) throw new IllegalArgumentException();
@@ -101,7 +104,7 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				public void setValues(double[] parameters, double[] values) throws SolverException {
 					objectiveFunction.setValues(parameters, values);
 				}
-			}).setFiniteDifferenceParameters(parameterStep, executor, executorShutdownWhenDone);
+			}).cloneWithModifiedParameters(properties);
 			break;
 		case SimpleGradientDescent:
 			if(targetValues.length > 1) throw new IllegalArgumentException();
@@ -113,7 +116,7 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				public void setValues(double[] parameters, double[] values) throws SolverException {
 					objectiveFunction.setValues(parameters, values);
 				}
-			}).setFiniteDifferenceParameters(parameterStep, executor, executorShutdownWhenDone);
+			}).cloneWithModifiedParameters(properties);
 			break;
 		case TruncatedGaussNetwonForUnderdeterminedNSLP:
 			if(targetValues.length > 1) throw new IllegalArgumentException();
@@ -125,10 +128,10 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				public void setValues(double[] parameters, double[] values) throws SolverException {
 					objectiveFunction.setValues(parameters, values);
 				}
-			}).setFiniteDifferenceParameters(parameterStep, executor, executorShutdownWhenDone);
+			}).cloneWithModifiedParameters(properties);
 			break;
 		case LevenbergMarquardt:
-			optimizer = (new LevenbergMarquardt(initialParameters, targetValues, maxIterations, maxThreads) {
+			optimizer = (new LevenbergMarquardt(initialParameters, targetValues, maxIterations, (ExecutorService)properties.get("executor")) {
 
 				private static final long serialVersionUID = 1L;
 
@@ -169,7 +172,7 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
 					objectiveFunction.setDerivatives(parameters, derivatives);
 				}
-			}).setFiniteDifferenceParameters(parameterStep, executor, executorShutdownWhenDone);
+			}).cloneWithModifiedParameters(properties);
 			break;
 		case GradientDescentArmijo:
 			if(targetValues.length > 1) throw new IllegalArgumentException();
@@ -186,7 +189,7 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
 					objectiveFunction.setDerivatives(parameters, derivatives);
 				}
-			}).setFiniteDifferenceParameters(parameterStep, executor, executorShutdownWhenDone);
+			}).cloneWithModifiedParameters(properties);
 			break;
 		case SimpleGradientDescent:
 			if(targetValues.length > 1) throw new IllegalArgumentException();
@@ -203,7 +206,7 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
 					objectiveFunction.setDerivatives(parameters, derivatives);
 				}
-			}).setFiniteDifferenceParameters(parameterStep, executor, executorShutdownWhenDone);
+			}).cloneWithModifiedParameters(properties);
 			break;
 		case TruncatedGaussNetwonForUnderdeterminedNSLP:
 			if(targetValues.length > 1) throw new IllegalArgumentException();
@@ -220,10 +223,10 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
 					objectiveFunction.setDerivatives(parameters, derivatives);
 				}
-			}).setFiniteDifferenceParameters(parameterStep, executor, executorShutdownWhenDone);
+			}).cloneWithModifiedParameters(properties);
 			break;
 		case LevenbergMarquardt:
-			optimizer = (new LevenbergMarquardt(initialParameters, targetValues, maxIterations, maxThreads) {
+			optimizer = (new LevenbergMarquardt(initialParameters, targetValues, maxIterations, (ExecutorService)properties.get("executor")) {
 
 				private static final long serialVersionUID = 1L;
 

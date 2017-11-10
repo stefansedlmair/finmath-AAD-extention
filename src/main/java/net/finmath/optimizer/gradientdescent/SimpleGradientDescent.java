@@ -1,8 +1,7 @@
 package net.finmath.optimizer.gradientdescent;
 
-import java.util.concurrent.ExecutorService;
+import java.util.Map;
 
-import net.finmath.functions.VectorAlgbra;
 import net.finmath.optimizer.SolverException;
 
 /**
@@ -20,31 +19,63 @@ public abstract class SimpleGradientDescent extends AbstractGradientDescentScala
 
 	private static final long serialVersionUID = -84822697392025037L;
 	
-	private final double fixedStepSize;	
+	private double fixedStepSize;	
 	
-	public SimpleGradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
-			int maxNumberOfIterations, double[] finiteDifferenceStepSizes, ExecutorService executor,
-			boolean allowWorsening, double fixedStepSize) {
-		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, finiteDifferenceStepSizes, executor,
-				allowWorsening);
+	private SimpleGradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
+			int maxNumberOfIterations, long maxRunTime ,double fixedStepSize) {
+		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, maxRunTime, null, null, errorTolerance <= 0.0);
 		
 		this.fixedStepSize = fixedStepSize;
 	}
 
 	public SimpleGradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
 			int maxNumberOfIterations) {
-		this(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, null, null, true/*allow optimizer to get worse*/, Math.abs(VectorAlgbra.getAverage(initialParameter) * 1E-1));
+		this(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, Long.MAX_VALUE, 1E-3);
 	}
 	
+	public SimpleGradientDescent(double[] initialParameter, double targetValue, double errorTolerance,
+			long maxRunTimeInMillis) {
+		this(initialParameter, targetValue, errorTolerance, Integer.MAX_VALUE, maxRunTimeInMillis, 1E-3);
+	}
 	
 	@Override
-	protected double getStepSize(double[] currentParameter) throws SolverException {
-		
-		// increase number if iterations
+	protected double getStepSize(double[] parameter) throws SolverException {
+	
+		double stepSize = fixedStepSize;
+
 		numberOfIterations++;
 		
-		return fixedStepSize;
+		return stepSize;
 	}
+	
+	public SimpleGradientDescent cloneWithModifiedParameters(Map<String, Object> properties){
+
+		SimpleGradientDescent thisOptimizer = this;
+
+		SimpleGradientDescent clone = new SimpleGradientDescent(currentParameter, targetValue, errorTolerance,
+				maxNumberOfIterations) {
+
+			private static final long serialVersionUID = 1L;
+
+			@Override
+			public void setValues(double[] parameters, double[] values) throws SolverException {
+				thisOptimizer.setValues(parameters, values);
+			}
+
+			@Override
+			public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
+				thisOptimizer.setDerivatives(parameters, derivatives);
+			}
+		};
+
+		// collect general properties
+		clone.setProperties(properties, thisOptimizer);
+
+		// collect special properties
+		clone.fixedStepSize = (double) properties.getOrDefault("stepSize",	this.fixedStepSize);
+		
+		return clone;	
+	}	
 	
 }
 
