@@ -1,6 +1,8 @@
 language: java
 
+jdk:
+  - oraclejdk8
+
 env:
   global:
-    _MAVEN_OPTIONS: -Xmx15g -Xms15g
-    _JAVA_OPTIONS: -Xmx15g -Xms15g
+    _JAVA_OPTIONS: -mx40G
