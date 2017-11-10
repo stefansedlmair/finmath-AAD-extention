@@ -69,7 +69,6 @@ import net.finmath.optimizer.OptimizerFactory;
 import net.finmath.optimizer.OptimizerFactory.OptimizerType;
 import net.finmath.optimizer.OptimizerFactoryInterface;
 import net.finmath.optimizer.SolverException;
-import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.ScheduleGenerator;
 import net.finmath.time.ScheduleInterface;
 import net.finmath.time.TimeDiscretization;
@@ -131,24 +130,26 @@ public class LIBORMarketModelCalibrationTest {
 
 	private final ValueUnit valueUnit;
 	private final int numberOfPaths;
+	private final int numberOfThreads;
 	
 	public LIBORMarketModelCalibrationTest(OptimizerSolverType solverType, OptimizerDerivativeType derivativeType, OptimizerType optimizerType, ValueUnit valueUnit) {
 		
 		this.numberOfPaths = (int) 1E3;
+		this.numberOfThreads = 1;
 		
 		// define how derivatives are calculated
 		this.solverType = solverType;
 		this.derivativeType = derivativeType;
 		
 		// optimizer settings
-		int maxIterations = 100;
-		double errorTolerance = 1E-4;		
+		int maxIterations = 50;
+		double errorTolerance = 0;		
 		
 		
 		this.valueUnit = valueUnit;
 		
 		// 
-		this.optimizerFactory = new OptimizerFactory(optimizerType, maxIterations, errorTolerance);
+		this.optimizerFactory = new OptimizerFactory(optimizerType, maxIterations, errorTolerance, numberOfThreads, null, true);
 				
 		System.out.println("\n" + solverType + " - " + optimizerType + " - " + derivativeType + "\n");
 		
@@ -168,15 +169,16 @@ public class LIBORMarketModelCalibrationTest {
 		}
 		
 		// print current configuration
-		System.out.println("\n---------------------------------------------------------------");
+		System.out.println("---------------------------------------------------------------");
 		System.out.println("Configuration:");
 
 		System.out.println("Value Unit.............." + valueUnit);
 		System.out.println("Optimizer Type.........." + optimizerType);
 		System.out.println("Derivative Type........." + derivativeType);
 		System.out.println("Solver Type............." + solverType);	
-		System.out.println("max #Iterations........." + maxIterations);
+		System.out.println("maxNumberOfIterations..." + maxIterations);
 		System.out.println("errorTolerance.........." + errorTolerance);
+		System.out.println("numberOfThreads........." + numberOfThreads);
 		
 	}
 
@@ -244,10 +246,12 @@ public class LIBORMarketModelCalibrationTest {
 		
 		
 
-		System.out.println("#Paths.................." + numberOfPaths);
+		System.out.println("numberOfPaths..........." + numberOfPaths);
 		System.out.println("seed...................." + seed);
-		System.out.println("#Factors................" + numberOfFactors);
+		System.out.println("numberOfFactors........." + numberOfFactors);
 		System.out.println("\nCurrent Time............" + LocalDateTime.now());
+		System.out.println("maxSizeJVM.............." + (Runtime.getRuntime().maxMemory()/1024.0/1024.0) + " MB");
+		System.out.println("numberOfCores..........." + Runtime.getRuntime().availableProcessors());
 		System.out.println("---------------------------------------------------------------\n");
 
 
@@ -379,6 +383,8 @@ public class LIBORMarketModelCalibrationTest {
 
 		// Set calibration properties (should use our brownianMotion for calibration - needed to have to right correlation).
 		Map<String, Object> calibrationParameters = new HashMap<String, Object>();
+		calibrationParameters.put("numberOfThreads", numberOfThreads);
+		
 		calibrationParameters.put("brownianMotion", brownianMotion);
 		calibrationParameters.put("optimizerFactory", optimizerFactory);
 		calibrationParameters.put("parameterStep", new Double(1E-4));
