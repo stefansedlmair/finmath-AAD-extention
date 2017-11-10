@@ -849,7 +849,7 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 			this.id = indexOfNextRandomVariable.getAndIncrement();
 			this.operatorType = operatorType;
 			
-			// children are always empty
+			// children are always empty at first
 			this.childTreeNodes = Collections.synchronizedList(new ArrayList<OperatorTreeNode>());
 								
 			// factory
@@ -1103,8 +1103,10 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 				// \frac{\partial f}{\partial x} | has to exist by construction!
 				RandomVariableInterface parentPartialDerivtivWRTLeaf = partialDerivatives.get(parentID);
 				
-				for(OperatorTreeNode childTreeNode : parentOperatorTreeNode.childTreeNodes){
-					
+				//for(OperatorTreeNode childTreeNode : parentOperatorTreeNode.childTreeNodes){
+				for(int childIndex = 0; childIndex < parentOperatorTreeNode.childTreeNodes.size(); childIndex++){
+				    OperatorTreeNode childTreeNode = parentOperatorTreeNode.childTreeNodes.get(childIndex);
+				
 					Long childID = childTreeNode.id;
 					
 					// \frac{\partial F}{\partial f}
