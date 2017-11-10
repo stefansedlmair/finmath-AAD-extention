@@ -480,7 +480,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 		RandomVariableInterface[] calibratedPrices = new RandomVariableInterface[numberOfCalibrationProducts];
 		for(int calibrationProductIndex=0; calibrationProductIndex < numberOfCalibrationProducts; calibrationProductIndex++)
 			try {
-				calibratedPrices[calibrationProductIndex] = valueFutures.get(calibrationProductIndex).get();
+				calibratedPrices[calibrationProductIndex] = valueFutures.get(calibrationProductIndex).get().average();
 			} catch (InterruptedException | ExecutionException e) {
 				e.printStackTrace();
 			}
