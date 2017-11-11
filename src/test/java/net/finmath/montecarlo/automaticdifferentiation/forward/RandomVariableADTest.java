@@ -16,9 +16,8 @@ import org.junit.runners.Parameterized.Parameters;
 
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.automaticdifferentiation.AbstractRandomVariableDifferentiableFactory;
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableAlgorithmicDifferentiationFactory;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
-import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
-import net.finmath.montecarlo.automaticdifferentiation.forward.RandomVariableADFactory.RandomVariableAD;
 import net.finmath.randomnumbers.MersenneTwister;
 import net.finmath.stochastic.RandomVariableInterface;
 
@@ -33,7 +32,7 @@ public class RandomVariableADTest {
 		List<Object[]> config = new ArrayList<>();
 		
 		config.add(new Object[]{ new RandomVariableADFactory(), "AD"});
-//		config.add(new Object[]{ new RandomVariableDifferentiableAADFactory(), "AAD"});
+		config.add(new Object[]{ new RandomVariableAlgorithmicDifferentiationFactory(), "AlgorthmicDifferentiation"});
 
 		return config;
 	}
@@ -158,9 +157,9 @@ public class RandomVariableADTest {
 
 		Map<Long, RandomVariableInterface> adGradient = new HashMap<>();
 		
-		RandomVariableAD adRandomVariable00 = (RandomVariableAD) randomVariable00;
-		RandomVariableAD adRandomVariable01 = (RandomVariableAD) randomVariable01;
-		RandomVariableAD adRandomVariable04 = (RandomVariableAD) randomVariable04;
+		RandomVariableDifferentiableInterface adRandomVariable00 = (RandomVariableDifferentiableInterface) randomVariable00;
+		RandomVariableDifferentiableInterface adRandomVariable01 = (RandomVariableDifferentiableInterface) randomVariable01;
+		RandomVariableDifferentiableInterface adRandomVariable04 = (RandomVariableDifferentiableInterface) randomVariable04;
 		
 		adGradient.put(adRandomVariable00.getID(), adRandomVariable00.getAllPartialDerivatives().get(adRandomVariable04.getID()));
 		adGradient.put(adRandomVariable01.getID(), adRandomVariable01.getAllPartialDerivatives().get(adRandomVariable04.getID()));	
@@ -206,9 +205,9 @@ public class RandomVariableADTest {
 
 		Map<Long, RandomVariableInterface> adGradient = new HashMap<>();
 		
-		RandomVariableAD adRandomVariable00 = (RandomVariableAD) randomVariable00;
-		RandomVariableAD adRandomVariable01 = (RandomVariableAD) randomVariable01;
-		RandomVariableAD adRandomVariable04 = (RandomVariableAD) randomVariable04;
+		RandomVariableDifferentiableInterface adRandomVariable00 = (RandomVariableDifferentiableInterface) randomVariable00;
+		RandomVariableDifferentiableInterface adRandomVariable01 = (RandomVariableDifferentiableInterface) randomVariable01;
+		RandomVariableDifferentiableInterface adRandomVariable04 = (RandomVariableDifferentiableInterface) randomVariable04;
 		
 		adGradient.put(adRandomVariable00.getID(), adRandomVariable00.getAllPartialDerivatives().get(adRandomVariable04.getID()));
 		adGradient.put(adRandomVariable01.getID(), adRandomVariable01.getAllPartialDerivatives().get(adRandomVariable04.getID()));	
@@ -232,7 +231,7 @@ public class RandomVariableADTest {
 	}
 	
 	@Test
-	public void testRandomVariableADMultipleIndependentFunctions() {
+	public void testRandomVariableDifferentiableInterfaceMultipleIndependentFunctions() {
 		
 		int seed = 1234;
 		MersenneTwister mt = new MersenneTwister(seed);
@@ -254,7 +253,7 @@ public class RandomVariableADTest {
 		}
 		
 		long start = System.currentTimeMillis();
-		Map<Long, RandomVariableInterface> partialDerivatives = ((RandomVariableAD) x).getAllPartialDerivatives();
+		Map<Long, RandomVariableInterface> partialDerivatives = ((RandomVariableDifferentiableInterface) x).getAllPartialDerivatives();
 		long end = System.currentTimeMillis();
 		
 		System.out.print(((end-start)/1E3));
