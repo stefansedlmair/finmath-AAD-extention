@@ -76,7 +76,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 	 * @see net.finmath.montecarlo.automaticdifferentiation.AbstractRandomVariableDifferentiableFactory#createRandomVariable(double, double[])
 	 */
 	@Override
-	public RandomVariableDifferentiableInterface createRandomVariable(double time, double[] values) {
+	public RandomVariableDifferentiableInterface createRandomVariable(double time, double[] values) {		
 		RandomVariableInterface randomvariable = super.createRandomVariableNonDifferentiable(time, values);
 		return new RandomVariableAlgorithmicDifferentiation(randomvariable, null, this);
 	}
@@ -136,7 +136,6 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 			// only connect to children if AD is enabled
 			if(factory.enableAD) {
 				this.childTreeNodes = Collections.synchronizedList(new ArrayList<OperatorTreeNode>());
-				if(this.parentTreeNodes != null)
 					for(OperatorTreeNode parentTreeNode : this.parentTreeNodes) 
 						if(parentTreeNode != null) 
 							parentTreeNode.childTreeNodes.add(this);
@@ -359,6 +358,10 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		private final RandomVariableAlgorithmicDifferentiationFactory factory;
 
 		public RandomVariableAlgorithmicDifferentiation(RandomVariableInterface randomvariable, List<Object[]> parentInformation, RandomVariableAlgorithmicDifferentiationFactory factory) {
+			// catch random variable that are of size one and not deterministic!
+			if(!randomvariable.isDeterministic() && randomvariable.size() == 1)
+				randomvariable = factory.createRandomVariableNonDifferentiable(randomvariable.getFiltrationTime(), randomvariable.get(0));
+			
 			this.values = valuesOf(randomvariable);
 			this.opteratorTreeNode = new OperatorTreeNode(parentInformation, factory);
 			this.factory = factory;
