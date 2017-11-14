@@ -38,19 +38,30 @@
   		<version>3.1.5</version>
   	</dependency>
   	<dependency>
-  		<groupId>net.finmath</groupId>
-  		<artifactId>
-  			finmath-lib-automaticdifferentiation-extensions
-  		</artifactId>
-  		<version>0.8.2</version>
-  	</dependency>
-  	<dependency>
   		<groupId>junit</groupId>
   		<artifactId>junit</artifactId>
   		<version>4.12</version>
   	</dependency>
+  	<dependency>
+  		<groupId>net.finmath</groupId>
+  		<artifactId>
+  			finmath-lib-automaticdifferentiation-extensions
+  		</artifactId>
+  		<version>0.8.0</version>
+  	</dependency>
   </dependencies>
   <ciManagement>
   	<url>https://travis-ci.org/stefansedlmair/finmath-AAD-extention</url>
+  	<system>Travis CI</system>
   </ciManagement>
+  <issueManagement>
+  	<system>GitHub</system>
+  	<url>https://github.com/stefansedlmair/finmath-AAD-extention/issues</url>
+  </issueManagement>
+  <scm>
+  	<url>https://github.com/stefansedlmair/finmath-AAD-extention</url>
+  	<connection>scm:git:https://github.com/stefansedlmair/finmath-AAD-extention.git</connection>
+  	<developerConnection>scm:git:https://github.com/stefansedlmair/finmath-AAD-extention.git</developerConnection>
+  	<tag>finmath-lib-AAD-extensions-0.0.1</tag>
+  </scm>
 </project>
