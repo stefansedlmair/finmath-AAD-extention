@@ -146,6 +146,15 @@ public class VectorAlgbra {
 		return true;
 	}	
 	
+	public static boolean isAllEntriesEqual(double[] X){
+		if(X != null && X.length > 1){
+			double x0 = X[0];
+			for(double x : X) 
+				if(x != x0) return false;
+		}
+		return true;
+	}
+	
 	public static double[][] getDiagonalMatrix(double[] diagonalEntries){
 		int n = diagonalEntries.length;
 		// double array gets initialized with zeros anyway!
