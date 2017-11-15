@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -20,6 +21,7 @@ import java.util.stream.DoubleStream;
 import org.apache.commons.math3.util.FastMath;
 
 import net.finmath.functions.DoubleTernaryOperator;
+import net.finmath.functions.VectorAlgbra;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.RandomVariableFactory;
@@ -34,11 +36,12 @@ import net.finmath.stochastic.RandomVariableInterface;
  * @author Stefan Sedlmair
  * @version 1.0
  */
-public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRandomVariableDifferentiableFactory {
+public class RandomVariableDifferentiableFactory extends AbstractRandomVariableDifferentiableFactory {
 
 	private final static AtomicLong nextIdentifier = new AtomicLong(0); 
 
 	private final double barrierDiracWidth;
+	private final double finiteDifferencesStepSize;
 
 	private final boolean enableAD;
 	private final boolean retainAllTreeNodes;
@@ -46,20 +49,21 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 	/**
 	 * @param randomVariableFactoryForNonDifferentiable
 	 */
-	public RandomVariableAlgorithmicDifferentiationFactory(AbstractRandomVariableFactory randomVariableFactoryForNonDifferentiable, Map<String, Object> properties) {
+	public RandomVariableDifferentiableFactory(AbstractRandomVariableFactory randomVariableFactoryForNonDifferentiable, Map<String, Object> properties) {
 		super(randomVariableFactoryForNonDifferentiable);
-		
-		this.barrierDiracWidth 		= (double) properties.getOrDefault("barrierDiracWidth", 0.2);
+			
+		this.barrierDiracWidth 			= (double) properties.getOrDefault("barrierDiracWidth", 0.2);
+		this.finiteDifferencesStepSize 	= (double) properties.getOrDefault("finiteDifferencesStepSize", 1E-8);
 
 		this.enableAD 				= (boolean) properties.getOrDefault("enableAD", true);
-		this.retainAllTreeNodes 	= (boolean) properties.getOrDefault("retainAllTreeNodes", true);
+		this.retainAllTreeNodes 	= (boolean) properties.getOrDefault("retainAllTreeNodes", false);
 	}
 
-	public RandomVariableAlgorithmicDifferentiationFactory(AbstractRandomVariableFactory randomVariableFactoryForNonDifferentiable) {
+	public RandomVariableDifferentiableFactory(AbstractRandomVariableFactory randomVariableFactoryForNonDifferentiable) {
 		this(randomVariableFactoryForNonDifferentiable, new HashMap<>());
 	}
 
-	public RandomVariableAlgorithmicDifferentiationFactory() {
+	public RandomVariableDifferentiableFactory() {
 		this(new RandomVariableFactory(), new HashMap<>());
 	}
 
@@ -93,7 +97,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 	 * */
 	private static class OperatorTreeNode{
 		private final long id;
-		private final RandomVariableAlgorithmicDifferentiationFactory factory;
+		private final RandomVariableDifferentiableFactory factory;
 
 		private final List<OperatorTreeNode> parentTreeNodes;
 		private final List<RandomVariableInterface> parentValues;
@@ -108,7 +112,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		 * @param parentInfromation list of object arrays. Has to be of the following order: <lu><li>ParentRandomVariable</li><li>derivativeWrtParent</li><li>keepValuesOfParent</li></lu>  
 		 * @param factory {@link AbstractRandomVariableDifferentiableFactory} to generate random variables
 		 * */
-		public OperatorTreeNode(List<Object[]> parentInfromation, RandomVariableAlgorithmicDifferentiationFactory factory) {
+		public OperatorTreeNode(List<Object[]> parentInfromation, RandomVariableDifferentiableFactory factory) {
 			// get identifier
 			this.id = nextIdentifier.getAndIncrement();
 
@@ -360,13 +364,13 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 
 		private RandomVariableInterface values;
 		private final OperatorTreeNode opteratorTreeNode;
-		private final RandomVariableAlgorithmicDifferentiationFactory factory;
+		private final RandomVariableDifferentiableFactory factory;
 
 		
 		/**
 		 * private constructor 
 		 * */
-		private RandomVariableAlgorithmicDifferentiation(RandomVariableInterface randomvariable, List<Object[]> parentInformation, RandomVariableAlgorithmicDifferentiationFactory factory) {
+		private RandomVariableAlgorithmicDifferentiation(RandomVariableInterface randomvariable, List<Object[]> parentInformation, RandomVariableDifferentiableFactory factory) {
 			// catch random variable that are of size one and not deterministic!
 			if(!randomvariable.isDeterministic() && randomvariable.size() == 1)
 				randomvariable = factory.createRandomVariableNonDifferentiable(randomvariable.getFiltrationTime(), randomvariable.get(0));
@@ -476,7 +480,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 			return values;
 		}
 
-		private RandomVariableAlgorithmicDifferentiationFactory getFactory() {
+		private RandomVariableDifferentiableFactory getFactory() {
 			return factory;
 		}
 
@@ -666,8 +670,8 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		@Override
 		public RandomVariableInterface apply(DoubleUnaryOperator operator) {
 			// get finite difference step size
-			double barrierDiracWidth = getFactory().barrierDiracWidth;
-			double epsilonX = (this.getStandardDeviation() > 0.0 ? this.getStandardDeviation() : 1.0) * barrierDiracWidth;
+			double finiteDifferencesStepSize = getFactory().finiteDifferencesStepSize;
+			double epsilonX = (this.getStandardDeviation() > 0.0 ? this.getStandardDeviation() : 1.0) * finiteDifferencesStepSize;
 
 			// apply central finite differences on unknown operator
 			return apply(operator,
@@ -678,9 +682,9 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		@Override
 		public RandomVariableInterface apply(DoubleBinaryOperator operator, RandomVariableInterface argument) {
 			// get finite difference step size
-			double barrierDiracWidth = getFactory().barrierDiracWidth;
-			double epsilonX = (this.getStandardDeviation() > 0.0 ? this.getStandardDeviation() : 1.0) * barrierDiracWidth;
-			double epsilonY = (argument.getStandardDeviation() > 0.0 ? argument.getStandardDeviation() : 1.0) * barrierDiracWidth;
+			double finiteDifferencesStepSize = getFactory().finiteDifferencesStepSize;
+			double epsilonX = (this.getStandardDeviation() > 0.0 ? this.getStandardDeviation() : 1.0) * finiteDifferencesStepSize;
+			double epsilonY = (argument.getStandardDeviation() > 0.0 ? argument.getStandardDeviation() : 1.0) * finiteDifferencesStepSize;
 
 			// apply central finite differences on unknown operator
 			return apply(operator, argument,
@@ -693,10 +697,10 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		public RandomVariableInterface apply(DoubleTernaryOperator operator, RandomVariableInterface argument1,
 				RandomVariableInterface argument2) {
 			// get finite difference step size
-			double barrierDiracWidth = getFactory().barrierDiracWidth;
-			double epsilonX = (this.getStandardDeviation() > 0.0 ? this.getStandardDeviation() : 1.0) * barrierDiracWidth;
-			double epsilonY = (argument1.getStandardDeviation() > 0.0 ? argument1.getStandardDeviation() : 1.0) * barrierDiracWidth;
-			double epsilonZ = (argument2.getStandardDeviation() > 0.0 ? argument2.getStandardDeviation() : 1.0) * barrierDiracWidth;
+			double finiteDifferencesStepSize = getFactory().finiteDifferencesStepSize;
+			double epsilonX = (this.getStandardDeviation() > 0.0 ? this.getStandardDeviation() : 1.0) * finiteDifferencesStepSize;
+			double epsilonY = (argument1.getStandardDeviation() > 0.0 ? argument1.getStandardDeviation() : 1.0) * finiteDifferencesStepSize;
+			double epsilonZ = (argument2.getStandardDeviation() > 0.0 ? argument2.getStandardDeviation() : 1.0) * finiteDifferencesStepSize;
 			
 			// apply central finite differences on unknown operator
 			return apply(operator, argument1, argument2,
@@ -870,8 +874,8 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		@Override
 		public RandomVariableInterface discount(RandomVariableInterface rate, double periodLength) {
 			return apply((x,y) -> x / (1.0 + y * periodLength), rate,
-						 (x,y) -> 1.0/ 1.0 + y * periodLength, 
-						 (x,y) -> x * periodLength / FastMath.pow(1.0 + y * periodLength, 2), 
+						 (x,y) -> 1.0/ (1.0 + y * periodLength), 
+						 (x,y) -> -1.0 * x * periodLength / FastMath.pow(1.0 + y * periodLength, 2), 
 						 true, true);
 		}
 
@@ -999,9 +1003,10 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		 * Method 
 		 * */
 		private static RandomVariableInterface catchWronglyNonDeterministicRandomVariable(RandomVariableInterface randomVariable) {
-			if(!randomVariable.isDeterministic() && randomVariable.size() == 1) {
+			if(!randomVariable.isDeterministic() && VectorAlgbra.isAllEntriesEqual(randomVariable.getRealizations())){
 				double time = randomVariable.getFiltrationTime();
 				double value = randomVariable.get(0);
+
 				if(randomVariable instanceof RandomVariableAlgorithmicDifferentiation) {
 					RandomVariableAlgorithmicDifferentiation rvAutoDiff = ((RandomVariableAlgorithmicDifferentiation) randomVariable); 
 					rvAutoDiff.values = rvAutoDiff.factory.createRandomVariableNonDifferentiable(time, value);
@@ -1015,7 +1020,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		
 		private static RandomVariableInterface nullToNaN(RandomVariableInterface X) {
 			RandomVariableInterface nan = new RandomVariable(Double.NaN);
-			return X == null ? nan : X;
+			return X == null ? nan : X.cache();
 		}
 
 		/**
@@ -1031,7 +1036,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		}
 			
 		/**
-		 * executes {@link DoubleBinaryOperator} ana ignores null values
+		 * executes {@link DoubleBinaryOperator} and ignores null values
 		 * @return function value, NaN if null in dependent variable
 		 */
 		public static RandomVariableInterface apply(DoubleBinaryOperator function, List<RandomVariableInterface> X) {
@@ -1043,7 +1048,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		}
 
 		/**
-		 * executes {@link DoubleTernaryOperator} ana ignores null values
+		 * executes {@link DoubleTernaryOperator} and ignores null values
 		 * @return function value, NaN if null in dependent variable
 		 */
 		public static RandomVariableInterface apply(DoubleTernaryOperator function, List<RandomVariableInterface> X) {
@@ -1052,6 +1057,11 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 			result = catchWronglyNonDeterministicRandomVariable(result);
 			
 			return result;
+		}
+		
+		@Override
+		public String toString() {
+			return "RandomVariableAlgorithmicDifferentiation [values=" + values + ", ID=" + getID() + "]";
 		}
 	}
 	
