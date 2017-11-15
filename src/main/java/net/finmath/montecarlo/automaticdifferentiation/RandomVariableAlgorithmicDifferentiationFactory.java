@@ -52,7 +52,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		this.barrierDiracWidth 		= (double) properties.getOrDefault("barrierDiracWidth", 0.2);
 
 		this.enableAD 				= (boolean) properties.getOrDefault("enableAD", true);
-		this.retainAllTreeNodes 	= (boolean) properties.getOrDefault("retainAllTreeNodes", false);
+		this.retainAllTreeNodes 	= (boolean) properties.getOrDefault("retainAllTreeNodes", true);
 	}
 
 	public RandomVariableAlgorithmicDifferentiationFactory(AbstractRandomVariableFactory randomVariableFactoryForNonDifferentiable) {
@@ -115,13 +115,20 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 			// get factory
 			this.factory = factory;
 
-			// initialize values
-			this.parentTreeNodes = new ArrayList<>();
-			this.parentValues = new ArrayList<>();
-			this.derivatives = new ArrayList<>();
+			// initialize values and allocate memory
+			int numberOfParents = parentInfromation != null ? parentInfromation.size() : 0;
+			this.parentTreeNodes = new ArrayList<>(numberOfParents);
+			this.parentValues = new ArrayList<>(numberOfParents);
+			this.derivatives = new ArrayList<>(numberOfParents);
 
 			// if parent information null no parents available
 			if(parentInfromation != null) {
+//				for(int parentIndex = 0; parentIndex < numberOfParents; parentIndex++){
+//					Object[] item = parentInfromation.get(parentIndex);
+//					parentTreeNodes.add(parentIndex, treeNodeOf((RandomVariableInterface)item[0]));
+//					derivatives.add(parentIndex, item[1]);
+//					parentValues.add(parentIndex, ((boolean)item[2]) ? RandomVariableAlgorithmicDifferentiation.valuesOf((RandomVariableInterface)item[0]) : null);
+//				}
 				// assign values from parentInfromation
 				parentInfromation.stream().forEachOrdered(
 						item -> {
@@ -185,17 +192,17 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 			RandomVariableInterface zero = factory.createRandomVariableNonDifferentiable(-Double.MAX_VALUE, 0.0);
 			RandomVariableInterface one = factory.createRandomVariableNonDifferentiable(-Double.MAX_VALUE, 1.0);
 			
-			Map<Long, RandomVariableInterface> partialDerivatives = new HashMap<>();
+			Map<Long, RandomVariableInterface> gradient = new HashMap<>();
 
 			// every child in the operator tree is of the same instance of its parents
 			TreeMap<Long, OperatorTreeNode> treeNodesToPropagte = new TreeMap<>();
 
 			// partial derivative with respect to itself
-			partialDerivatives.put(id, one);
+			gradient.put(id, one);
 
 			// add id of this variable to propagate downwards
 			treeNodesToPropagte.put(id, this);			
-
+			
 			while(!treeNodesToPropagte.isEmpty()){
 
 				// get and remove highest ID from treeNodesToPropagate
@@ -203,7 +210,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 
 				Long childID = highestEntry.getKey();
 				OperatorTreeNode childTreeNode = highestEntry.getValue();
-
+				
 				final List<OperatorTreeNode> parentTreeNodes = childTreeNode.parentTreeNodes;
 				for(int i = 0; i < parentTreeNodes.size(); i++) {
 					OperatorTreeNode parentTreeNode = parentTreeNodes.get(i);
@@ -213,9 +220,9 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 
 					// get the current parent id
 					final Long parentID = parentTreeNode.id;
-
+	
 					// \frac{\partial f_N}{\partial f_n} | has to exist by construction!
-					RandomVariableInterface originPartialDerivtivWRTchild = partialDerivatives.get(childID);
+					RandomVariableInterface originPartialDerivtivWRTchild = gradient.get(childID);
 
 					// \frac{\partial f_n}{\partial f_{n-1}}
 					RandomVariableInterface childPartialDerivativeWRTParent = null;
@@ -246,27 +253,26 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 					}
 					
 					// chain rule - get already existing part of the sum, if it does not exist yet start the sum with zero
-					RandomVariableInterface existingChainRuleSum = partialDerivatives.getOrDefault(parentID, zero);
+					RandomVariableInterface existingChainRuleSum = gradient.getOrDefault(parentID, zero);
 
 					// add existing and new part of the derivative sum 
 					RandomVariableInterface chainRuleSum = existingChainRuleSum.addProduct(originPartialDerivtivWRTchild, childPartialDerivativeWRTParent);
 
 					// put result back in gradient
-					partialDerivatives.put(parentID, chainRuleSum);
+					gradient.put(parentID, chainRuleSum);
 
 					// add parent to ToDo-list to propagate derivatives further downwards
 					treeNodesToPropagte.put(parentID, parentTreeNode);
-
 				}
 
 				// if not defined otherwise delete child after derivative has been propagated downwards to parents
 				// if no parents existed leave if it for the results
-				if(!childTreeNode.parentTreeNodes.isEmpty() && !factory.retainAllTreeNodes) partialDerivatives.remove(childID); 
+				if(!childTreeNode.parentTreeNodes.isEmpty() && !factory.retainAllTreeNodes) gradient.remove(childID); 
 			}
 
-			if(!this.childTreeNodes.isEmpty() && !factory.retainAllTreeNodes) partialDerivatives.remove(id);
+			if(!this.childTreeNodes.isEmpty() && !factory.retainAllTreeNodes) gradient.remove(id);
 
-			return partialDerivatives;
+			return gradient;
 		}
 
 		/**
@@ -312,6 +318,8 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 					// \frac{\partial F}{\partial f}
 					RandomVariableInterface childPartialDerivativeWRTParent = childTreeNode.getPartialDerivativeFor(parentOperatorTreeNode);
 
+					//TODO: Conditional and Unconditional Expectation!
+					
 					// chain rule - get already existing part of the sum
 					RandomVariableInterface existingChainRuleSum = partialDerivatives.getOrDefault(childID, zero);
 
@@ -651,35 +659,65 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 			return this;
 		}
 
+		/*
+		 * The following methods are operations with are differentiable.
+		 */
+		
 		@Override
 		public RandomVariableInterface apply(DoubleUnaryOperator operator) {
-			double[] realizations = getValues().apply(operator).getRealizations();
-			return getFactory().createRandomVariableNonDifferentiable(getFiltrationTime(), realizations);
+			// get finite difference step size
+			double barrierDiracWidth = getFactory().barrierDiracWidth;
+			double epsilonX = (this.getStandardDeviation() > 0.0 ? this.getStandardDeviation() : 1.0) * barrierDiracWidth;
+
+			// apply central finite differences on unknown operator
+			return apply(operator,
+						 x -> (operator.applyAsDouble(x+epsilonX) - operator.applyAsDouble(x-epsilonX))/(2.0*epsilonX),
+						 true);
 		}
 
 		@Override
 		public RandomVariableInterface apply(DoubleBinaryOperator operator, RandomVariableInterface argument) {
-			double[] realizations = getValues().apply(operator, argument).getRealizations();
-			return getFactory().createRandomVariableNonDifferentiable(getFiltrationTime(), realizations);
+			// get finite difference step size
+			double barrierDiracWidth = getFactory().barrierDiracWidth;
+			double epsilonX = (this.getStandardDeviation() > 0.0 ? this.getStandardDeviation() : 1.0) * barrierDiracWidth;
+			double epsilonY = (argument.getStandardDeviation() > 0.0 ? argument.getStandardDeviation() : 1.0) * barrierDiracWidth;
+
+			// apply central finite differences on unknown operator
+			return apply(operator, argument,
+						 (x,y) -> (operator.applyAsDouble(x+epsilonX,y) - operator.applyAsDouble(x-epsilonX,y))/(2.0*epsilonX),
+						 (x,y) -> (operator.applyAsDouble(x,y+epsilonY) - operator.applyAsDouble(x,y-epsilonY))/(2.0*epsilonY),
+						 true, true);
 		}
 
 		@Override
 		public RandomVariableInterface apply(DoubleTernaryOperator operator, RandomVariableInterface argument1,
 				RandomVariableInterface argument2) {
-			double[] realizations = getValues().apply(operator, argument1, argument2).getRealizations();
-			return getFactory().createRandomVariableNonDifferentiable(getFiltrationTime(), realizations);
+			// get finite difference step size
+			double barrierDiracWidth = getFactory().barrierDiracWidth;
+			double epsilonX = (this.getStandardDeviation() > 0.0 ? this.getStandardDeviation() : 1.0) * barrierDiracWidth;
+			double epsilonY = (argument1.getStandardDeviation() > 0.0 ? argument1.getStandardDeviation() : 1.0) * barrierDiracWidth;
+			double epsilonZ = (argument2.getStandardDeviation() > 0.0 ? argument2.getStandardDeviation() : 1.0) * barrierDiracWidth;
+			
+			// apply central finite differences on unknown operator
+			return apply(operator, argument1, argument2,
+						 (x,y,z) -> (operator.applyAsDouble(x+epsilonX,y,z) - operator.applyAsDouble(x-epsilonX,y,z))/(2.0*epsilonX),
+						 (x,y,z) -> (operator.applyAsDouble(x,y+epsilonY,z) - operator.applyAsDouble(x,y-epsilonY,z))/(2.0*epsilonY),
+						 (x,y,z) -> (operator.applyAsDouble(x,y,z+epsilonZ) - operator.applyAsDouble(x,y,z-epsilonZ))/(2.0*epsilonZ),
+						 true, true, true);
 		}
-
-
-		/*
-		 * The following methods are operations with are differentiable.
-		 */
 
 		@Override
 		public RandomVariableInterface floor(double floor) {
 			return apply(x -> FastMath.max(x, floor), 
 						 x -> x < floor ? 0.0 : 1.0, 
 						 true);
+		}
+		
+		@Override
+		public RandomVariableInterface cap(double cap) {
+			return apply(x -> FastMath.min(x, cap), 
+					 	 x -> x < cap ? 1.0 : 0.0, 
+					     true);
 		}
 
 		@Override
@@ -734,75 +772,75 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		@Override
 		public RandomVariableInterface squared() {
 			return apply(x -> x * x, 
-					x -> 2.0 * x, 
-					true);
+						 x -> 2.0 * x, 
+						 true);
 		}
 
 		@Override
 		public RandomVariableInterface sqrt() {
 			return apply(FastMath::sqrt, 
-					x -> 0.5 / FastMath.sqrt(x), 
-					true);
+						 x -> 0.5 / FastMath.sqrt(x), 
+						 true);
 		}
 
 		@Override
 		public RandomVariableInterface exp() {
 			return apply(FastMath::exp, 
-					FastMath::exp, 
-					true);
+						 FastMath::exp, 
+						 true);
 		}
 
 		@Override
 		public RandomVariableInterface log() {
 			return apply(FastMath::log, 
-					x -> 1.0/x, 
-					true);
+						 x -> 1.0/x, 
+						 true);
 		}
 
 		@Override
 		public RandomVariableInterface sin() {
 			return apply(FastMath::sin, 
-					FastMath::cos, 
-					true);
+						 FastMath::cos, 
+						 true);
 		}
 
 		@Override
 		public RandomVariableInterface cos() {
 			return apply(FastMath::cos, 
-					x -> -FastMath.sin(x), 
-					true);
+						 x -> -FastMath.sin(x), 
+						 true);
 		}
 
 		@Override
 		public RandomVariableInterface add(RandomVariableInterface randomVariable) {
 			return apply((x,y) -> x + y, randomVariable, 
-					(x,y) -> 1.0, 
-					(x,y) -> 1.0, 
-					false, false);
+						 (x,y) -> 1.0, 
+						 (x,y) -> 1.0, 
+						 false, false);
 		}
 
 		@Override
 		public RandomVariableInterface sub(RandomVariableInterface randomVariable) {
 			return apply((x,y) -> x - y, randomVariable, 
-					(x,y) -> +1.0, 
-					(x,y) -> -1.0, 
-					false, false);
+						 (x,y) -> +1.0, 
+						 (x,y) -> -1.0, 
+						 false, false);
 		}
 
 		@Override
 		public RandomVariableInterface mult(RandomVariableInterface randomVariable) {
 			return apply((x,y) -> x * y, randomVariable, 
-					(x,y) -> y, 
-					(x,y) -> x, 
-					true, true);
+						 (x,y) -> y, 
+						 (x,y) -> x, 
+						 true, true);
 		}
 
 		@Override
 		public RandomVariableInterface div(RandomVariableInterface randomVariable) {
 			return apply((x,y) -> x / y, randomVariable, 
-					(x,y) -> 1.0 / y, 
-					(x,y) -> -x / (y*y),
-					true, true);
+						 (x,y) -> 1.0 / y, 
+						 (x,y) -> -x / (y*y),
+						 true, true);
 		}
 
 		@Override
@@ -865,15 +903,15 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 			
 			if(epsilon > 0.0) 
 				return apply((x,y) -> x >= 0.0 ? y : valueIfTriggerNegative, valueIfTriggerNonNegative,
-						(x,y) -> (y - valueIfTriggerNegative)*((x + epsilon/2) >= 0 ? 1.0 : 0.0)*((x - epsilon/2) >= 0 ? 0.0 : 1.0)/epsilon,
-						(x,y) -> x >= 0.0 ? 1.0 : 0.0,
-						true, true);
+							 (x,y) -> (y - valueIfTriggerNegative)*((x + epsilon/2) >= 0 ? 1.0 : 0.0)*((x - epsilon/2) >= 0 ? 0.0 : 1.0)/epsilon,
+							 (x,y) -> x >= 0.0 ? 1.0 : 0.0,
+							 true, true);
 			
 			if(epsilon == 0.0)
 				return apply((x,y) -> x >= 0.0 ? y : valueIfTriggerNegative, valueIfTriggerNonNegative,
-					(x,y) -> x == 0 ? (valueIfTriggerNegative < y ? Double.POSITIVE_INFINITY : ( valueIfTriggerNegative == y ? 0.0 : Double.NEGATIVE_INFINITY)) : 0.0 ,
-					(x,y) -> x >= 0.0 ? 1.0 : 0.0,
-					true, true);
+						 	 (x,y) -> x == 0 ? (valueIfTriggerNegative < y ? Double.POSITIVE_INFINITY : ( valueIfTriggerNegative == y ? 0.0 : Double.NEGATIVE_INFINITY)) : 0.0 ,
+						 	 (x,y) -> x >= 0.0 ? 1.0 : 0.0,
+						 	 true, true);
 			else throw new IllegalArgumentException("Epsilon shoud never be negative!");
 		}
 
@@ -911,7 +949,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 				RandomVariableInterface denominator) {
 			return apply((x,y,z) -> x + y / z, numerator, denominator,
 						 (x,y,z) -> 1.0,
-						 (x,y,z) -> +1/z, 
+						 (x,y,z) -> +1.0/z, 
 						 (x,y,z) -> -y/(z*z), 
 						 false, true, true);
 		}
@@ -957,7 +995,9 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		}
 		
 		
-		
+		/**
+		 * Method 
+		 * */
 		private static RandomVariableInterface catchWronglyNonDeterministicRandomVariable(RandomVariableInterface randomVariable) {
 			if(!randomVariable.isDeterministic() && randomVariable.size() == 1) {
 				double time = randomVariable.getFiltrationTime();
@@ -972,13 +1012,14 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 			return randomVariable;
 		}
 
+		
 		private static RandomVariableInterface nullToNaN(RandomVariableInterface X) {
 			RandomVariableInterface nan = new RandomVariable(Double.NaN);
 			return X == null ? nan : X;
 		}
 
 		/**
-		 * executes {@link DoubleUnaryOperator} an ignores null values
+		 * executes {@link DoubleUnaryOperator} and ignores null values
 		 * @return function value, NaN if null in dependent variable
 		 */
 		public static RandomVariableInterface apply(DoubleUnaryOperator function, List<RandomVariableInterface> X) {
@@ -990,7 +1031,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		}
 			
 		/**
-		 * executes {@link DoubleBinaryOperator} an ignores null values
+		 * executes {@link DoubleBinaryOperator} ana ignores null values
 		 * @return function value, NaN if null in dependent variable
 		 */
 		public static RandomVariableInterface apply(DoubleBinaryOperator function, List<RandomVariableInterface> X) {
@@ -1002,7 +1043,7 @@ public class RandomVariableAlgorithmicDifferentiationFactory extends AbstractRan
 		}
 
 		/**
-		 * executes {@link DoubleTernaryOperator} an ignores null values
+		 * executes {@link DoubleTernaryOperator} ana ignores null values
 		 * @return function value, NaN if null in dependent variable
 		 */
 		public static RandomVariableInterface apply(DoubleTernaryOperator function, List<RandomVariableInterface> X) {
