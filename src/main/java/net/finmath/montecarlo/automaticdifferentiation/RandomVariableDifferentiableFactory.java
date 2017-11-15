@@ -73,7 +73,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 	@Override
 	public RandomVariableDifferentiableInterface createRandomVariable(double time, double value) {
 		RandomVariableInterface randomvariable = super.createRandomVariableNonDifferentiable(time, value);
-		return new RandomVariableAlgorithmicDifferentiation(randomvariable, null, this);
+		return new RandomVariableDifferentiable(randomvariable, null, this);
 	}
 
 	/* (non-Javadoc)
@@ -82,7 +82,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 	@Override
 	public RandomVariableDifferentiableInterface createRandomVariable(double time, double[] values) {		
 		RandomVariableInterface randomvariable = super.createRandomVariableNonDifferentiable(time, values);
-		return new RandomVariableAlgorithmicDifferentiation(randomvariable, null, this);
+		return new RandomVariableDifferentiable(randomvariable, null, this);
 	}
 
 	
@@ -127,18 +127,12 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 
 			// if parent information null no parents available
 			if(parentInfromation != null) {
-//				for(int parentIndex = 0; parentIndex < numberOfParents; parentIndex++){
-//					Object[] item = parentInfromation.get(parentIndex);
-//					parentTreeNodes.add(parentIndex, treeNodeOf((RandomVariableInterface)item[0]));
-//					derivatives.add(parentIndex, item[1]);
-//					parentValues.add(parentIndex, ((boolean)item[2]) ? RandomVariableAlgorithmicDifferentiation.valuesOf((RandomVariableInterface)item[0]) : null);
-//				}
 				// assign values from parentInfromation
 				parentInfromation.stream().forEachOrdered(
 						item -> {
 							parentTreeNodes.add(treeNodeOf((RandomVariableInterface)item[0]));
 							derivatives.add(item[1]);
-							parentValues.add(((boolean)item[2]) ? RandomVariableAlgorithmicDifferentiation.valuesOf((RandomVariableInterface)item[0]) : null);
+							parentValues.add(((boolean)item[2]) ? RandomVariableDifferentiable.valuesOf((RandomVariableInterface)item[0]) : null);
 						});
 				// free memory
 				parentInfromation = null;
@@ -171,13 +165,13 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 			RandomVariableInterface partialDerivative = null;
 			switch(parentTreeNodes.size()){
 			case 1:
-				partialDerivative = RandomVariableAlgorithmicDifferentiation.apply((DoubleUnaryOperator) derivativeFunction, parentValues);
+				partialDerivative = RandomVariableDifferentiable.apply((DoubleUnaryOperator) derivativeFunction, parentValues);
 				break;
 			case 2:
-				partialDerivative = RandomVariableAlgorithmicDifferentiation.apply((DoubleBinaryOperator) derivativeFunction, parentValues);
+				partialDerivative = RandomVariableDifferentiable.apply((DoubleBinaryOperator) derivativeFunction, parentValues);
 				break;
 			case 3:
-				partialDerivative = RandomVariableAlgorithmicDifferentiation.apply((DoubleTernaryOperator) derivativeFunction, parentValues);
+				partialDerivative = RandomVariableDifferentiable.apply((DoubleTernaryOperator) derivativeFunction, parentValues);
 				break;
 			default:	
 				throw new UnsupportedOperationException();
@@ -232,7 +226,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 					RandomVariableInterface childPartialDerivativeWRTParent = null;
 					
 					// for expectation operators rely on 
-					if(childTreeNode.derivatives.get(0) instanceof ExpectationInformation) {
+					if(childTreeNode.derivatives.get(i) instanceof ExpectationInformation) {
 						ExpectationInformation expectationInformation = (ExpectationInformation) childTreeNode.derivatives.get(0);
 						ExpectationType expectationOperator = expectationInformation.expectationType;
 						switch (expectationOperator) {
@@ -250,6 +244,10 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 						// for expectations the derivative is one
 						childPartialDerivativeWRTParent = one;
 						
+					} else if(childTreeNode.derivatives.get(i) instanceof RandomVariableInterface) {
+						
+						childPartialDerivativeWRTParent = (RandomVariableInterface) childTreeNode.derivatives.get(i) ;
+					
 					} else {
 						
 						// for normal functions just use the partial derivative functions that are given
@@ -367,7 +365,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 		}
 
 		private static OperatorTreeNode treeNodeOf(RandomVariableInterface randomVariable) {
-			return randomVariable instanceof RandomVariableAlgorithmicDifferentiation ? ((RandomVariableAlgorithmicDifferentiation)randomVariable).opteratorTreeNode : null;
+			return randomVariable instanceof RandomVariableDifferentiable ? ((RandomVariableDifferentiable)randomVariable).opteratorTreeNode : null;
 		}
 	}
 
@@ -380,7 +378,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 	 * @author Stefan Sedlmair
 	 * @version 1.0
 	 * */
-	public static class RandomVariableAlgorithmicDifferentiation implements RandomVariableDifferentiableInterface {
+	public static class RandomVariableDifferentiable implements RandomVariableDifferentiableInterface {
 
 		private static final long serialVersionUID = 2036109523330671173L;
 
@@ -392,7 +390,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 		/**
 		 * private constructor 
 		 * */
-		private RandomVariableAlgorithmicDifferentiation(RandomVariableInterface randomvariable, List<Object[]> parentInformation, RandomVariableDifferentiableFactory factory) {
+		private RandomVariableDifferentiable(RandomVariableInterface randomvariable, List<Object[]> parentInformation, RandomVariableDifferentiableFactory factory) {
 			// catch random variable that are of size one and not deterministic!
 			if(!randomvariable.isDeterministic() && randomvariable.size() == 1)
 				randomvariable = factory.createRandomVariableNonDifferentiable(randomvariable.getFiltrationTime(), randomvariable.get(0));
@@ -408,7 +406,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 		 * @param function {@link DoubleUnaryOperator} f(x)
 		 * @param derivativeWrtThis {@link DoubleUnaryOperator} df(x)/dx
 		 * @param keepValuesOfThis boolean f'(x) depends on x
-		 * @return new {@link RandomVariableAlgorithmicDifferentiation}
+		 * @return new {@link RandomVariableDifferentiable}
 		 */
 		public RandomVariableInterface apply(DoubleUnaryOperator function, DoubleUnaryOperator derivativeWrtThis, boolean keepValuesOfThis) {
 			// calculate result
@@ -419,7 +417,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 			parentInformation.add(new Object[]{this, derivativeWrtThis, keepValuesOfThis});
 
 			// return new random variable
-			return new RandomVariableAlgorithmicDifferentiation(result, parentInformation, getFactory());
+			return new RandomVariableDifferentiable(result, parentInformation, getFactory());
 		}
 		
 		/**
@@ -431,7 +429,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 		 * @param derivativeWrtArgument1 {@link DoubleBinaryOperator} df(x,y)/dy
 		 * @param keepValuesOfThis boolean f'(x,y) depends on x
 		 * @param keepValuesOfArgument1 boolean f'(x,y) depends on y
-		 * @return new {@link RandomVariableAlgorithmicDifferentiation}
+		 * @return new {@link RandomVariableDifferentiable}
 		 */
 		public RandomVariableInterface apply(DoubleBinaryOperator function, RandomVariableInterface argument1,
 				DoubleBinaryOperator derivativeWrtThis, DoubleBinaryOperator derivativeWrtArgument1,
@@ -446,7 +444,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 			parentInformation.add(new Object[]{argument1, derivativeWrtArgument1, keepValuesOfArgument1});
 
 			// return new random variable
-			return new RandomVariableAlgorithmicDifferentiation(result, parentInformation, getFactory());
+			return new RandomVariableDifferentiable(result, parentInformation, getFactory());
 		}
 
 		/**
@@ -461,7 +459,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 		 * @param keepValuesOfThis boolean f'(x,y,z) depends on x
 		 * @param keepValuesOfArgument1 boolean f'(x,y,z) depends on y 
 		 * @param keepValuesOfArgument2 boolean f'(x,y,z) depends on z
-		 * @return new {@link RandomVariableAlgorithmicDifferentiation}
+		 * @return new {@link RandomVariableDifferentiable}
 		 * */
 		public RandomVariableInterface apply(DoubleTernaryOperator function, 
 				RandomVariableInterface argument1, RandomVariableInterface argument2,
@@ -477,17 +475,17 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 			parentInformation.add(new Object[]{argument2, derivativeWrtArgument2, keepValuesOfArgument2});
 
 			// return new random variable
-			return new RandomVariableAlgorithmicDifferentiation(result, parentInformation, getFactory());
+			return new RandomVariableDifferentiable(result, parentInformation, getFactory());
 		}
 
 		/**
-		 * Extracts the values argument if parameter is of instance {@link RandomVariableAlgorithmicDifferentiation}
+		 * Extracts the values argument if parameter is of instance {@link RandomVariableDifferentiable}
 		 * 
 		 * @param randomVariable
-		 * @return values of randomVariable if instance of {@link RandomVariableAlgorithmicDifferentiation}
+		 * @return values of randomVariable if instance of {@link RandomVariableDifferentiable}
 		 * */
 		private static RandomVariableInterface valuesOf(RandomVariableInterface randomVariable) {
-			return randomVariable instanceof RandomVariableAlgorithmicDifferentiation ? ((RandomVariableAlgorithmicDifferentiation)randomVariable).values : randomVariable;
+			return randomVariable instanceof RandomVariableDifferentiable ? ((RandomVariableDifferentiable)randomVariable).values : randomVariable;
 		}
 
 		/* (non-Javadoc)
@@ -652,7 +650,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 		 */
 		@Override
 		public double getQuantile(double quantile, RandomVariableInterface probabilities) {
-			return ((RandomVariableAlgorithmicDifferentiation) getValues()).getValues().getQuantile(quantile, probabilities);
+			return ((RandomVariableDifferentiable) getValues()).getValues().getQuantile(quantile, probabilities);
 		}
 
 		/* (non-Javadoc)
@@ -660,7 +658,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 		 */
 		@Override
 		public double getQuantileExpectation(double quantileStart, double quantileEnd) {
-			return ((RandomVariableAlgorithmicDifferentiation) getValues()).getValues().getQuantileExpectation(quantileStart, quantileEnd);
+			return ((RandomVariableDifferentiable) getValues()).getValues().getQuantileExpectation(quantileStart, quantileEnd);
 		}
 
 		/* (non-Javadoc)
@@ -783,7 +781,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 			List<Object[]> parentInformation = new ArrayList<>();			
 			parentInformation.add(new Object[]{this, new ExpectationInformation(ExpectationType.UNCONDITIONAL) , false, true});
 
-			return new RandomVariableAlgorithmicDifferentiation(values.average(), parentInformation, factory);
+			return new RandomVariableDifferentiable(values.average(), parentInformation, factory);
 		}
 
 		@Override
@@ -792,7 +790,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 			List<Object[]> parentInformation = new ArrayList<>();			
 			parentInformation.add(new Object[]{this, new ExpectationInformation(ExpectationType.UNCONDITIONAL, conditionalExpectationOperator) , false, true});
 
-			return new RandomVariableAlgorithmicDifferentiation(values.average(), parentInformation, factory);
+			return new RandomVariableDifferentiable(values.average(), parentInformation, factory);
 		}
 		
 		@Override
@@ -989,7 +987,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 						 (x,y,z) -> +y/(z*z), 
 						 false, true, true);
 		}
-
+		
 		@Override
 		public RandomVariableInterface isNaN() {
 			return getValues().isNaN();
@@ -1029,8 +1027,8 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 				double time = randomVariable.getFiltrationTime();
 				double value = randomVariable.get(0);
 
-				if(randomVariable instanceof RandomVariableAlgorithmicDifferentiation) {
-					RandomVariableAlgorithmicDifferentiation rvAutoDiff = ((RandomVariableAlgorithmicDifferentiation) randomVariable); 
+				if(randomVariable instanceof RandomVariableDifferentiable) {
+					RandomVariableDifferentiable rvAutoDiff = ((RandomVariableDifferentiable) randomVariable); 
 					rvAutoDiff.values = rvAutoDiff.factory.createRandomVariableNonDifferentiable(time, value);
 				} else {
 					randomVariable = new RandomVariable(time, value);
@@ -1083,7 +1081,7 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 		
 		@Override
 		public String toString() {
-			return "RandomVariableAlgorithmicDifferentiation [values=" + values + ", ID=" + getID() + "]";
+			return "RandomVariableDifferentiable [values=" + values + ", ID=" + getID() + "]";
 		}
 	}
 	
