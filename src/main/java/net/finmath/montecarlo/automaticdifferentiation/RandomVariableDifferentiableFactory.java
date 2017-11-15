@@ -308,9 +308,6 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 				Long parentID = lowestEntry.getKey();
 				OperatorTreeNode parentOperatorTreeNode = lowestEntry.getValue();
 
-				// \frac{\partial f}{\partial x} | has to exist by construction!
-				RandomVariableInterface parentPartialDerivtivWRTLeaf = partialDerivatives.get(parentID);
-
 				final List<OperatorTreeNode> childTreeNodes = parentOperatorTreeNode.childTreeNodes;
 				for(int i = 0; i<childTreeNodes.size(); i++) {
 					// current child tree node (alsways exists)
@@ -319,11 +316,36 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 					// get current child id
 					Long childID = childTreeNode.id;
 
+					// \frac{\partial f}{\partial x} | has to exist by construction!
+					RandomVariableInterface parentPartialDerivtivWRTLeaf = partialDerivatives.get(parentID);
+					
 					// \frac{\partial F}{\partial f}
-					RandomVariableInterface childPartialDerivativeWRTParent = childTreeNode.getPartialDerivativeFor(parentOperatorTreeNode);
+					RandomVariableInterface childPartialDerivativeWRTParent = null;
 
 					//TODO: Conditional and Unconditional Expectation!
-					
+					if(childTreeNode.derivatives.get(0) instanceof ExpectationInformation) {
+						ExpectationInformation expectationInformation = (ExpectationInformation) childTreeNode.derivatives.get(0);
+						ExpectationType expectationOperator = expectationInformation.expectationType;
+						switch (expectationOperator) {
+						case UNCONDITIONAL:
+							// Implementation of AVERAGE (see https://ssrn.com/abstract=2995695 for details).
+							parentPartialDerivtivWRTLeaf = parentPartialDerivtivWRTLeaf.average();
+							break;
+						case CONDTIONAL:
+							// Implementation of CONDITIONAL_EXPECTATION (see https://ssrn.com/abstract=2995695 for details).
+							ConditionalExpectationEstimatorInterface estimator = expectationInformation.estimator;
+							parentPartialDerivtivWRTLeaf = estimator.getConditionalExpectation(parentPartialDerivtivWRTLeaf);
+							break;
+						}	
+						
+						// for expectations the derivative is one
+						childPartialDerivativeWRTParent = one;
+						
+					} else {
+						
+						// for normal functions just use the partial derivative functions that are given
+						childPartialDerivativeWRTParent = childTreeNode.getPartialDerivativeFor(parentOperatorTreeNode);
+					}
 					// chain rule - get already existing part of the sum
 					RandomVariableInterface existingChainRuleSum = partialDerivatives.getOrDefault(childID, zero);
 
