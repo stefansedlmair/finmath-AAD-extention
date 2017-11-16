@@ -20,6 +20,8 @@ import net.finmath.marketdata.model.curves.DiscountCurveFromForwardCurve;
 import net.finmath.marketdata.model.curves.ForwardCurve;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.BrownianMotionInterface;
+import net.finmath.montecarlo.RandomVariableLazyEvaluationFactory;
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
 import net.finmath.montecarlo.interestrate.modelplugins.AbstractLIBORCovarianceModelParametric;
@@ -55,11 +57,11 @@ public class LIBORMarketModelVegaTest {
 
 		Collection<Object[]> config = new ArrayList<>();
 		
-		config.add(new Object[]{(int) 1E2});
+//		config.add(new Object[]{(int) 1E2});
 		config.add(new Object[]{(int) 1E3});
-		config.add(new Object[]{(int) 3E3});
-		config.add(new Object[]{(int) 5E3});
-		config.add(new Object[]{(int) 7E3});
+//		config.add(new Object[]{(int) 3E3});
+//		config.add(new Object[]{(int) 5E3});
+//		config.add(new Object[]{(int) 7E3});
 //		config.add(new Object[]{(int) 1E4}); /* needs ~14GB of RAM: use '-mx14G' in run-config*/
 
 		return config;
@@ -67,7 +69,8 @@ public class LIBORMarketModelVegaTest {
 	
 	public LIBORMarketModelVegaTest(int numberOfPaths) throws CalculationException {
 		
-		AbstractRandomVariableFactory randomVariableFactory = new RandomVariableDifferentiableAADFactory();
+		AbstractRandomVariableFactory randomVariableFactory = new RandomVariableDifferentiableFactory();
+		
 		this.numberOfPaths				= numberOfPaths;
 		int numberOfFactors				= 1;
 		double correlationDecayParam	= 4.0;
@@ -169,7 +172,7 @@ public class LIBORMarketModelVegaTest {
 		/*
 		 * Create a correlation model rho_{i,j} = exp(-a * abs(T_i-T_j))
 		 */
-		LIBORCorrelationModelExponentialDecay correlationModel = new LIBORCorrelationModelExponentialDecay(
+		LIBORCorrelationModelExponentialDecay correlationModel = new LIBORCorrelationModelExponentialDecay(randomVariableFactory,
 				timeDiscretization, liborPeriodDiscretization, numberOfFactors,
 				correlationDecayParam);
 
@@ -258,9 +261,9 @@ public class LIBORMarketModelVegaTest {
 
 				gradientDifferences.put(key, diff);
 				
-//				System.out.println(key + "\t\t" + formatterValue.format(aad.getAverage()) + 
-//										 "\t\t" + formatterValue.format(fd.getAverage()) + 
-//										 "\t\t" + formatterValue.format(diff.getAverage()));
+				System.out.println(key + "\t\t" + formatterValue.format(aad.getAverage()) + 
+										 "\t\t" + formatterValue.format(fd.getAverage()) + 
+										 "\t\t" + formatterValue.format(diff.getAverage()));
 		}
 		
 		System.out.println();
