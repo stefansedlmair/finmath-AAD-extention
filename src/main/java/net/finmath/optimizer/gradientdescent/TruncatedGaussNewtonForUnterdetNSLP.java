@@ -38,9 +38,7 @@ public abstract class TruncatedGaussNewtonForUnterdetNSLP extends  AbstractGradi
 		
 		double value = getValue(parameter);
 		double[] derivative = getDerivative(parameter);
-		
-		System.out.println(numberOfIterations + ";" + (System.currentTimeMillis() - startTimeInMilliSeconds));
-		
+			
 		return value / VectorAlgbra.innerProduct(derivative, derivative);
 	}
 	

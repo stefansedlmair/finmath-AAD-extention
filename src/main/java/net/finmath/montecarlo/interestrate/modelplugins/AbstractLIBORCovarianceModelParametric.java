@@ -22,7 +22,6 @@ import net.finmath.exception.CalculationException;
 import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
-import net.finmath.montecarlo.automaticdifferentiation.forward.RandomVariableADFactory.RandomVariableAD;
 import net.finmath.montecarlo.interestrate.LIBORMarketModelInterface;
 import net.finmath.montecarlo.interestrate.LIBORModelMonteCarloSimulation;
 import net.finmath.montecarlo.interestrate.products.AbstractLIBORMonteCarloProduct;
@@ -308,7 +307,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 
 						for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) {
 							
-							final RandomVariableAD parameter = (RandomVariableAD) parameterRandomVariables[parameterIndex];
+							final RandomVariableDifferentiableInterface parameter = (RandomVariableDifferentiableInterface) parameterRandomVariables[parameterIndex];
 							
 							Callable<Map<Long, RandomVariableInterface>> worker = new Callable<Map<Long,RandomVariableInterface>>() {
 								
