@@ -7,8 +7,6 @@ package net.finmath.montecarlo.interestrate.modelplugins;
 
 import java.util.Arrays;
 
-import net.finmath.montecarlo.RandomVariable;
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
 
@@ -59,13 +57,13 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
         // @todo numberOfComponents should be stored as a member?!
         int numberOfComponents = getLiborPeriodDiscretization().getNumberOfTimeSteps();
         
-        double factorWeight = 0.0;
+        RandomVariableInterface factorWeight = null;
         for(int componentIndex=0; componentIndex<numberOfComponents; componentIndex++) {
-            double factorElement = correlationModel.getFactorLoading(timeIndex, factor, componentIndex);            
-            factorWeight +=  factorElement*factorElement;                                                                                                                 
+            RandomVariableInterface factorElement = correlationModel.getFactorLoading(timeIndex, factor, componentIndex);            
+            factorWeight = factorWeight == null ? factorElement.squared() : factorWeight.add(factorElement.squared());                                                                                                                 
         }
 
-        factorLoadingPseudoInverse = factorLoadingPseudoInverse.mult(1/factorWeight);
+        factorLoadingPseudoInverse = factorLoadingPseudoInverse.div(factorWeight);
 
         return factorLoadingPseudoInverse;		
 	}
@@ -82,7 +80,7 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
     	RandomVariableInterface volatilityOfComponent1 = volatilityModel.getVolatility(timeIndex, component1);
     	RandomVariableInterface volatilityOfComponent2 = volatilityModel.getVolatility(timeIndex, component2);
     	
-    	double correlationOfComponent1And2 = correlationModel.getCorrelation(timeIndex, component1, component2);
+    	RandomVariableInterface correlationOfComponent1And2 = correlationModel.getCorrelation(timeIndex, component1, component2);
     	
     	RandomVariableInterface covariance = volatilityOfComponent1.mult(volatilityOfComponent2).mult(correlationOfComponent1And2);
     	
@@ -93,7 +91,7 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
 	public RandomVariableInterface[] getParameterAsRandomVariable() {
 		// get parameters
 		RandomVariableInterface[] volatilityParameter = volatilityModel.getParameterAsRandomVariable();
-		RandomVariableInterface[] correlationParameter = null; //correlationModel.getParameterAsRandomVariable();
+		RandomVariableInterface[] correlationParameter = correlationModel.getParameterAsRandomVariable();
 
 		// cover case of not calibrateable models
 		if(volatilityParameter  == null) volatilityParameter  = new RandomVariableInterface[] {};
