@@ -16,7 +16,7 @@ import org.junit.runners.Parameterized.Parameters;
 
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.automaticdifferentiation.AbstractRandomVariableDifferentiableFactory;
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableAlgorithmicDifferentiationFactory;
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.randomnumbers.MersenneTwister;
 import net.finmath.stochastic.RandomVariableInterface;
@@ -32,7 +32,7 @@ public class RandomVariableADTest {
 		List<Object[]> config = new ArrayList<>();
 		
 		config.add(new Object[]{ new RandomVariableADFactory(), "AD"});
-		config.add(new Object[]{ new RandomVariableAlgorithmicDifferentiationFactory(), "AlgorthmicDifferentiation"});
+		config.add(new Object[]{ new RandomVariableDifferentiableFactory(), "AlgorthmicDifferentiation"});
 
 		return config;
 	}
@@ -256,7 +256,7 @@ public class RandomVariableADTest {
 		Map<Long, RandomVariableInterface> partialDerivatives = ((RandomVariableDifferentiableInterface) x).getAllPartialDerivatives();
 		long end = System.currentTimeMillis();
 		
-		System.out.print(((end-start)/1E3));
+		System.out.println(((end-start)/1E3));
 		
 		RandomVariableInterface analyticResult = x.mult(x.squared().exp());
 		for(int i=0; i < numberOfFunctionRepetitions; i++) {

@@ -18,6 +18,8 @@ import net.finmath.montecarlo.BrownianMotion;
 import net.finmath.montecarlo.BrownianMotionInterface;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.RandomVariableFactory;
+import net.finmath.montecarlo.RandomVariableLazyEvaluation;
+import net.finmath.montecarlo.RandomVariableLazyEvaluationFactory;
 import net.finmath.montecarlo.automaticdifferentiation.AbstractRandomVariableDifferentiableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
@@ -39,7 +41,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 	public static Collection<Object[]> data(){
 		return Arrays.asList(new Object[][] {
 			{new RandomVariableDifferentiableAADFactory(new RandomVariableFactory()) },
-			{new RandomVariableAlgorithmicDifferentiationFactory(new RandomVariableFactory()) },
+			{new RandomVariableDifferentiableFactory(new RandomVariableLazyEvaluationFactory()) },
 
 
 		});
