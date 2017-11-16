@@ -38,8 +38,9 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 		this.errorTolerance = errorTolerance;
 
 		this.optimizerType 	= optimizerType;
-		this.properties 	= (properties == null) ? new HashMap<>() : properties;
+		this.properties 	= new HashMap<>();
 		
+		if(properties != null) this.properties.putAll(properties); 
 		this.properties.put("executor", executor);
 		this.properties.put("executorShutdownWhenDone", executorShutdownWhenDone);
 		
@@ -139,7 +140,7 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				public void setValues(double[] parameters, double[] values) throws SolverException {
 					objectiveFunction.setValues(parameters, values);
 				}
-			}).setErrorTolerance(errorTolerance);
+			}).cloneWithModifiedParameters(properties);
 			break;
 		default:
 			throw new UnknownError();		
@@ -156,6 +157,10 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 	public OptimizerInterface getOptimizer(DerivativeFunction objectiveFunction, double[] initialParameters, double[] lowerBound, double[] upperBound, double[] parameterStep, double[] targetValues) {
 		OptimizerInterface optimizer = null;
 
+		properties.put("lowerBound",lowerBound);
+		properties.put("upperBound",upperBound);
+		properties.put("finiteDifferenceStepSizes",parameterStep);
+		
 		switch (optimizerType) {
 		case BroydenFletcherGoldfarbShanno:
 			if(targetValues.length > 1) throw new IllegalArgumentException();
@@ -239,7 +244,7 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				public void setDerivatives(double[] parameters, double[][] derivatives) throws SolverException {
 					objectiveFunction.setDerivatives(parameters, derivatives);
 				}
-			}).setErrorTolerance(errorTolerance);
+			}).cloneWithModifiedParameters(properties);
 			break;
 		default:
 			throw new UnknownError();		

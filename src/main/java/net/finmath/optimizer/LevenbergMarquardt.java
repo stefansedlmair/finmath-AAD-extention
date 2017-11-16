@@ -8,6 +8,7 @@ package net.finmath.optimizer;
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
@@ -799,6 +800,28 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
 
 		if(isUseBestParametersAsInitialParameters && this.done()) clonedOptimizer.initialParameters = this.getBestFitParameters();
 
+		return clonedOptimizer;
+	}
+	
+	public LevenbergMarquardt cloneWithModifiedParameters(Map<String, Object> properties){
+		LevenbergMarquardt clonedOptimizer = null;
+		try {
+			clonedOptimizer = (LevenbergMarquardt)clone();
+				
+			clonedOptimizer.targetValues 	= (double[]) 	properties.getOrDefault("targetValues", this.targetValues);
+			clonedOptimizer.weights 		= (double[])	properties.getOrDefault("weights", this.weights);
+			clonedOptimizer.maxIteration 	= (int) 		properties.getOrDefault("maxNumberOfIterations", this.maxIteration);
+			clonedOptimizer.maxRunTime		= (long) 		properties.getOrDefault("maxRunTimeInMillis", this.maxRunTime);
+			clonedOptimizer.lambda				= (double) 	properties.getOrDefault("lambda", this.lambda);
+			clonedOptimizer.lambdaDivisor		= (double) 	properties.getOrDefault("lambdaDivisor", this.lambdaDivisor);
+			clonedOptimizer.lambdaMultiplicator	= (double) 	properties.getOrDefault("lambdaMultiplicator", this.lambdaMultiplicator);
+			clonedOptimizer.errorRootMeanSquaredTolerance 		= (double) 	properties.getOrDefault("errorTolerance", this.errorRootMeanSquaredTolerance);
+			clonedOptimizer.isParameterCurrentDerivativeValid 	= (boolean) properties.getOrDefault("isParameterCurrentDerivativeValid", this.isParameterCurrentDerivativeValid);;
+			clonedOptimizer.parameterSteps 				= (double[]) 		properties.getOrDefault("finiteDifferenceStepSizes", this.parameterSteps);
+			clonedOptimizer.executor 					= (ExecutorService) properties.getOrDefault("executor",	this.executor);
+			clonedOptimizer.executorShutdownWhenDone	= (boolean) 		properties.getOrDefault("executorShutdownWhenDone",	this.executorShutdownWhenDone);
+
+		} catch (CloneNotSupportedException e) {e.printStackTrace();}
 		return clonedOptimizer;
 	}
 	
