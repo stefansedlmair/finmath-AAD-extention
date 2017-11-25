@@ -11,6 +11,9 @@ package net.finmath.optimizer;
  *
  */
 public interface OptimizerInterfaceAAD extends OptimizerInterface {
+	
+	public String getCalibrationLog();
+	public long getRunTime();
 
 	public interface DerivativeFunction extends ObjectiveFunction {
 	

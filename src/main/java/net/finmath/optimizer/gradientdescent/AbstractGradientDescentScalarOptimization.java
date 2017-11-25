@@ -44,6 +44,8 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 
 	protected int 		maxNumberOfIterations;
 	protected long		startTimeInMilliSeconds;
+	protected long		endTimeInMilliSeconds = Long.MIN_VALUE;
+
 	protected long 		maxRunTimeInMilliSeconds;
 	
 	protected double[] finiteDifferenceStepSizes;
@@ -55,6 +57,8 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 	protected double   targetValue;
 
 	protected boolean 	allowWorsening;
+	
+	public String log = "";
 
 	protected ExecutorService 	executor;
 	protected boolean			executorShutdownWhenDone;
@@ -104,6 +108,7 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 	 */
 	@Override
 	public void run() throws SolverException {
+		startTimeInMilliSeconds = System.currentTimeMillis();
 		try {
 			double stepSize = Double.NaN;
 
@@ -112,7 +117,6 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 			currentAccuracy = Math.abs(currentValue - targetValue);
 			bestAccuracy = currentAccuracy;
 
-			startTimeInMilliSeconds = System.currentTimeMillis();
 			
 			while(!isDone()){
 				// get step size for this gradient descent algorithm
@@ -127,8 +131,6 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 				// update accuracy and store last one to see advance
 				double lastAccuracy = currentAccuracy;
 				currentAccuracy = Math.abs(currentValue - targetValue);
-				
-				System.out.println(numberOfIterations + ";" + (System.currentTimeMillis() - startTimeInMilliSeconds) + ";" + currentAccuracy);
 				
 				// store best result
 				if(currentAccuracy < bestAccuracy){			
@@ -152,7 +154,7 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 				executor = null;
 			}
 		}
-
+		endTimeInMilliSeconds = System.currentTimeMillis();
 	}
 
 	protected abstract double getStepSize(double[] currentParameter) throws SolverException;
@@ -190,6 +192,8 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 	}
 
 	protected boolean isDone(){
+		log += getRunTime() + "\t" + currentAccuracy + "\n";
+		// check all cancellation criteria
 		return 	(maxNumberOfIterations <= getIterations())
 				||
 				(maxRunTimeInMilliSeconds <= (System.currentTimeMillis() - startTimeInMilliSeconds))
@@ -299,6 +303,17 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 		this.executorShutdownWhenDone	= (boolean) 	properties.getOrDefault("executorShutdownWhenDone",	cloneFather.executorShutdownWhenDone);
 		this.allowWorsening 			= (boolean) 	properties.getOrDefault("allowWorsening",			cloneFather.allowWorsening);
 		this.executor 					= (ExecutorService) properties.getOrDefault("executor",				cloneFather.executor);
+	}
+	
+	@Override
+	public String getCalibrationLog() {
+		return log;
+	}
+	
+	@Override
+	public long getRunTime() {
+		if(endTimeInMilliSeconds < startTimeInMilliSeconds) return System.currentTimeMillis() - startTimeInMilliSeconds;
+		return endTimeInMilliSeconds - startTimeInMilliSeconds;
 	}
 	
 	@Override

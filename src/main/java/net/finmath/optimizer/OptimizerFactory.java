@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import net.finmath.optimizer.LevenbergMarquardt.RegularizationMethod;
 import net.finmath.optimizer.OptimizerInterface.ObjectiveFunction;
 import net.finmath.optimizer.OptimizerInterfaceAAD.DerivativeFunction;
 import net.finmath.optimizer.gradientdescent.GradientDescentArmijosRule;
@@ -23,7 +24,12 @@ import net.finmath.optimizer.quasinewton.BroydenFletcherGoldfarbShanno;
 public class OptimizerFactory implements OptimizerFactoryInterface {
 
 	public static enum OptimizerType {
-		LevenbergMarquardt, SimpleGradientDescent, GradientDescentArmijo, TruncatedGaussNetwonForUnderdeterminedNSLP, BroydenFletcherGoldfarbShanno
+		Levenberg, 
+		LevenbergMarquardt, 
+		SimpleGradientDescent, 
+		GradientDescentArmijo, 
+		TruncatedGaussNetwonForUnderdeterminedNSLP, 
+		BroydenFletcherGoldfarbShanno
 	}
 
 	private final int		maxIterations;
@@ -131,6 +137,9 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				}
 			}).cloneWithModifiedParameters(properties);
 			break;
+		case Levenberg:
+			// add regularization-method to property map and initialize a LevenbergMarquardt 
+			properties.put("RegularizationMethod", RegularizationMethod.LEVENBERG);
 		case LevenbergMarquardt:
 			optimizer = (new LevenbergMarquardt(initialParameters, targetValues, maxIterations, (ExecutorService)properties.get("executor")) {
 
@@ -230,6 +239,9 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				}
 			}).cloneWithModifiedParameters(properties);
 			break;
+		case Levenberg:
+			// add regularization-method to property map and initialize a LevenbergMarquardt 
+			properties.put("RegularizationMethod", RegularizationMethod.LEVENBERG);
 		case LevenbergMarquardt:
 			optimizer = (new LevenbergMarquardt(initialParameters, targetValues, maxIterations, (ExecutorService)properties.get("executor")) {
 
