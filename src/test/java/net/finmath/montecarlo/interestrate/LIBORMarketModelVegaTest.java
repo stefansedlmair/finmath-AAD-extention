@@ -172,7 +172,7 @@ public class LIBORMarketModelVegaTest {
 		/*
 		 * Create a correlation model rho_{i,j} = exp(-a * abs(T_i-T_j))
 		 */
-		LIBORCorrelationModelExponentialDecay correlationModel = new LIBORCorrelationModelExponentialDecay(randomVariableFactory,
+		LIBORCorrelationModelExponentialDecay correlationModel = new LIBORCorrelationModelExponentialDecay(
 				timeDiscretization, liborPeriodDiscretization, numberOfFactors,
 				correlationDecayParam);
 
