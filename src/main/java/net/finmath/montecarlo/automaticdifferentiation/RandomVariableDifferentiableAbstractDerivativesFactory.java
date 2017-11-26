@@ -197,11 +197,9 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 		}
 
 		/**
-		 * Propergate the derivatives along any direction of the Operator tree:
+		 * Propagate the derivatives along any direction of the Operator tree:
 		 * 
 		 * <center> works for AD and AAD </center>
-		 * 
-		 * TODO: This class could be multi-threaded. It does not mater in which order the TreeNodes will be propagated.
 		 * 
 		 * @param derivatives {@link Map} of all derivatives already calculated
 		 * @param treeNodeOfOrigin the {@link OperatorTreeNode} from which we are propagating the derivative from
@@ -215,9 +213,6 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			
 			// derivative from root/leaf of tree wrt to treeNodeOfOrigin
 			final RandomVariableInterface derivative = derivatives.get(treeNodeOfOrigin.id);
-			
-			// NOTE: does not need to be sequentially 
-			ArrayList<Future<Void>> futureTreeNodePropergation = new ArrayList<>(treeNodes.size());
 			
 			for(int parentIndex = 0; parentIndex < treeNodes.size(); parentIndex++) {
 				// declare final index for callable
@@ -247,32 +242,6 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 					// add parent to ToDo-list to propagate derivatives further downwards
 					treeNodesToPropagte.put(ID, treeNode);
 				});
-				
-				
-
-			
-				//				OperatorTreeNode treeNode = treeNodes.get(parentIndex);
-//
-//				// if parentTreeNode is null, derivative is zero, thus continue with next treeNode
-//				if(treeNode == null) continue;
-//
-//				// get the current parent id
-//				final Long ID = treeNode.id;
-//				
-//				// get partial derivative of treeNodeOfOrigin wrt the treeNode and multiply it with its derivative
-//				RandomVariableInterface newAddendOfChainRuleSum = treeNodeOfOrigin.getDerivativeProduct(parentIndex, derivative);
-//				
-//				// chain rule - get already existing part of the sum, if it does not exist yet start the sum with zero
-//				RandomVariableInterface existingChainRuleSum = derivatives.getOrDefault(ID, PartialDerivativeFunction.zero);
-//
-//				// add existing and new part of the derivative sum 
-//				RandomVariableInterface chainRuleSum = existingChainRuleSum.add(newAddendOfChainRuleSum);
-//
-//				// put result back in derivatives
-//				derivatives.put(ID, chainRuleSum);
-//
-//				// add parent to ToDo-list to propagate derivatives further downwards
-//				treeNodesToPropagte.put(ID, treeNode);
 			}
 			executor.shutdown();
 			while(!executor.isTerminated()){/*do nothing until all jobs finished*/}

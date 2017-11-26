@@ -292,9 +292,6 @@ public class RandomVariableDifferentiableInterfaceTest {
 			RandomVariableDifferentiableInterface sum =  (RandomVariableDifferentiableInterface) randomVariableFactory.createRandomVariable(0.0);
 			for(int i = 0; i < numberOfIterations; i++){
 				System.out.println(i + "\t" + ((Runtime.getRuntime().totalMemory() /*- Runtime.getRuntime().freeMemory()*/)/1024.0/1024.0) + "MB / " + (Runtime.getRuntime().maxMemory()/1024.0/1024.0) + "MB");
-				System.out.println(sum);
-				if(i == 123)
-					sum = sum;
 				sum = (RandomVariableDifferentiableInterface) sum.add(aadRandomVariable01);
 			}
 
