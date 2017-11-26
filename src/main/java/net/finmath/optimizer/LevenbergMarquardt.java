@@ -601,7 +601,13 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
 	 */
 	boolean done() {
 //		System.out.println(Math.sqrt(errorMeanSquaredCurrent) + " \t" + errorRootMeanSquaredChange + " \t" + lambda);
-		calibrationLog += getRunTime() + "\t"+ Math.sqrt(errorMeanSquaredCurrent) + "\n";
+		// remember performance of optimizer
+		String lastIterationLog = getRunTime() + "\t" + Math.sqrt(errorMeanSquaredCurrent);
+		calibrationLog += lastIterationLog + "\n";
+
+		// print result to visualize convergence
+		System.out.println(lastIterationLog);
+
 		// The solver terminates if...
 		return 
 				// Maximum number of iterations is reached

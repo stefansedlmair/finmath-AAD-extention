@@ -192,7 +192,13 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 	}
 
 	protected boolean isDone(){
-		log += getRunTime() + "\t" + currentAccuracy + "\n";
+		// remember performance of optimizer
+		String lastIterationLog = getRunTime() + "\t" + currentAccuracy;
+		log += lastIterationLog + "\n";
+		
+		// print result to visualize convergence
+		System.out.println(lastIterationLog);
+		
 		// check all cancellation criteria
 		return 	(maxNumberOfIterations <= getIterations())
 				||
