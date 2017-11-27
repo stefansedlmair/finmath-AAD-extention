@@ -28,7 +28,7 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 		LevenbergMarquardt, 
 		SimpleGradientDescent, 
 		GradientDescentArmijo, 
-		TruncatedGaussNetwonForUnderdeterminedNSLP, 
+		TruncatedGaussNetwon, 
 		BroydenFletcherGoldfarbShanno
 	}
 
@@ -125,7 +125,7 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				}
 			}).cloneWithModifiedParameters(properties);
 			break;
-		case TruncatedGaussNetwonForUnderdeterminedNSLP:
+		case TruncatedGaussNetwon:
 			if(targetValues.length > 1) throw new IllegalArgumentException();
 			optimizer = (new TruncatedGaussNewtonForUnterdetNSLP(initialParameters, targetValues[0], errorTolerance, maxIterations) {
 
@@ -222,7 +222,7 @@ public class OptimizerFactory implements OptimizerFactoryInterface {
 				}
 			}).cloneWithModifiedParameters(properties);
 			break;
-		case TruncatedGaussNetwonForUnderdeterminedNSLP:
+		case TruncatedGaussNetwon:
 			if(targetValues.length > 1) throw new IllegalArgumentException();
 			optimizer = (new TruncatedGaussNewtonForUnterdetNSLP(initialParameters, targetValues[0], errorTolerance, maxIterations) {
 

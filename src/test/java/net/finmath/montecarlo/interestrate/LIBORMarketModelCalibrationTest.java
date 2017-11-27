@@ -101,7 +101,7 @@ public class LIBORMarketModelCalibrationTest {
 
 		// Caibration for VOLATILITYNORMALS
 		// vector valued calibration
-//		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.FINITE_DIFFERENCES, OptimizerType.LevenbergMarquardt, ValueUnit.VOLATILITYNORMAL});
+		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.FINITE_DIFFERENCES, OptimizerType.LevenbergMarquardt, ValueUnit.VOLATILITYNORMAL});
 		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ALGORITHMIC_DIFFERENCIATION, OptimizerType.LevenbergMarquardt, ValueUnit.VOLATILITYNORMAL});
 		config.add(new Object[] {OptimizerSolverType.VECTOR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.LevenbergMarquardt, ValueUnit.VOLATILITYNORMAL});
 
@@ -109,7 +109,7 @@ public class LIBORMarketModelCalibrationTest {
 		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.Levenberg, ValueUnit.VOLATILITYNORMAL});
 		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.SimpleGradientDescent, ValueUnit.VOLATILITYNORMAL});
 		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.GradientDescentArmijo, ValueUnit.VOLATILITYNORMAL});
-		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.TruncatedGaussNetwonForUnderdeterminedNSLP, ValueUnit.VOLATILITYNORMAL});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.TruncatedGaussNetwon, ValueUnit.VOLATILITYNORMAL});
 		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.BroydenFletcherGoldfarbShanno, ValueUnit.VOLATILITYNORMAL});
 
 		// Caibration for VALUES
@@ -122,7 +122,7 @@ public class LIBORMarketModelCalibrationTest {
 		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.Levenberg, ValueUnit.VALUE});
 		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.SimpleGradientDescent, ValueUnit.VALUE});
 		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.GradientDescentArmijo, ValueUnit.VALUE});
-		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.TruncatedGaussNetwonForUnderdeterminedNSLP, ValueUnit.VALUE});
+		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.TruncatedGaussNetwon, ValueUnit.VALUE});
 		config.add(new Object[] {OptimizerSolverType.SKALAR, OptimizerDerivativeType.ADJOINT_ALGORITHMIC_DIFFERENCIATION, OptimizerType.BroydenFletcherGoldfarbShanno, ValueUnit.VALUE});
 
 		return config;
@@ -152,10 +152,15 @@ public class LIBORMarketModelCalibrationTest {
 		testProperties.put("OptimizerType", optimizerType);
 		testProperties.put("DerivativeType", derivativeType);
 		testProperties.put("SolverType", solverType);
+		testProperties.put("ValueUnit", valueUnit);
+
+		testProperties.put("numberOfPathsATM", (int)1E3);
+		testProperties.put("numberOfPathsSwaptionSmile",(int) 1E5);
+	
 		
-		testProperties.put("numberOfPaths", (int) 1E3);
+		testProperties.put("numberOfThreads", 4);
 		testProperties.put("maxIterations", Integer.MAX_VALUE);
-		testProperties.put("maxRunTime", (long) (10 * /*min->sec*/ 60 * /*sec->millis*/ 1E3));
+		testProperties.put("maxRunTime", (long) (30 * /*min->sec*/ 60 * /*sec->millis*/ 1E3));
 	}
 
 	@Test
@@ -186,7 +191,7 @@ public class LIBORMarketModelCalibrationTest {
 		final double errorTolerance 	= (double) 	properties.getOrDefault(	"errorTolerance", 0.0);
 		final int numberOfThreads 		= (int) 	properties.getOrDefault(	"numberOfThreads", 2);
 		final int numberOfFactors 		= (int) 	properties.getOrDefault(	"numberOfFactors", 1);
-		final int numberOfPaths 		= (int) 	properties.getOrDefault(	"numberOfPaths", (int)1E3);
+		final int numberOfPaths 		= (int) 	properties.getOrDefault(	"numberOfPathsATM", (int)1E5);
 		final int seed 					= (int) 	properties.getOrDefault(	"seed", 1234);
 
 		OptimizerFactoryInterface optimizerFactory = (OptimizerFactoryInterface) properties.get("OptimizerFactory");
@@ -359,7 +364,7 @@ public class LIBORMarketModelCalibrationTest {
 		final double errorTolerance 	= (double) 	properties.getOrDefault(	"errorTolerance", 0.0);
 		final int numberOfThreads 		= (int) 	properties.getOrDefault(	"numberOfThreads", 2);
 		final int numberOfFactors 		= (int) 	properties.getOrDefault(	"numberOfFactors", 1);
-		final int numberOfPaths 		= (int) 	properties.getOrDefault(	"numberOfPaths", (int)1E3);
+		final int numberOfPaths 		= (int) 	properties.getOrDefault(	"numberOfPathsSwaptionSmile", (int)1E4);
 		final int seed 					= (int) 	properties.getOrDefault(	"seed", 1234);
 
 		OptimizerFactoryInterface optimizerFactory = (OptimizerFactoryInterface) properties.get("OptimizerFactory");
