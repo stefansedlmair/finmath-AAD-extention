@@ -16,7 +16,7 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 		super(initialParameter, targetValue, errorTolerance, maxNumberOfIterations, maxRunTime, null, null, errorTolerance <= 0.0);
 
 		this.maxStepSize = Math.abs(VectorAlgbra.getAverage(initialParameter)) * 10;
-		this.minStepSize = maxStepSize * 1E-12;
+		this.minStepSize = maxStepSize * 1E-15;
 		this.lastStepSize = maxStepSize;
 
 		this.alpha = 2.0;
@@ -64,8 +64,6 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 			rightSide = value + c1 * stepSize * derivativeL2Squared;
 
 			isStepSizeNeedsAdjustment = (leftSide > rightSide || Double.isNaN(leftSide)) && stepSize > minStepSize;
-
-			System.out.println(numberOfIterations + ";" + (System.currentTimeMillis() - startTimeInMilliSeconds) +";"+ currentAccuracy);
 		};
 
 		lastStepSize = stepSize;
