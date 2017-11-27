@@ -260,8 +260,10 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 		}
 		
 		private int indexOfTreeNodeInParentTreeNodes(OperatorTreeNode treeNode){
-			for(int index = 0; index < parentTreeNodes.size(); index++)
-				if(parentTreeNodes.get(index).id == treeNode.id) return index;
+			for(int index = 0; index < parentTreeNodes.size(); index++){
+				OperatorTreeNode parentTreeNode = parentTreeNodes.get(index);
+				if(parentTreeNode != null && parentTreeNode.id == treeNode.id) return index;
+			}
 			return -1;
 		}
 
@@ -994,7 +996,7 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			return new RandomVariableDifferentiableAbstract(
 					values.accrue(rate, periodLength),
 					Arrays.asList(this, rate),
-					new PartialDerivativeFunction(null, rate) {	
+					new PartialDerivativeFunction(this, rate) {	
 						@Override
 						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
 							switch (parameterIndex) {
@@ -1150,16 +1152,17 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 		@Override
 		public RandomVariableInterface addSumProduct(List<RandomVariableInterface> factor1,
 				List<RandomVariableInterface> factor2) {
-			List<RandomVariableInterface> parents = Arrays.asList(this);
+			List<RandomVariableInterface> parents = new ArrayList<>();
+			parents.add(this);
 			parents.addAll(factor1);
 			parents.addAll(factor2);
 
-			List<Boolean> keepValues = new ArrayList<>(parents.size());
-			keepValues.replaceAll(item -> true);
-			keepValues.add(0, false);			
+			List<Boolean> keepValues = new ArrayList<>();
+			keepValues.add(false);
+			for(int i = 0; i < parents.size()-1;i++) keepValues.add(true);
 
 			return new RandomVariableDifferentiableAbstract(
-					addSumProduct(factor1, factor2),
+					values.addSumProduct(factor1, factor2),
 					parents,
 					new PartialDerivativeFunction(parents, keepValues) {
 
