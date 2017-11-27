@@ -22,6 +22,7 @@ import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.IntToDoubleFunction;
 import java.util.stream.DoubleStream;
+import java.util.stream.IntStream;
 
 import org.apache.commons.math3.util.FastMath;
 
@@ -204,23 +205,20 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 		 * @param derivatives {@link Map} of all derivatives already calculated
 		 * @param treeNodeOfOrigin the {@link OperatorTreeNode} from which we are propagating the derivative from
 		 * @param treeNodes the {@link OperatorTreeNode}s to which the derivatives will be propagated
-		 * @param treeNodesToPropagte {@link TreeMap} of {@link OperatorTreeNode}s that still have to be propagated 
+		 * @param treeNodesToPropagte {@link ConcurrentSkipListMap} of {@link OperatorTreeNode}s that still have to be propagated 
 		 * */
 		private static void propergateTreeNodesThroughOperatorTree(Map<Long, RandomVariableInterface> derivatives, 
 				OperatorTreeNode treeNodeOfOrigin, List<OperatorTreeNode> treeNodes, ConcurrentSkipListMap<Long, OperatorTreeNode> treeNodesToPropagte) {
-			
-			ExecutorService executor = Executors.newFixedThreadPool(2);
+						
+			final long originID = treeNodeOfOrigin.id;
 			
 			// derivative from root/leaf of tree wrt to treeNodeOfOrigin
-			final RandomVariableInterface derivative = derivatives.get(treeNodeOfOrigin.id);
+			final RandomVariableInterface derivative = derivatives.get(originID);
 			
-			for(int parentIndex = 0; parentIndex < treeNodes.size(); parentIndex++) {
-				// declare final index for callable
-				final int parentIndex2 = parentIndex;
-				
-				executor.submit(() -> {
-					OperatorTreeNode treeNode = treeNodes.get(parentIndex2);
-
+			// each treeNode can be propagated independently 
+			IntStream.range(0, treeNodes.size()).forEach(treeNodeIndex -> {
+					OperatorTreeNode treeNode = treeNodes.get(treeNodeIndex);
+			
 					// if parentTreeNode is null, derivative is zero, thus continue with next treeNode
 					if(treeNode == null) return;
 
@@ -228,7 +226,10 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 					final Long ID = treeNode.id;
 					
 					// get partial derivative of treeNodeOfOrigin wrt the treeNode and multiply it with its derivative
-					RandomVariableInterface newAddendOfChainRuleSum = treeNodeOfOrigin.getDerivativeProduct(parentIndex2, derivative);
+					RandomVariableInterface newAddendOfChainRuleSum = (originID > ID) ? 
+							/*AAD*/	treeNodeOfOrigin.getDerivativeProduct(treeNode, derivative):
+							/* AD*/	treeNode.getDerivativeProduct(treeNodeOfOrigin, derivative);
+							
 					
 					// chain rule - get already existing part of the sum, if it does not exist yet start the sum with zero
 					RandomVariableInterface existingChainRuleSum = derivatives.getOrDefault(ID, PartialDerivativeFunction.zero);
@@ -242,17 +243,26 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 					// add parent to ToDo-list to propagate derivatives further downwards
 					treeNodesToPropagte.put(ID, treeNode);
 				});
-			}
-			executor.shutdown();
-			while(!executor.isTerminated()){/*do nothing until all jobs finished*/}
 		}
 
-		private RandomVariableInterface getDerivativeProduct(int parameterIndex, RandomVariableInterface derivative) {
+		private RandomVariableInterface getDerivativeProduct(OperatorTreeNode treeNode, RandomVariableInterface derivative) {
 			// if no derivative function exists the partial derivative w.r.t. some parameter will always be zero
 			if(derivatives == null) return PartialDerivativeFunction.zero;
+						
+			// map TreeNode to index
+			int parameterIndex = indexOfTreeNodeInParentTreeNodes(treeNode); 
+			
+			// if parameterIndex smaller zero, this value is independent of this ID
+			if(parameterIndex < 0) return PartialDerivativeFunction.zero;
 			
 			// calculate the multiplication for the chain rule sum
 			return derivatives.getDerivativeProduct(parameterIndex, derivative);
+		}
+		
+		private int indexOfTreeNodeInParentTreeNodes(OperatorTreeNode treeNode){
+			for(int index = 0; index < parentTreeNodes.size(); index++)
+				if(parentTreeNodes.get(index).id == treeNode.id) return index;
+			return -1;
 		}
 
 		/**
@@ -283,36 +293,10 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 
 				final List<OperatorTreeNode> childTreeNodes = parentOperatorTreeNode.childTreeNodes;
 				
-				if(childTreeNodes == null) continue;
+				if(childTreeNodes.isEmpty()) continue;
 				
 				propergateTreeNodesThroughOperatorTree(partialDerivatives, parentOperatorTreeNode, childTreeNodes, treeNodesToPropagte);
-				
-//				for(int i = 0; i<childTreeNodes.size(); i++) {
-//					// current child tree node (alsways exists)
-//					OperatorTreeNode childTreeNode = childTreeNodes.get(i);
-//
-//					// get current child id
-//					Long childID = childTreeNode.id;
-//
-//					// \frac{\partial f}{\partial x} | has to exist by construction!
-//					RandomVariableInterface parentPartialDerivtivWRTLeaf = partialDerivatives.get(parentID);
-//
-//					// chain rule - get already existing part of the sum
-//					RandomVariableInterface existingChainRuleSum = partialDerivatives.getOrDefault(childID, zero);
-//
-//					// \frac{\partial F}{\partial x}
-//					RandomVariableInterface newPartOfChainRuleSum = childTreeNode.getDerivativeProduct(i, parentPartialDerivtivWRTLeaf);
-//					
-//					// add existing and new part of the derivative sum 
-//					RandomVariableInterface chainRuleSum = existingChainRuleSum.add(newPartOfChainRuleSum);
-//
-//					// put result back in reverseGradient
-//					partialDerivatives.put(childID, chainRuleSum);
-//
-//					// add child to ToDo-list to propagate derivatives further upwards
-//					treeNodesToPropagte.put(childID, childTreeNode);
-//				}
-
+	
 				// if not defined otherwise delete parent after derivative has been propagated upwards to children
 				if(!factory.retainAllTreeNodes) partialDerivatives.remove(parentID); 
 			}
