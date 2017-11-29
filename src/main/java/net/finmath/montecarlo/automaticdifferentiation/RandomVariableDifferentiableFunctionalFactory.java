@@ -134,11 +134,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			
 			// get factory
 			this.factory = factory;
-
-			// initialize parent tree nodes if needed
-			if(factory.enableAAD) 	this.parentTreeNodes = parents;
-			else 					this.parentTreeNodes = null;
-
+ 
 			// only connect to children if AD is enabled
 			if(factory.enableAD) {
 				// start with an empty list
@@ -152,9 +148,15 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			else this.childTreeNodes = null;
 			
 			// in any case initialize partial derivative function (holds values of parents)
-			if(factory.enableAD || factory.enableAAD) this.derivatives = partialDerivativeFunction;
+			if(factory.enableAD || factory.enableAAD){
+				this.derivatives = partialDerivativeFunction;
+				this.parentTreeNodes = parents;
+			}
 			// in case neither algorithmic differentiation technique is selected do not save partial derivative function either
-			else									  this.derivatives = null;
+			else{ 
+				this.derivatives = null;
+				this.parentTreeNodes = null;
+			}
 
 		}
 
@@ -248,21 +250,13 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			if(derivatives == null) return randomVariableFromConstant(0.0);
 						
 			// map TreeNode to index
-			int parameterIndex = indexOfTreeNodeInParentTreeNodes(treeNode); 
+			int parameterIndex = parentTreeNodes.indexOf(treeNode); 
 			
 			// if parameterIndex smaller zero, this value is independent of this ID
 			if(parameterIndex < 0) return randomVariableFromConstant(0.0);
 			
 			// calculate the multiplication for the chain rule sum
 			return derivatives.getDerivativeProduct(parameterIndex, derivative);
-		}
-		
-		private int indexOfTreeNodeInParentTreeNodes(OperatorTreeNode treeNode){
-			for(int index = 0; index < parentTreeNodes.size(); index++){
-				OperatorTreeNode parentTreeNode = parentTreeNodes.get(index);
-				if(parentTreeNode != null && parentTreeNode.id == treeNode.id) return index;
-			}
-			return -1;
 		}
 
 		/**
@@ -1162,7 +1156,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 	}
 
 	/**
-	 * abstract class implementing the functions to calculate the analytic partial derivative with respect to some parameter index
+	 * class implementing the functions to calculate the analytic partial derivative with respect to some parameter index
 	 * 
 	 * @author Stefan Sedlmair
 	 * @version 1.0
