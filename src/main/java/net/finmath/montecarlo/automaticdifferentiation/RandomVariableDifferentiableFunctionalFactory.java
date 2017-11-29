@@ -9,18 +9,15 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.Map.Entry;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentSkipListMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
 import java.util.function.IntToDoubleFunction;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
@@ -39,7 +36,7 @@ import net.finmath.stochastic.RandomVariableInterface;
  * @author Stefan Sedlmair
  * @version 1.0
  */
-public class RandomVariableDifferentiableAbstractDerivativesFactory extends AbstractRandomVariableDifferentiableFactory {
+public class RandomVariableDifferentiableFunctionalFactory extends AbstractRandomVariableDifferentiableFactory {
 
 	private final static AtomicLong nextIdentifier = new AtomicLong(0); 
 
@@ -53,7 +50,7 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 	/**
 	 * @param randomVariableFactoryForNonDifferentiable
 	 */
-	public RandomVariableDifferentiableAbstractDerivativesFactory(AbstractRandomVariableFactory randomVariableFactoryForNonDifferentiable, Map<String, Object> properties) {
+	public RandomVariableDifferentiableFunctionalFactory(AbstractRandomVariableFactory randomVariableFactoryForNonDifferentiable, Map<String, Object> properties) {
 		super(randomVariableFactoryForNonDifferentiable);
 
 		// step-size for the usage of finite differences if no analytic derivative is given
@@ -65,30 +62,30 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 		this.retainAllTreeNodes 	= (boolean) properties.getOrDefault("retainAllTreeNodes", false);
 	}
 
-	public RandomVariableDifferentiableAbstractDerivativesFactory(AbstractRandomVariableFactory randomVariableFactoryForNonDifferentiable) {
+	public RandomVariableDifferentiableFunctionalFactory(AbstractRandomVariableFactory randomVariableFactoryForNonDifferentiable) {
 		this(randomVariableFactoryForNonDifferentiable, new HashMap<>());
 	}
 
-	public RandomVariableDifferentiableAbstractDerivativesFactory() {
+	public RandomVariableDifferentiableFunctionalFactory() {
 		this(new RandomVariableFactory(), new HashMap<>());
 	}
 
 	/* (non-Javadoc)
-	 * @see net.finmath.montecarlo.automaticdifferentiation.AbstractRandomVariableDifferentiableAbstractFactory#createRandomVariable(double, double)
+	 * @see net.finmath.montecarlo.automaticdifferentiation.AbstractRandomVariableDifferentiableFunctionalFactory#createRandomVariable(double, double)
 	 */
 	@Override
 	public RandomVariableDifferentiableInterface createRandomVariable(double time, double value) {
 		RandomVariableInterface randomvariable = super.createRandomVariableNonDifferentiable(time, value);
-		return new RandomVariableDifferentiableAbstract(randomvariable, null, null, this);
+		return new RandomVariableDifferentiableFunctional(randomvariable, null, null, this);
 	}
 
 	/* (non-Javadoc)
-	 * @see net.finmath.montecarlo.automaticdifferentiation.AbstractRandomVariableDifferentiableAbstractFactory#createRandomVariable(double, double[])
+	 * @see net.finmath.montecarlo.automaticdifferentiation.AbstractRandomVariableDifferentiableFunctionalFactory#createRandomVariable(double, double[])
 	 */
 	@Override
 	public RandomVariableDifferentiableInterface createRandomVariable(double time, double[] values) {		
 		RandomVariableInterface randomvariable = super.createRandomVariableNonDifferentiable(time, values);
-		return new RandomVariableDifferentiableAbstract(randomvariable, null, null, this);
+		return new RandomVariableDifferentiableFunctional(randomvariable, null, null, this);
 	}
 
 	@Override
@@ -113,7 +110,7 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 	 * */
 	private static class OperatorTreeNode{
 		private final long id;
-		private final RandomVariableDifferentiableAbstractDerivativesFactory factory;
+		private final RandomVariableDifferentiableFunctionalFactory factory;
 
 		private final List<OperatorTreeNode> parentTreeNodes;
 		private final List<OperatorTreeNode> childTreeNodes;
@@ -121,12 +118,17 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 		private final PartialDerivativeFunction derivatives;	
 
 		/**
-		 * Note derivativeWrtParentRandomVariable can hold {@link ExpectationInformation}.
-		 * 
-		 * @param parentInfromation list of object arrays. Has to be of the following order: <lu><li>ParentRandomVariable</li><li>derivativeWrtParent</li><li>keepValuesOfParent</li></lu>  
-		 * @param factory {@link AbstractRandomVariableDifferentiableAbstractFactory} to generate random variables
+		 * Operator Tree Node that holds parent and child information according to the settings of the given {@link RandomVariableDifferentiableFunctionalFactory}.
+		 * <lu>
+		 * 	<li>if <code>enableAD = true</code> extract parent tree nodes from parents</li>
+		 * 	<li>if <code>enableAAD = true</code> add this instance to child tree nodes of parents</li>
+		 * 	<li>else do not save any information about the operator tree or the parital derivatives</li>
+		 * </lu>
+		 * @param parents {@link List} of {@link OperatorTreeNode}s from parents   
+		 * @param partialDerivativeFunction {@link PartialDerivativeFunction} to calculate the next addend for the chain rule of derivation
+		 * @param factory {@link RandomVariableDifferentiableFunctionalFactory} holding the setting on what to save for the operator tree
 		 * */
-		public OperatorTreeNode(List<OperatorTreeNode> parents, PartialDerivativeFunction partialDerivativeFunction, RandomVariableDifferentiableAbstractDerivativesFactory factory) {
+		public OperatorTreeNode(List<OperatorTreeNode> parents, PartialDerivativeFunction partialDerivativeFunction, RandomVariableDifferentiableFunctionalFactory factory) {
 			// get identifier
 			this.id = nextIdentifier.getAndIncrement();
 			
@@ -165,13 +167,11 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			
 			Map<Long, RandomVariableInterface> gradient = Collections.synchronizedMap(new HashMap<>());
 
-			// every child in the operator tree is of the same instance of its parents
-//			TreeMap<Long, OperatorTreeNode> treeNodesToPropagte = new TreeMap<>();
 			// thread save treeMap
 			ConcurrentSkipListMap<Long, OperatorTreeNode> treeNodesToPropagte = new ConcurrentSkipListMap<>();
 
 			// partial derivative with respect to itself
-			gradient.put(id, PartialDerivativeFunction.one);
+			gradient.put(id, randomVariableFromConstant(1.0));
 
 			// add id of this variable to propagate downwards
 			treeNodesToPropagte.put(id, this);			
@@ -216,23 +216,21 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			final RandomVariableInterface derivative = derivatives.get(originID);
 			
 			// each treeNode can be propagated independently 
-			IntStream.range(0, treeNodes.size()).forEach(treeNodeIndex -> {
-					OperatorTreeNode treeNode = treeNodes.get(treeNodeIndex);
-			
+			treeNodes.stream().forEach( treeNode -> {
 					// if parentTreeNode is null, derivative is zero, thus continue with next treeNode
 					if(treeNode == null) return;
 
 					// get the current parent id
-					final Long ID = treeNode.id;
+					long ID = treeNode.id;
 					
-					// get partial derivative of treeNodeOfOrigin wrt the treeNode and multiply it with its derivative
+					/* get product of partial derivative and derivative from root/leaf to origin (is different for AD and AAD) */
 					RandomVariableInterface newAddendOfChainRuleSum = (originID > ID) ? 
 							/*AAD*/	treeNodeOfOrigin.getDerivativeProduct(treeNode, derivative):
 							/* AD*/	treeNode.getDerivativeProduct(treeNodeOfOrigin, derivative);
 							
 					
 					// chain rule - get already existing part of the sum, if it does not exist yet start the sum with zero
-					RandomVariableInterface existingChainRuleSum = derivatives.getOrDefault(ID, PartialDerivativeFunction.zero);
+					RandomVariableInterface existingChainRuleSum = derivatives.getOrDefault(ID, randomVariableFromConstant(0.0));
 
 					// add existing and new part of the derivative sum 
 					RandomVariableInterface chainRuleSum = existingChainRuleSum.add(newAddendOfChainRuleSum);
@@ -247,13 +245,13 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 
 		private RandomVariableInterface getDerivativeProduct(OperatorTreeNode treeNode, RandomVariableInterface derivative) {
 			// if no derivative function exists the partial derivative w.r.t. some parameter will always be zero
-			if(derivatives == null) return PartialDerivativeFunction.zero;
+			if(derivatives == null) return randomVariableFromConstant(0.0);
 						
 			// map TreeNode to index
 			int parameterIndex = indexOfTreeNodeInParentTreeNodes(treeNode); 
 			
 			// if parameterIndex smaller zero, this value is independent of this ID
-			if(parameterIndex < 0) return PartialDerivativeFunction.zero;
+			if(parameterIndex < 0) return randomVariableFromConstant(0.0);
 			
 			// calculate the multiplication for the chain rule sum
 			return derivatives.getDerivativeProduct(parameterIndex, derivative);
@@ -280,7 +278,7 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			ConcurrentSkipListMap<Long, OperatorTreeNode> treeNodesToPropagte = new ConcurrentSkipListMap<>();
 
 			// partial derivative with respect to itself
-			partialDerivatives.put(id, PartialDerivativeFunction.one);
+			partialDerivatives.put(id, randomVariableFromConstant(1.0));
 
 			// add id of this variable to propagate upwards
 			treeNodesToPropagte.put(id, this);
@@ -304,6 +302,10 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			}
 			return partialDerivatives;
 		}
+		
+		private static RandomVariableInterface randomVariableFromConstant(double value){
+			return RandomVariableDifferentiableFunctional.randomVariableFromConstant(value);
+		}
 	}
 
 	/**
@@ -315,25 +317,25 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 	 * @author Stefan Sedlmair
 	 * @version 1.0
 	 * */
-	public static class RandomVariableDifferentiableAbstract implements RandomVariableDifferentiableInterface {
+	public static class RandomVariableDifferentiableFunctional implements RandomVariableDifferentiableInterface {
 
 		private static final long serialVersionUID = 2036109523330671173L;
 
 		private 	  RandomVariableInterface values;
 		private final OperatorTreeNode opteratorTreeNode;
-		private final RandomVariableDifferentiableAbstractDerivativesFactory factory;
+		private final RandomVariableDifferentiableFunctionalFactory factory;
 
 
 		/**
-		 * Constructor for generating a {@link RandomVariableDifferentiableAbstract} 
+		 * Constructor for generating a {@link RandomVariableDifferentiableFunctional} 
 		 * 
 		 * @param randomvariable {@link RandomVariableInterface} to store values
 		 * @param parents {@link List} of {@link RandomVariableInterface}s that where arguments of the function which resulted in randomVariable (<code>null</code> if non exist)
 		 * @param partialDerivativeFunction {@link PartialDerivativeFunction} defining the way the partial derivatives are calculated (if <code>null</code> partial derivative will always be zero)
-		 * @param factory {@link RandomVariableDifferentiableAbstractDerivativesFactory} factory to construct new {@link RandomVariableInterface}s
+		 * @param factory {@link RandomVariableDifferentiableFunctionalFactory} factory to construct new {@link RandomVariableInterface}s
 		 * */
-		public RandomVariableDifferentiableAbstract(RandomVariableInterface randomvariable, List<RandomVariableInterface> parents, PartialDerivativeFunction partialDerivativeFunction, 
-				RandomVariableDifferentiableAbstractDerivativesFactory factory) {
+		public RandomVariableDifferentiableFunctional(RandomVariableInterface randomvariable, List<RandomVariableInterface> parents, PartialDerivativeFunction partialDerivativeFunction, 
+				RandomVariableDifferentiableFunctionalFactory factory) {
 
 			// extract the tree nodes from 
 			List<OperatorTreeNode> parentTreeNodes = null;
@@ -353,18 +355,31 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			this.factory = factory;
 		}
 		
+		private RandomVariableDifferentiableFunctional(RandomVariableInterface randomvariable, List<RandomVariableInterface> parents,List<Boolean> keepValues,
+				BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface> partialDerivativeFunction,
+				RandomVariableDifferentiableFunctionalFactory factory){
+			this(randomvariable, parents, new PartialDerivativeFunction(parents, keepValues, partialDerivativeFunction),factory);
+		}
+		
+		private RandomVariableDifferentiableFunctional(RandomVariableInterface randomvariable, List<RandomVariableInterface> parents,List<Boolean> keepValues,
+				BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface> partialDerivativeFunction, 
+				BinaryOperator<RandomVariableInterface> derivativeProductFunction,
+				RandomVariableDifferentiableFunctionalFactory factory){
+			this(randomvariable, parents, new PartialDerivativeFunction(parents, keepValues, partialDerivativeFunction, derivativeProductFunction),factory);
+		}
+		
 		/**
-		 * Extracts the values argument if parameter is of instance {@link RandomVariableDifferentiableAbstract}
+		 * Extracts the values argument if parameter is of instance {@link RandomVariableDifferentiableFunctional}
 		 * 
 		 * @param randomVariable
-		 * @return values of randomVariable if instance of {@link RandomVariableDifferentiableAbstract}
+		 * @return values of randomVariable if instance of {@link RandomVariableDifferentiableFunctional}
 		 * */
 		private static RandomVariableInterface valuesOf(RandomVariableInterface randomVariable) {
-			return randomVariable instanceof RandomVariableDifferentiableAbstract ? ((RandomVariableDifferentiableAbstract)randomVariable).values : randomVariable;
+			return randomVariable instanceof RandomVariableDifferentiableFunctional ? ((RandomVariableDifferentiableFunctional)randomVariable).values : randomVariable;
 		}
 
 		private static OperatorTreeNode treeNodeOf(RandomVariableInterface randomVariable) {
-			return randomVariable instanceof RandomVariableDifferentiableAbstract ? ((RandomVariableDifferentiableAbstract)randomVariable).opteratorTreeNode : null;
+			return randomVariable instanceof RandomVariableDifferentiableFunctional ? ((RandomVariableDifferentiableFunctional)randomVariable).opteratorTreeNode : null;
 		}
 
 		/* (non-Javadoc)
@@ -379,7 +394,7 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			return values;
 		}
 
-		private RandomVariableDifferentiableAbstractDerivativesFactory getFactory() {
+		private RandomVariableDifferentiableFunctionalFactory getFactory() {
 			return factory;
 		}
 
@@ -529,7 +544,7 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 		 */
 		@Override
 		public double getQuantile(double quantile, RandomVariableInterface probabilities) {
-			return ((RandomVariableDifferentiableAbstract) getValues()).getValues().getQuantile(quantile, probabilities);
+			return ((RandomVariableDifferentiableFunctional) getValues()).getValues().getQuantile(quantile, probabilities);
 		}
 
 		/* (non-Javadoc)
@@ -537,7 +552,7 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 		 */
 		@Override
 		public double getQuantileExpectation(double quantileStart, double quantileEnd) {
-			return ((RandomVariableDifferentiableAbstract) getValues()).getValues().getQuantileExpectation(quantileStart, quantileEnd);
+			return ((RandomVariableDifferentiableFunctional) getValues()).getValues().getQuantileExpectation(quantileStart, quantileEnd);
 		}
 
 		/* (non-Javadoc)
@@ -573,21 +588,13 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			double epsilonX = (this.getStandardDeviation() > 0.0 ? this.getStandardDeviation() : 1.0) * finiteDifferencesStepSize;
 
 			// apply central finite differences on unknown operator
-			return new RandomVariableDifferentiableAbstract(
+			return new RandomVariableDifferentiableFunctional(
 					values.apply(operator),
 					Arrays.asList(this),
-					new PartialDerivativeFunction(this) {
-
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return X.add(epsilonX).apply(operator).sub(X.sub(epsilonX).apply(operator)).div(2.0 * epsilonX);
-							default:
-								return null;
-							}
-						}
-					}, 
+					Arrays.asList(true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						return x.get(0).add(epsilonX).apply(operator).sub(x.get(0).sub(epsilonX).apply(operator)).div(2.0 * epsilonX);
+					},
 					getFactory());
 		}
 
@@ -599,20 +606,18 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			double epsilonY = (argument.getStandardDeviation() > 0.0 ? argument.getStandardDeviation() : 1.0) * finiteDifferencesStepSize;
 
 			// apply central finite differences on unknown operator
-			return new RandomVariableDifferentiableAbstract(
+			return new RandomVariableDifferentiableFunctional(
 					values.apply(operator, argument),
 					Arrays.asList(this, argument),
-					new PartialDerivativeFunction(this, argument) {
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return X.add(epsilonX).apply(operator, Y).sub(X.sub(epsilonX).apply(operator, Y)).div(2.0 * epsilonX);
-							case 1:
-								return X.apply(operator, Y.add(epsilonY)).sub(X.apply(operator, Y.sub(epsilonY))).div(2.0 * epsilonY);
-							default:
-								return null;
-							}
+					Arrays.asList(true,true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(0).add(epsilonX).apply(operator, x.get(1)).sub(x.get(0).sub(epsilonX).apply(operator, x.get(1))).div(2.0 * epsilonX);
+						case 1:
+							return x.get(0).apply(operator, x.get(1).add(epsilonY)).sub(x.get(0).apply(operator, x.get(1).sub(epsilonY))).div(2.0 * epsilonY);
+						default:
+							return null;
 						}
 					}, 
 					getFactory());
@@ -628,23 +633,20 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			double epsilonZ = (argument2.getStandardDeviation() > 0.0 ? argument2.getStandardDeviation() : 1.0) * finiteDifferencesStepSize;
 
 			// apply central finite differences on unknown operator
-			return new RandomVariableDifferentiableAbstract(
+			return new RandomVariableDifferentiableFunctional(
 					values.apply(operator, argument1, argument2),
 					Arrays.asList(this, argument1, argument2),
-					new PartialDerivativeFunction(this, argument1, argument2) {
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return X.add(epsilonX).apply(operator, Y, Z).sub(X.sub(epsilonX).apply(operator, Y, Z)).div(2.0 * epsilonX);
-							case 1:
-								return X.apply(operator, Y.add(epsilonY), Z).sub(X.apply(operator, Y.sub(epsilonY), Z)).div(2.0 * epsilonY);
-							case 2:
-								return X.apply(operator, Y, Z.add(epsilonZ)).sub(X.apply(operator, Y, Z.sub(epsilonZ))).div(2.0 * epsilonZ);
-
-							default:
-								return null;
-							}
+					Arrays.asList(true,true, true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(0).add(epsilonX).apply(operator, x.get(1), x.get(2)).sub(x.get(0).sub(epsilonX).apply(operator, x.get(1), x.get(2))).div(2.0 * epsilonX);
+						case 1:
+							return x.get(0).apply(operator, x.get(1).add(epsilonY), x.get(2)).sub(x.get(0).apply(operator, x.get(1).sub(epsilonY), x.get(2))).div(2.0 * epsilonY);
+						case 2:
+							return x.get(0).apply(operator, x.get(1), x.get(2).add(epsilonZ)).sub(x.get(0).apply(operator, x.get(1), x.get(2).sub(epsilonZ))).div(2.0 * epsilonZ);
+						default:
+							return null;
 						}
 					}, 
 					getFactory());
@@ -662,19 +664,19 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 
 		@Override
 		public RandomVariableInterface add(double value) {
-			RandomVariableInterface result = values.add(value);
-
-			PartialDerivativeFunction partialDerivativeFunction = new PartialDerivativeFunction(null) {	
-				@Override
-				public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-
-					if(parameterIndex != 0) return null;
-
-					return one;
-				}
-			};
-
-			return new RandomVariableDifferentiableAbstract(result, Arrays.asList(this), partialDerivativeFunction, factory);
+			return new RandomVariableDifferentiableFunctional(
+					values.add(value),
+					Arrays.asList(this),
+					Arrays.asList(false),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return randomVariableFromConstant(1.0);
+						default:
+							return null;
+						}
+					}, 
+					getFactory());
 		}
 
 		@Override
@@ -684,19 +686,19 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 
 		@Override
 		public RandomVariableInterface mult(double value) {
-			RandomVariableInterface result = values.mult(value);
-
-			PartialDerivativeFunction partialDerivativeFunction = new PartialDerivativeFunction(null) {	
-				@Override
-				public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-
-					if(parameterIndex != 0) return null;
-
-					return factory.createRandomVariableNonDifferentiable(0.0, value);
-				}
-			};
-
-			return new RandomVariableDifferentiableAbstract(result, Arrays.asList(this), partialDerivativeFunction, factory);
+			return new RandomVariableDifferentiableFunctional(
+					values.mult(value),
+					Arrays.asList(this),
+					Arrays.asList(false),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return randomVariableFromConstant(value);
+						default:
+							return null;
+						}
+					}, 
+					getFactory());
 		}
 
 		@Override
@@ -706,81 +708,59 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 
 		@Override
 		public RandomVariableInterface pow(double exponent) {
-			return new RandomVariableDifferentiableAbstract(
-					values.pow(exponent), 
+			return new RandomVariableDifferentiableFunctional(
+					values.pow(exponent),
 					Arrays.asList(this),
-					new PartialDerivativeFunction(values) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return X.pow(exponent - 1.0).mult(exponent);
-							default:
-								return null;
-							}
-
+					Arrays.asList(true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(0).pow(exponent - 1.0).mult(exponent);
+						default:
+							return null;
 						}
-					},
+					}, 
 					getFactory());
+			
 		}
 
 		@Override
 		public RandomVariableInterface average() {
-			return new RandomVariableDifferentiableAbstract(
-					values.average(), 
+			return new RandomVariableDifferentiableFunctional(
+					values.average(),
 					Arrays.asList(this),
-					new PartialDerivativeFunction(null) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex) {
-							return null;
-						}
-						
-						@Override
-						public RandomVariableInterface getDerivativeProduct(int parameterIndex, RandomVariableInterface derivative) {
-							if(parameterIndex != 0) return null;
-							return derivative.average();
-						}
-					},
+					Arrays.asList(false),
+					null, 
+					(BinaryOperator<RandomVariableInterface>) (x,y) -> y.average(),
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface getConditionalExpectation(
-				ConditionalExpectationEstimatorInterface conditionalExpectationOperator) {			
-			return new RandomVariableDifferentiableAbstract(
-					values.average(), 
+				ConditionalExpectationEstimatorInterface conditionalExpectationOperator) {	
+			return new RandomVariableDifferentiableFunctional(
+					values.average(),
 					Arrays.asList(this),
-					new PartialDerivativeFunction(null) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex) {
-							return null;
-						}
-						
-						@Override
-						public RandomVariableInterface getDerivativeProduct(int parameterIndex, RandomVariableInterface derivative) {
-							if(parameterIndex != 0) return null;
-							return conditionalExpectationOperator.getConditionalExpectation(derivative);
-						}
-					},
+					Arrays.asList(false),
+					null, 
+					(BinaryOperator<RandomVariableInterface>) (x,y) -> conditionalExpectationOperator.getConditionalExpectation(y),
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface squared() {
-			return new RandomVariableDifferentiableAbstract(
-					values.squared(), 
+			return new RandomVariableDifferentiableFunctional(
+					values.squared(),
 					Arrays.asList(this),
-					new PartialDerivativeFunction(this) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return X.mult(2.0);
-							default:
-								return null;
-							}
+					Arrays.asList(true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(0).mult(2.0);
+						default:
+							return null;
 						}
-					},
+					}, 
 					getFactory());
 		}
 
@@ -791,245 +771,220 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 
 		@Override
 		public RandomVariableInterface exp() {
-			return new RandomVariableDifferentiableAbstract(
-					values.exp(), 
+			return new RandomVariableDifferentiableFunctional(
+					values.squared(),
 					Arrays.asList(this),
-					new PartialDerivativeFunction(this) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return X.exp();
-							default:
-								return null;
-							}
+					Arrays.asList(true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(0).exp();
+						default:
+							return null;
 						}
-					},
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface log() {
-			return new RandomVariableDifferentiableAbstract(
-					values.log(), 
+			return new RandomVariableDifferentiableFunctional(
+					values.squared(),
 					Arrays.asList(this),
-					new PartialDerivativeFunction(this) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return X.log();
-							default:
-								return null;
-							}
+					Arrays.asList(true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(0).invert();
+						default:
+							return null;
 						}
-					},
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface sin() {
-			return new RandomVariableDifferentiableAbstract(
-					values.sin(), 
+			return new RandomVariableDifferentiableFunctional(
+					values.sin(),
 					Arrays.asList(this),
-					new PartialDerivativeFunction(this) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return X.cos();
-							default:
-								return null;
-							}
+					Arrays.asList(true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(0).cos();
+						default:
+							return null;
 						}
-					},
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface cos() {
-			return new RandomVariableDifferentiableAbstract(
-					values.sin(), 
+			return new RandomVariableDifferentiableFunctional(
+					values.sin(),
 					Arrays.asList(this),
-					new PartialDerivativeFunction(this) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return X.sin().mult(-1.0);
-							default:
-								return null;
-							}
+					Arrays.asList(true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(0).sin().mult(-1.0);
+						default:
+							return null;
 						}
-					},
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface add(RandomVariableInterface randomVariable) {
-			return new RandomVariableDifferentiableAbstract(
-					values.add(randomVariable), 
+			return new RandomVariableDifferentiableFunctional(
+					values.add(randomVariable),
 					Arrays.asList(this, randomVariable),
-					new PartialDerivativeFunction(null) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-							case 1:
-								return one;
-							default:
-								return null;
-							}
+					Arrays.asList(false, false),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+						case 1:
+							return randomVariableFromConstant(1.0);
+						default:
+							return null;
 						}
-					},
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface sub(RandomVariableInterface randomVariable) {
-			return new RandomVariableDifferentiableAbstract(
-					values.sub(randomVariable), 
+			return new RandomVariableDifferentiableFunctional(
+					values.sub(randomVariable),
 					Arrays.asList(this, randomVariable),
-					new PartialDerivativeFunction(null) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return one;
-							case 1:
-								return one.mult(-1.0);
-							default:
-								return null;
-							}							
+					Arrays.asList(false, false),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return randomVariableFromConstant(1.0);
+						case 1:
+							return randomVariableFromConstant(-1.0);
+						default:
+							return null;
 						}
-					},
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface mult(RandomVariableInterface randomVariable) {
-			return new RandomVariableDifferentiableAbstract(
-					values.mult(randomVariable), 
+			return new RandomVariableDifferentiableFunctional(
+					values.mult(randomVariable),
 					Arrays.asList(this, randomVariable),
-					new PartialDerivativeFunction(this, randomVariable) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return Y;
-							case 1:
-								return X;
-							default:
-								return null;
-							}							
+					Arrays.asList(true, true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(1);
+						case 1:
+							return x.get(0);
+						default:
+							return null;
 						}
-					},
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface div(RandomVariableInterface randomVariable) {
-			return new RandomVariableDifferentiableAbstract(
-					values.div(randomVariable), 
+			return new RandomVariableDifferentiableFunctional(
+					values.div(randomVariable),
 					Arrays.asList(this, randomVariable),
-					new PartialDerivativeFunction(this, randomVariable) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return Y.invert();
-							case 1:
-								return X.mult(-1.0).div(Y.squared());
-							default:
-								return null;
-							}							
+					Arrays.asList(true, true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(1).invert();
+						case 1:
+							return x.get(0).mult(-1.0).div(x.get(1).squared());
+						default:
+							return null;
 						}
-					},
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface cap(RandomVariableInterface cap) {
-			
-			return new RandomVariableDifferentiableAbstract(
-					values.cap(cap), 
+			return new RandomVariableDifferentiableFunctional(
+					values.cap(cap),
 					Arrays.asList(this, cap),
-					new PartialDerivativeFunction(this, cap) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return X.barrier(X.sub(Y), zero, one);
-							case 1:
-								return X.barrier(X.sub(Y), one, zero);
-							default:
-								return null;
-							}							
-						}
-					},
-					getFactory());
+					Arrays.asList(true, true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(0).barrier(x.get(0).sub(x.get(1)), randomVariableFromConstant(0.0), randomVariableFromConstant(1.0));
+						case 1:
+							return x.get(0).barrier(x.get(0).sub(x.get(1)), randomVariableFromConstant(1.0), randomVariableFromConstant(0.0));
+						default:
+							return null;
+						}		
+					}, 
+					getFactory());								
 		}
 
 		@Override
 		public RandomVariableInterface floor(RandomVariableInterface floor) {
-			return new RandomVariableDifferentiableAbstract(
-					values.floor(floor), 
+			return new RandomVariableDifferentiableFunctional(
+					values.floor(floor),
 					Arrays.asList(this, floor),
-					new PartialDerivativeFunction(this, floor) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return X.barrier(X.sub(Y), one, zero);
-							case 1:
-								return X.barrier(X.sub(Y), zero, one);
-							default:
-								return null;
-							}							
-						}
-					},
+					Arrays.asList(true, true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(0).barrier(x.get(0).sub(x.get(1)), randomVariableFromConstant(1.0), randomVariableFromConstant(0.0));
+						case 1:
+							return x.get(0).barrier(x.get(0).sub(x.get(1)), randomVariableFromConstant(0.0), randomVariableFromConstant(1.0));
+						default:
+							return null;
+						}		
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface accrue(RandomVariableInterface rate, double periodLength) {
-			return new RandomVariableDifferentiableAbstract(
+			return new RandomVariableDifferentiableFunctional(
 					values.accrue(rate, periodLength),
 					Arrays.asList(this, rate),
-					new PartialDerivativeFunction(this, rate) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return Y.mult(periodLength).add(1.0);
-							case 1:
-								return X.mult(periodLength);
-							default:
-								return null;
-							}							
-						}
-					},
+					Arrays.asList(true, true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(1).mult(periodLength).add(1.0);
+						case 1:
+							return x.get(0).mult(periodLength);
+						default:
+							return null;
+						}		
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface discount(RandomVariableInterface rate, double periodLength) {
-			return new RandomVariableDifferentiableAbstract(
+			return new RandomVariableDifferentiableFunctional(
 					values.discount(rate, periodLength),
 					Arrays.asList(this, rate),
-					new PartialDerivativeFunction(this, rate) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return Y.mult(periodLength).add(1.0).invert();
-							case 1:
-								return X.mult(-periodLength).div(Y.mult(periodLength).add(1.0).squared());
-							default:
-								return null;
-							}							
-						}
-					},
+					Arrays.asList(true, true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(1).mult(periodLength).add(1.0).invert();
+						case 1:
+							return x.get(0).mult(-periodLength).div(x.get(1).mult(periodLength).add(1.0).squared());
+						default:
+							return null;
+						}		
+					}, 
 					getFactory());
 		}
 
@@ -1060,92 +1015,84 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 
 		@Override
 		public RandomVariableInterface addProduct(RandomVariableInterface factor1, double factor2) {
-			return new RandomVariableDifferentiableAbstract(
+			return new RandomVariableDifferentiableFunctional(
 					values.addProduct(factor1, factor2),
 					Arrays.asList(this, factor1),
-					new PartialDerivativeFunction(null) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return one;
-							case 1:
-								return factory.createRandomVariableNonDifferentiable(0.0, factor2);
-							default:
-								return null;
-							}							
-						}
-					},
+					Arrays.asList(false, false),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return randomVariableFromConstant(1.0);
+						case 1:
+							return randomVariableFromConstant(factor2);
+						default:
+							return null;
+						}		
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface addProduct(RandomVariableInterface factor1, RandomVariableInterface factor2) {
-			return new RandomVariableDifferentiableAbstract(
+			return new RandomVariableDifferentiableFunctional(
 					values.addProduct(factor1, factor2),
 					Arrays.asList(this, factor1, factor2),
-					new PartialDerivativeFunction(null, factor1, factor2) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return one;
-							case 1:
-								return Z;
-							case 2:
-								return Y;
-							default:
-								return null;
-							}							
-						}
-					},
+					Arrays.asList(false, true, true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return randomVariableFromConstant(1.0);
+						case 1:
+							return x.get(2);
+						case 2:
+							return x.get(1);
+						default:
+							return null;
+						}		
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface addRatio(RandomVariableInterface numerator, RandomVariableInterface denominator) {
-			return new RandomVariableDifferentiableAbstract(
-					values.addRatio(numerator, denominator),
+			return new RandomVariableDifferentiableFunctional(
+					values.addProduct(numerator, denominator),
 					Arrays.asList(this, numerator, denominator),
-					new PartialDerivativeFunction(null, numerator, denominator) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return one;
-							case 1:
-								return Z.invert();
-							case 2:
-								return Y.mult(-1.0).div(Z.squared());
-							default:
-								return null;
-							}							
-						}
-					},
+					Arrays.asList(false, true, true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return randomVariableFromConstant(1.0);
+						case 1:
+							return x.get(2).invert();
+						case 2:
+							return x.get(1).div(x.get(2).squared()).mult(-1.0);
+						default:
+							return null;
+						}		
+					}, 
 					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface subRatio(RandomVariableInterface numerator,
 				RandomVariableInterface denominator) {
-			return new RandomVariableDifferentiableAbstract(
+			return new RandomVariableDifferentiableFunctional(
 					values.subRatio(numerator, denominator),
 					Arrays.asList(this, numerator, denominator),
-					new PartialDerivativeFunction(null, numerator, denominator) {	
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex ) {
-							switch (parameterIndex) {
-							case 0:
-								return one;
-							case 1:
-								return Z.mult(-1.0).invert();
-							case 2:
-								return Y.div(Z.squared());
-							default:
-								return null;
-							}							
-						}
-					},
+					Arrays.asList(false, true, true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return randomVariableFromConstant(1.0);
+						case 1:
+							return x.get(2).invert().mult(-1.0);
+						case 2:
+							return x.get(1).div(x.get(2).squared());
+						default:
+							return null;
+						}		
+					}, 
 					getFactory());
 		}
 
@@ -1161,18 +1108,15 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 			keepValues.add(false);
 			for(int i = 0; i < parents.size()-1;i++) keepValues.add(true);
 
-			return new RandomVariableDifferentiableAbstract(
+			return new RandomVariableDifferentiableFunctional(
 					values.addSumProduct(factor1, factor2),
 					parents,
-					new PartialDerivativeFunction(parents, keepValues) {
-
-						private int numberOfFactors = factor1.size();
-						@Override
-						public RandomVariableInterface getPartialDerivativeFor(int parameterIndex) {
-							if(parameterIndex == 0) return one;
-							if(parameterIndex > numberOfFactors) return parentValues.get(parameterIndex - numberOfFactors);
-							else return parentValues.get(parameterIndex + numberOfFactors);
-						}
+					keepValues,
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						int numberOfFactors = (int) ((x.size() - 1) / 2);
+						if(i == 0) return randomVariableFromConstant(1.0);
+						if(i > numberOfFactors) return x.get(i - numberOfFactors);
+						else return x.get(i + numberOfFactors);
 					}, 
 					getFactory());
 		}
@@ -1209,8 +1153,12 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 
 //		@Override
 //		public String toString() {
-//			return "RandomVariableDifferentiableAbstract [values=" + values + ", ID=" + getID() + "]";
+//			return "RandomVariableDifferentiableFunctional [values=" + values + ", ID=" + getID() + "]";
 //		}
+		
+		private static RandomVariableInterface randomVariableFromConstant(double value){
+			return new RandomVariable(value);
+		}
 	}
 
 	/**
@@ -1219,41 +1167,30 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 	 * @author Stefan Sedlmair
 	 * @version 1.0
 	 * */
-	private abstract static class PartialDerivativeFunction{
-
-		protected static final RandomVariableInterface zero = new RandomVariable(0.0);
-		protected static final RandomVariableInterface one = new RandomVariable(1.0);
+	private static class PartialDerivativeFunction{
 		
+		final BinaryOperator<RandomVariableInterface> derivativeProduct;
+		final BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface> partialDerivativeFunction;
 		
-		protected final List<RandomVariableInterface> parentValues;
+		private final List<RandomVariableInterface> parentValues;
 
-		protected final RandomVariableInterface X, Y, Z;
-
-		public PartialDerivativeFunction(RandomVariableInterface X, RandomVariableInterface Y, RandomVariableInterface Z) {
-			parentValues = null;//Arrays.asList(X,Y,Z);
-			this.X = RandomVariableDifferentiableAbstract.valuesOf(X);
-			this.Y = RandomVariableDifferentiableAbstract.valuesOf(Y);
-			this.Z = RandomVariableDifferentiableAbstract.valuesOf(Z);
+		public PartialDerivativeFunction(List<RandomVariableInterface> parentValues, List<Boolean> keepValues ,
+				BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface> partialDerivativeFunction,
+				BinaryOperator<RandomVariableInterface> derivativeProduct) {
+			int numberOfParents = parentValues.size();
+			this.parentValues = IntStream.range(0, numberOfParents).mapToObj(
+					i -> keepValues.get(i) ? RandomVariableDifferentiableFunctional.valuesOf(parentValues.get(i)) : null
+							).collect(Collectors.toList());
+			
+			this.partialDerivativeFunction = (partialDerivativeFunction == null) ? 
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x,y) -> null 
+					: partialDerivativeFunction;
+			this.derivativeProduct = derivativeProduct;
 		}
-
-		public PartialDerivativeFunction(RandomVariableInterface X, RandomVariableInterface Y) {
-			this(X,Y,null);
-		}
-
-		public PartialDerivativeFunction(RandomVariableInterface X) {
-			this(X,null,null);
-		}
-
-		public PartialDerivativeFunction(List<RandomVariableInterface> parentValues, List<Boolean> keepValues) {
-			for(int i = 0; i < parentValues.size(); i++)
-				if(!keepValues.get(i)) parentValues.set(i, null);
-			this.parentValues = parentValues;
-			this.X = null;
-			this.Y = null;
-			this.Z = null;
-//			this.X = (parentValues.size() > 0) ? parentValues.get(0) : null;
-//			this.Y = (parentValues.size() > 1) ? parentValues.get(1) : null;
-//			this.Z = (parentValues.size() > 2) ? parentValues.get(2) : null;
+		
+		public PartialDerivativeFunction(List<RandomVariableInterface> parentValues, List<Boolean> keepValues ,
+				BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface> partialDerivativeFunction) {
+			this(parentValues, keepValues, partialDerivativeFunction, (x,y) -> x.mult(y));
 		}
 
 		/**
@@ -1265,10 +1202,12 @@ public class RandomVariableDifferentiableAbstractDerivativesFactory extends Abst
 		 * @param parameterIndex gives the index i for x<sub>i</sub> to calculate the partial derivative to f for.
 		 * @return {@link RandomVariableInterface} representing the partial derivative df(x<sub>1</sub>,...,x<sub>n</sub>)/dx<sub>i</sub>
 		 * */
-		public abstract RandomVariableInterface getPartialDerivativeFor(int parameterIndex);
+		public RandomVariableInterface getPartialDerivativeFor(int parameterIndex){
+			return partialDerivativeFunction.apply(parentValues, parameterIndex);
+		}
 		
 		public RandomVariableInterface getDerivativeProduct(int parameterIndex, RandomVariableInterface derivative) {
-			return getPartialDerivativeFor(parameterIndex).mult(derivative);
+			return derivativeProduct.apply(getPartialDerivativeFor(parameterIndex), derivative);
 		}
 	}
 }
