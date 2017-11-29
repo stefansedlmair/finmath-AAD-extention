@@ -45,9 +45,9 @@ public class RandomVariableDifferentiableInterfaceTest {
 		
 		
 		return Arrays.asList(new Object[][] {
-			{new RandomVariableDifferentiableAADFactory(new RandomVariableFactory()) },
+			{new RandomVariableDifferentiableFunctionalFactory(new RandomVariableFactory(), factoryProperties)},
 			{new RandomVariableDifferentiableFactory(new RandomVariableFactory()) },
-			{new RandomVariableDifferentiableAbstractDerivativesFactory(new RandomVariableFactory(), factoryProperties)},
+			{new RandomVariableDifferentiableAADFactory(new RandomVariableFactory()) },
 
 
 		});
@@ -127,7 +127,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 	public void testRandomVariableArithmeticSquaredPow() {
 
 		// Create a stochastic random variable
-		RandomVariableInterface randomVariable = randomVariableFactory.createRandomVariable(0.0,
+		RandomVariableInterface randomVariable = randomVariableFactory.createRandomVariable(-Double.MAX_VALUE,
 				new double[] {3.0, 1.0, 0.0, 2.0, 4.0, 1.0/3.0} );
 
 		RandomVariableInterface check = randomVariable.squared().sub(randomVariable.pow(2.0));
@@ -291,7 +291,7 @@ public class RandomVariableDifferentiableInterfaceTest {
 
 			RandomVariableDifferentiableInterface sum =  (RandomVariableDifferentiableInterface) randomVariableFactory.createRandomVariable(0.0);
 			for(int i = 0; i < numberOfIterations; i++){
-				System.out.println(i + "\t" + ((Runtime.getRuntime().totalMemory() /*- Runtime.getRuntime().freeMemory()*/)/1024.0/1024.0) + "MB / " + (Runtime.getRuntime().maxMemory()/1024.0/1024.0) + "MB");
+//				System.out.println(i + "\t" + ((Runtime.getRuntime().totalMemory() /*- Runtime.getRuntime().freeMemory()*/)/1024.0/1024.0) + "MB / " + (Runtime.getRuntime().maxMemory()/1024.0/1024.0) + "MB");
 				sum = (RandomVariableDifferentiableInterface) sum.add(aadRandomVariable01);
 			}
 

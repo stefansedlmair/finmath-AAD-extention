@@ -31,7 +31,8 @@ import net.finmath.montecarlo.assetderivativevaluation.products.AsianOption;
 import net.finmath.montecarlo.assetderivativevaluation.products.BermudanOption;
 import net.finmath.montecarlo.assetderivativevaluation.products.EuropeanOption;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
-import net.finmath.montecarlo.automaticdifferentiation.backward.RandomVariableDifferentiableAADFactory;
+import net.finmath.montecarlo.automaticdifferentiation.backward.alternative.RandomVariableDifferentiableAADPathwiseFactory;
+import net.finmath.montecarlo.automaticdifferentiation.backward.alternative.RandomVariableDifferentiableAADStochasticNonOptimizedFactory;
 import net.finmath.montecarlo.model.AbstractModel;
 import net.finmath.montecarlo.process.AbstractProcess;
 import net.finmath.montecarlo.process.ProcessEulerScheme;
@@ -400,10 +401,11 @@ public class RandomVariableDifferentiableAADPerformanceTest {
 	}
 
 	private static AbstractRandomVariableFactory[] testMethods = {
-			//			new RandomVariableFactory(),
-			//			new RandomVariableDifferentiableAADPathwiseFactory(),
-			//			new RandomVariableDifferentiableAADStochasticNonOptimizedFactory(),
-			new RandomVariableDifferentiableFactory()
+			new RandomVariableFactory(),
+			new RandomVariableDifferentiableAADPathwiseFactory(),
+			new RandomVariableDifferentiableAADStochasticNonOptimizedFactory(),
+			new RandomVariableDifferentiableFactory(),
+			new RandomVariableDifferentiableFunctionalFactory()
 	};
 
 	private static int numberOfPaths = 10000;		/* In the paper we use 100000 */
@@ -593,7 +595,7 @@ public class RandomVariableDifferentiableAADPerformanceTest {
 		long endMemAutoDiff = getAllocatedMemory();
 
 		if(y.isNaN().getAverage() > 0) System.out.println("error");
-		if(dydx[0].isNaN().getAverage() > 0) System.out.println("error");
+		if(dydx[0] != null && dydx[0].isNaN().getAverage() > 0) System.out.println("error");
 
 		RandomVariableInterface[] dydxAnalytic = function.derivative(x, c);
 

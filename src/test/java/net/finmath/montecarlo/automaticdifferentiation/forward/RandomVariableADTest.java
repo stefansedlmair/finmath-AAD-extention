@@ -6,7 +6,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -17,6 +16,7 @@ import org.junit.runners.Parameterized.Parameters;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.automaticdifferentiation.AbstractRandomVariableDifferentiableFactory;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableFactory;
+import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableFunctionalFactory;
 import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.randomnumbers.MersenneTwister;
 import net.finmath.stochastic.RandomVariableInterface;
@@ -33,6 +33,7 @@ public class RandomVariableADTest {
 		
 		config.add(new Object[]{ new RandomVariableADFactory(), "AD"});
 		config.add(new Object[]{ new RandomVariableDifferentiableFactory(), "AlgorthmicDifferentiation"});
+		config.add(new Object[]{ new RandomVariableDifferentiableFunctionalFactory(), "AlgorthmicDifferentiationAbstractDerivative"});
 
 		return config;
 	}
@@ -161,8 +162,11 @@ public class RandomVariableADTest {
 		RandomVariableDifferentiableInterface adRandomVariable01 = (RandomVariableDifferentiableInterface) randomVariable01;
 		RandomVariableDifferentiableInterface adRandomVariable04 = (RandomVariableDifferentiableInterface) randomVariable04;
 		
-		adGradient.put(adRandomVariable00.getID(), adRandomVariable00.getAllPartialDerivatives().get(adRandomVariable04.getID()));
-		adGradient.put(adRandomVariable01.getID(), adRandomVariable01.getAllPartialDerivatives().get(adRandomVariable04.getID()));	
+		Map<Long, RandomVariableInterface> adDerivatives00 = adRandomVariable00.getAllPartialDerivatives();
+		Map<Long, RandomVariableInterface> adDerivatives01 = adRandomVariable01.getAllPartialDerivatives();
+		
+		adGradient.put(adRandomVariable00.getID(), adDerivatives00.get(adRandomVariable04.getID()));
+		adGradient.put(adRandomVariable01.getID(), adDerivatives01.get(adRandomVariable04.getID()));	
 
 		/* dx_4/dx_0 = x_0 * 2 + x_1 + 1
 		 * dx_4/dx_1 = x_0 */
