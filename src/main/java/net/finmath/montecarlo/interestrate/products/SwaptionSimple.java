@@ -90,24 +90,31 @@ public class SwaptionSimple extends AbstractLIBORMonteCarloProduct {
 		double strikeSwaprate = swaprate;
 		double swapAnnuity = discountCurve != null ? SwapAnnuity.getSwapAnnuity(tenor, discountCurve) : SwapAnnuity.getSwapAnnuity(tenor, forwardCurve);
 
-		DoubleUnaryOperator impliedBlackScholesVolaFunction = x -> AnalyticFormulas.blackScholesOptionImpliedVolatility(parSwaprate, optionMaturity, strikeSwaprate, swapAnnuity, x);
-		DoubleUnaryOperator impliedBachelierVolaFunction 	= x -> AnalyticFormulas.bachelierOptionImpliedVolatility(	parSwaprate, optionMaturity, strikeSwaprate, swapAnnuity, x);
+		final DoubleUnaryOperator impliedBlackScholesVolaFunction = x -> AnalyticFormulas.blackScholesOptionImpliedVolatility(parSwaprate, optionMaturity, strikeSwaprate, swapAnnuity, x);
+		final DoubleUnaryOperator impliedBachelierVolaFunction 	= x -> AnalyticFormulas.bachelierOptionImpliedVolatility(	parSwaprate, optionMaturity, strikeSwaprate, swapAnnuity, x);
 		
-		if(valueUnit == ValueUnit.VOLATILITY || valueUnit == ValueUnit.VOLATILITYLOGNORMAL) {
-			return value.average().apply(impliedBlackScholesVolaFunction);
-		}
-		else if(valueUnit == ValueUnit.VOLATILITYNORMAL) {
-			return value.average().apply(impliedBachelierVolaFunction);
-		}
-		else if(valueUnit == ValueUnit.INTEGRATEDVARIANCE  || valueUnit == ValueUnit.INTEGRATEDLOGNORMALVARIANCE) {
-			return value.average().apply(impliedBlackScholesVolaFunction).squared().mult(optionMaturity);
-		}
-		else if(valueUnit == ValueUnit.INTEGRATEDNORMALVARIANCE) {
-			return value.average().apply(impliedBachelierVolaFunction).squared().mult(optionMaturity);
-		}
-		else {
+		RandomVariableInterface volatility = null;
+		
+		switch (valueUnit) {
+		case VOLATILITY:
+		case VOLATILITYLOGNORMAL:
+			volatility = value.average().apply(impliedBlackScholesVolaFunction);
+			break;
+		case INTEGRATEDVARIANCE:
+		case INTEGRATEDLOGNORMALVARIANCE:
+			volatility = value.average().apply(impliedBlackScholesVolaFunction).squared().mult(optionMaturity);
+			break;
+		case VOLATILITYNORMAL:
+			volatility = value.average().apply(impliedBachelierVolaFunction);
+			break;
+		case INTEGRATEDNORMALVARIANCE:
+			volatility = value.average().apply(impliedBachelierVolaFunction).squared().mult(optionMaturity);
+			break;
+		default:
 			throw new UnsupportedOperationException("Provided valueUnit not implemented.");
 		}
+		
+		return volatility;
 	}
 
 	@Override
