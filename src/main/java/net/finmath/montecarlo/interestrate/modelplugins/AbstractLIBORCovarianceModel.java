@@ -5,6 +5,8 @@
  */
 package net.finmath.montecarlo.interestrate.modelplugins;
 
+import java.util.stream.IntStream;
+
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
 
@@ -136,14 +138,10 @@ public abstract class AbstractLIBORCovarianceModel {
 		RandomVariableInterface[] factorLoadingOfComponent1 = getFactorLoading(timeIndex, component1, realizationAtTimeIndex);
 		RandomVariableInterface[] factorLoadingOfComponent2 = getFactorLoading(timeIndex, component2, realizationAtTimeIndex);
 
-		// Multiply first factor loading (this avoids that we have to init covariance to 0).
-		RandomVariableInterface covariance = factorLoadingOfComponent1[0].mult(factorLoadingOfComponent2[0]);
+		RandomVariableInterface covariance = IntStream.range(0, getNumberOfFactors()).parallel()
+			.mapToObj(factorIndex -> factorLoadingOfComponent1[factorIndex].mult(factorLoadingOfComponent2[factorIndex]))
+			.reduce(RandomVariableInterface::add).get();
 		
-		// Add others, if any
-		for(int factorIndex=1; factorIndex<this.getNumberOfFactors(); factorIndex++) {
-			covariance = covariance.addProduct(factorLoadingOfComponent1[factorIndex],factorLoadingOfComponent2[factorIndex]);
-		}
-
 		return covariance;
 	}
 

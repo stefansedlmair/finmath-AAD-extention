@@ -6,6 +6,7 @@
 
 package net.finmath.montecarlo.interestrate.modelplugins;
 
+import java.util.Arrays;
 import java.util.Map;
 
 import org.apache.commons.lang3.ArrayUtils;
@@ -55,7 +56,7 @@ public class LIBORCovarianceModelStochasticVolatility extends AbstractLIBORCovar
 	private AbstractLIBORCovarianceModelParametric covarianceModel;
 	private BrownianMotionInterface brownianMotion;
 	private	RandomVariableInterface rho, nu;
-	
+
 	private AbstractRandomVariableFactory randomVariableFactory;
 
 	private boolean isCalibrateable = false;
@@ -75,15 +76,15 @@ public class LIBORCovarianceModelStochasticVolatility extends AbstractLIBORCovar
 		super(covarianceModel.getTimeDiscretization(), covarianceModel.getLiborPeriodDiscretization(), covarianceModel.getNumberOfFactors());
 
 		this.randomVariableFactory = randomVariableFactory;
-		
+
 		this.covarianceModel = covarianceModel;
 		this.brownianMotion = brownianMotion;
 		this.nu		= randomVariableFactory.createRandomVariable(nu);
 		this.rho	= randomVariableFactory.createRandomVariable(rho);
-		
+
 		this.isCalibrateable = isCalibrateable;
 	}
-	
+
 
 	private void setParameter(double[] parameter) {
 		if(parameter == null || parameter.length == 0) return;
@@ -97,7 +98,7 @@ public class LIBORCovarianceModelStochasticVolatility extends AbstractLIBORCovar
 		System.arraycopy(parameter, 0, covarianceParameters, 0, covarianceParameters.length);
 
 		covarianceModel = covarianceModel.getCloneWithModifiedParameters(covarianceParameters);
-		
+
 		nu	= randomVariableFactory.createRandomVariable(parameter[covarianceParameters.length + 0]);
 		rho	= randomVariableFactory.createRandomVariable(parameter[covarianceParameters.length + 1]);
 
@@ -118,7 +119,38 @@ public class LIBORCovarianceModelStochasticVolatility extends AbstractLIBORCovar
 
 	@Override
 	public RandomVariableInterface[] getFactorLoading(int timeIndex, int component, RandomVariableInterface[] realizationAtTimeIndex) {
+		
+		RandomVariableInterface[] factorLoading = null;
+		
+		try {
+			RandomVariableInterface stochasticVolatilityScaling = getStochasticVolatilityScalings().getProcessValue(timeIndex,0);
+			RandomVariableInterface[] covarianceFactorLoading = covarianceModel.getFactorLoading(timeIndex, component, realizationAtTimeIndex);
+			
+			factorLoading = Arrays.stream(covarianceFactorLoading).map(fl -> fl.mult(stochasticVolatilityScaling)).toArray(RandomVariableInterface[]::new);
+		} catch (CalculationException e) {
+			// Exception is not handled explicitly, we just return null
+		}
 
+		return factorLoading;
+	}
+
+	@Override
+	public RandomVariableInterface getFactorLoadingPseudoInverse(int timeIndex, int component, int factor, RandomVariableInterface[] realizationAtTimeIndex) {
+		return null;
+	}
+
+	@Override
+	public RandomVariableInterface[] getParameterAsRandomVariable() {		
+		// get covariance parameter
+		RandomVariableInterface[] covarianceParameter = covarianceModel.getParameterAsRandomVariable();	
+
+		// get stochastic volatility parameter
+		RandomVariableInterface[] stochasticVolatilityParameter = isCalibrateable ? new RandomVariableInterface[]{nu, rho} : null;
+
+		return ArrayUtils.addAll(covarianceParameter, stochasticVolatilityParameter);
+	}
+
+	private AbstractProcessInterface getStochasticVolatilityScalings() {
 		synchronized (this) {
 			if(stochasticVolatilityScalings == null) {
 				stochasticVolatilityScalings = new ProcessEulerScheme(brownianMotion);
@@ -160,7 +192,7 @@ public class LIBORCovarianceModelStochasticVolatility extends AbstractLIBORCovar
 
 					@Override
 					public RandomVariableInterface[] getFactorLoading(int timeIndex, int componentIndex, RandomVariableInterface[] realizationAtTimeIndex) {
-//						return new RandomVariableInterface[] { brownianMotion.getRandomVariableForConstant(rho * nu) , brownianMotion.getRandomVariableForConstant(Math.sqrt(1.0 - rho*rho) * nu) };
+						//					return new RandomVariableInterface[] { brownianMotion.getRandomVariableForConstant(rho * nu) , brownianMotion.getRandomVariableForConstant(Math.sqrt(1.0 - rho*rho) * nu) };
 						return new RandomVariableInterface[] { rho.mult(nu), rho.squared().mult(-1.0).add(1.0).sqrt().mult(nu) };
 					}
 
@@ -190,43 +222,9 @@ public class LIBORCovarianceModelStochasticVolatility extends AbstractLIBORCovar
 						throw new UnsupportedOperationException("Method not implemented");
 					}
 				});
-
 			}
+			return stochasticVolatilityScalings;
 		}
-
-		RandomVariableInterface stochasticVolatilityScaling = null;
-		try {
-			stochasticVolatilityScaling = stochasticVolatilityScalings.getProcessValue(timeIndex,0);
-		} catch (CalculationException e) {
-			// Exception is not handled explicitly, we just return null
-		}
-
-		RandomVariableInterface[] factorLoading = null;
-
-		if(stochasticVolatilityScaling != null) {
-			factorLoading = covarianceModel.getFactorLoading(timeIndex, component, realizationAtTimeIndex);
-			for(int i=0; i<factorLoading.length; i++) {
-				factorLoading[i] = factorLoading[i].mult(stochasticVolatilityScaling);
-			}
-		}
-
-		return factorLoading;
 	}
 
-	@Override
-	public RandomVariableInterface getFactorLoadingPseudoInverse(int timeIndex, int component, int factor, RandomVariableInterface[] realizationAtTimeIndex) {
-		return null;
-	}
-
-	@Override
-	public RandomVariableInterface[] getParameterAsRandomVariable() {		
-		// get covariance parameter
-		RandomVariableInterface[] covarianceParameter = covarianceModel.getParameterAsRandomVariable();	
-
-		// get stochastic volatility parameter
-		RandomVariableInterface[] stochasticVolatilityParameter = isCalibrateable ? 
-				new RandomVariableInterface[]{nu, rho} : null;
-					
-		return ArrayUtils.addAll(covarianceParameter, stochasticVolatilityParameter);
-	}
 }

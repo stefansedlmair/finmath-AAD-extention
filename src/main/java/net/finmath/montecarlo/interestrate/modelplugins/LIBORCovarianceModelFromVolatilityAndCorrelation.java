@@ -6,6 +6,9 @@
 package net.finmath.montecarlo.interestrate.modelplugins;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
@@ -38,12 +41,12 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
 
 	@Override
     public RandomVariableInterface[] getFactorLoading(int timeIndex, int component, RandomVariableInterface[] realizationAtTimeIndex) {
-		RandomVariableInterface[] factorLoading = new RandomVariableInterface[correlationModel.getNumberOfFactors()];
 
 		RandomVariableInterface volatility	= volatilityModel.getVolatility(timeIndex, component);
-		for (int factorIndex = 0; factorIndex < factorLoading.length; factorIndex++) {
-			factorLoading[factorIndex] = volatility.mult(correlationModel.getFactorLoading(timeIndex, factorIndex, component));
-		}
+		
+		RandomVariableInterface[] factorLoading = IntStream.range(0, correlationModel.getNumberOfFactors())
+				.mapToObj(factorIndex -> volatility.mult(correlationModel.getFactorLoading(timeIndex, factorIndex, component)))
+				.toArray(RandomVariableInterface[]::new);
 		
 		return factorLoading;
 	}
@@ -56,18 +59,9 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
 
         // @todo numberOfComponents should be stored as a member?!
         int numberOfComponents = getLiborPeriodDiscretization().getNumberOfTimeSteps();
-        
-//        RandomVariableInterface factorWeight = null;
-//        for(int componentIndex=0; componentIndex<numberOfComponents; componentIndex++) {
-//            RandomVariableInterface factorElement = correlationModel.getFactorLoading(timeIndex, factor, componentIndex);            
-//            factorWeight = factorWeight == null ? factorElement.squared() : factorWeight.add(factorElement.squared());                                                                                                                 
-//        }
-
-        double factorWeight = 0.0;
-        for(int componentIndex=0; componentIndex<numberOfComponents; componentIndex++) {
-        	double factorElement = correlationModel.getFactorLoading(timeIndex, factor, componentIndex);
-        	factorWeight += factorElement * factorElement;			
-        }
+               
+        double factorWeight = IntStream.range(0, numberOfComponents).mapToDouble(componentIndex -> correlationModel.getFactorLoading(timeIndex, factor, componentIndex))
+        		.map(x -> x*x).sum();
         
         factorLoadingPseudoInverse = factorLoadingPseudoInverse.div(factorWeight);
 
@@ -79,14 +73,10 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
      */
     @Override
     public RandomVariableInterface getCovariance(int timeIndex, int component1, int component2, RandomVariableInterface[] realizationAtTimeIndex) {
-//        RandomVariableInterface covariance = new RandomVariable(0.0, correlationModel.getCorrelation(timeIndex, component1, component2));
-//        covariance = covariance.mult(volatilityModel.getVolatility(timeIndex, component1))
-//                .mult(volatilityModel.getVolatility(timeIndex, component2));
-    	
+
     	RandomVariableInterface volatilityOfComponent1 = volatilityModel.getVolatility(timeIndex, component1);
     	RandomVariableInterface volatilityOfComponent2 = volatilityModel.getVolatility(timeIndex, component2);
     	
-//    	RandomVariableInterface correlationOfComponent1And2 = correlationModel.getCorrelation(timeIndex, component1, component2);
     	double					correlationOfComponent1And2 = correlationModel.getCorrelation(timeIndex, component1, component2);
     	
     	RandomVariableInterface covariance = volatilityOfComponent1.mult(volatilityOfComponent2).mult(correlationOfComponent1And2);
@@ -99,20 +89,8 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
 		// get parameters
 		RandomVariableInterface[] volatilityParameter = volatilityModel.getParameterAsRandomVariable();
 		RandomVariableInterface[] correlationParameter = null;//correlationModel.getParameterAsRandomVariable();
-
-		// cover case of not calibrateable models
-		if(volatilityParameter  == null) volatilityParameter  = new RandomVariableInterface[] {};
-		if(correlationParameter == null) correlationParameter = new RandomVariableInterface[] {};
-
-		// copy parameters into new storage
-		int numberOfParameters = volatilityParameter.length + correlationParameter.length;
 		
-		RandomVariableInterface[] parameter = new RandomVariableInterface[numberOfParameters];
-		
-		System.arraycopy(volatilityParameter,  0, parameter, 0, 							volatilityParameter.length);
-		System.arraycopy(correlationParameter, 0, parameter, volatilityParameter.length, 	parameter.length - volatilityParameter.length);
-
-		return parameter;
+		return ArrayUtils.addAll(volatilityParameter, correlationParameter);
 	}
 		
 	@Override
