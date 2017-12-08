@@ -587,7 +587,12 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 					Arrays.asList(this),
 					Arrays.asList(true),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
-						return x.get(0).add(epsilonX).apply(operator).sub(x.get(0).sub(epsilonX).apply(operator)).div(2.0 * epsilonX);
+						switch (i) {
+						case 0:
+							return x.get(0).add(epsilonX).apply(operator).sub(x.get(0).sub(epsilonX).apply(operator)).div(2.0 * epsilonX);
+						default:
+							return null;
+						}
 					},
 					getFactory());
 		}
@@ -648,12 +653,12 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 
 		@Override
 		public RandomVariableInterface floor(double floor) {
-			return floor(factory.createRandomVariableNonDifferentiable(0.0, floor));
+			return floor(randomVariableFromConstant(floor));
 		}
 
 		@Override
 		public RandomVariableInterface cap(double cap) {
-			return cap(factory.createRandomVariableNonDifferentiable(getFiltrationTime(), cap));
+			return cap(randomVariableFromConstant(cap));
 		}
 
 		@Override
@@ -766,7 +771,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		@Override
 		public RandomVariableInterface exp() {
 			return new RandomVariableDifferentiableFunctional(
-					values.squared(),
+					values.exp(),
 					Arrays.asList(this),
 					Arrays.asList(true),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
@@ -783,7 +788,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		@Override
 		public RandomVariableInterface log() {
 			return new RandomVariableDifferentiableFunctional(
-					values.squared(),
+					values.log(),
 					Arrays.asList(this),
 					Arrays.asList(true),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
@@ -817,7 +822,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		@Override
 		public RandomVariableInterface cos() {
 			return new RandomVariableDifferentiableFunctional(
-					values.sin(),
+					values.cos(),
 					Arrays.asList(this),
 					Arrays.asList(true),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
@@ -1050,7 +1055,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		@Override
 		public RandomVariableInterface addRatio(RandomVariableInterface numerator, RandomVariableInterface denominator) {
 			return new RandomVariableDifferentiableFunctional(
-					values.addProduct(numerator, denominator),
+					values.addRatio(numerator, denominator),
 					Arrays.asList(this, numerator, denominator),
 					Arrays.asList(false, true, true),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
@@ -1145,10 +1150,10 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			return Arrays.stream(getRealizations());
 		}
 
-//		@Override
-//		public String toString() {
-//			return "RandomVariableDifferentiableFunctional [values=" + values + ", ID=" + getID() + "]";
-//		}
+		@Override
+		public String toString() {
+			return "RandomVariableDifferentiableFunctional [values=" + values.toString() + ", ID=" + getID() + "]";
+		}
 		
 		private static RandomVariableInterface randomVariableFromConstant(double value){
 			return new RandomVariable(value);
