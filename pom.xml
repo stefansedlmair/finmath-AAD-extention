@@ -20,7 +20,8 @@
         <artifactId>maven-surefire-plugin</artifactId>
         <version>2.19</version>
         <configuration>
-            <argLine>-mx40G</argLine>
+            <argLine>-Xms10G</argLine>
+            <argLine>-Xmx100G</argLine>
         </configuration>
       </plugin>
     </plugins>
