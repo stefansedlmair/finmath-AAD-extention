@@ -168,7 +168,7 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 		// if nothing to calibrate return the same model
 		if(initialParameters == null) return this;
 		
-		final int numberOfCalibrationProducts = calibrationProducts.length;
+		final int numberOfCalibrationProducts 	= calibrationProducts.length;
 		final int numberOfParameters 			= initialParameters.length;
 		
 		if(numberOfCalibrationProducts != calibrationTargetValues.length) throw new IllegalArgumentException("Each calibration product has to have a target value!");
@@ -249,10 +249,12 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 						long[] keys = currentCalibrationCovarianceModel.getParameterID();					
 
 						ArrayList<Future<Map<Long, RandomVariableInterface>>> derivativeFutureAAD = new ArrayList<>(numberOfCalibrationProducts);
-												
+						
+						// loop over all leaf nodes of the operator tree
 						for(int productIndex=0; productIndex < numberOfCalibrationProducts; productIndex++) {
 							final RandomVariableInterface calibratedPrice = currentCalibratedPrices[productIndex];
 
+							// perform AAD for every leaf node
 							Callable<Map<Long, RandomVariableInterface>> worker = new Callable<Map<Long,RandomVariableInterface>>() {
 								
 								@Override
@@ -290,10 +292,11 @@ public abstract class AbstractLIBORCovarianceModelParametric extends AbstractLIB
 											
 						ArrayList<Future<Map<Long, RandomVariableInterface>>> derivativeFutureAD = new ArrayList<>(numberOfParameters);
 
+						// loop over all root values of the operator tree
 						for(int parameterIndex = 0; parameterIndex < parameters.length; parameterIndex++) {
-							
 							final RandomVariableDifferentiableInterface parameter = (RandomVariableDifferentiableInterface) parameterRandomVariables[parameterIndex];
 							
+							// perform AD for every root node
 							Callable<Map<Long, RandomVariableInterface>> worker = new Callable<Map<Long,RandomVariableInterface>>() {
 								
 								@Override
