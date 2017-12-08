@@ -661,10 +661,10 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
 			while(true) {
 				// Count iterations
 				iteration++;
-
+				
 				// Calculate values for test parameters
 				setValues(parameterTest, valueTest);
-
+				
 				// Calculate error
 				double errorMeanSquaredTest = getMeanSquaredError(valueTest);
 
@@ -882,8 +882,8 @@ public abstract class LevenbergMarquardt implements Serializable, Cloneable, Opt
 			
 			clonedOptimizer.targetValues 	= (double[]) 	properties.getOrDefault("targetValues", this.targetValues);
 			clonedOptimizer.weights 		= (double[])	properties.getOrDefault("weights", this.weights);
-			clonedOptimizer.maxIteration 	= (int) 		properties.getOrDefault("maxNumberOfIterations", this.maxIteration);
-			clonedOptimizer.maxRunTime		= (long) 		properties.getOrDefault("maxRunTimeInMillis", this.maxRunTime);
+			clonedOptimizer.maxIteration 	= (int) 		properties.getOrDefault("maxIterations", this.maxIteration);
+			clonedOptimizer.maxRunTime		= (long) 		properties.getOrDefault("maxRunTime", this.maxRunTime);
 			clonedOptimizer.lambda				= (double) 	properties.getOrDefault("lambda", this.lambda);
 			clonedOptimizer.lambdaDivisor		= (double) 	properties.getOrDefault("lambdaDivisor", this.lambdaDivisor);
 			clonedOptimizer.lambdaMultiplicator	= (double) 	properties.getOrDefault("lambdaMultiplicator", this.lambdaMultiplicator);

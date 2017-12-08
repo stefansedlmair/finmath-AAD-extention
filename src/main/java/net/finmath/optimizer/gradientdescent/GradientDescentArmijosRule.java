@@ -99,7 +99,7 @@ public abstract class GradientDescentArmijosRule extends AbstractGradientDescent
 
 		clone.maxStepSize 	= (double) properties.getOrDefault("maxStepSize",	this.maxStepSize);
 		clone.minStepSize 	= (double) properties.getOrDefault("minStepSize",	this.minStepSize);
-		clone.lastStepSize 	= (double) properties.getOrDefault("lastStepSize",	this.lastStepSize);
+		clone.lastStepSize 	= (double) properties.getOrDefault("stepSize",	this.lastStepSize);
 		
 		return clone;	
 	}	

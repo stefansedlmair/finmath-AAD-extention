@@ -300,8 +300,8 @@ public abstract class AbstractGradientDescentScalarOptimization	implements Seria
 	protected void setProperties(Map<String, Object> properties, AbstractGradientDescentScalarOptimization cloneFather){
 		this.targetValue 				= (double) 		properties.getOrDefault("targetValue",				cloneFather.targetValue);
 		this.errorTolerance 			= (double) 		properties.getOrDefault("errorTolerance",			cloneFather.errorTolerance);
-		this.maxNumberOfIterations		= (int) 		properties.getOrDefault("maxNumberOfIterations", 	cloneFather.maxNumberOfIterations);
-		this.maxRunTimeInMilliSeconds 	= (long) 		properties.getOrDefault("maxRunTimeInMillis", 		cloneFather.maxRunTimeInMilliSeconds);
+		this.maxNumberOfIterations		= (int) 		properties.getOrDefault("maxIterations", 	cloneFather.maxNumberOfIterations);
+		this.maxRunTimeInMilliSeconds 	= (long) 		properties.getOrDefault("maxRunTime", 		cloneFather.maxRunTimeInMilliSeconds);
 		this.finiteDifferenceStepSizes 	= (double[]) 	properties.getOrDefault("finiteDifferenceStepSizes", cloneFather.finiteDifferenceStepSizes);
 		double[] initialParameter 		= (double[]) 	properties.getOrDefault("initialParameters", 		cloneFather.currentParameter);
 		this.currentParameter 			= initialParameter.clone();

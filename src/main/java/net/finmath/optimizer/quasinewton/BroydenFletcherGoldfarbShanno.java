@@ -75,8 +75,6 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 			// try step size candidate
 			stepSize /= lambdaDivisor;
 
-			//			System.out.println("try stepping " + stepSize);
-
 			parameterCandidate = VectorAlgbra.add(parameter, VectorAlgbra.scalarProduct(stepSize, currentSearchDirection));
 
 			// calculate both sides of the equation for Armijos Condition
@@ -95,7 +93,6 @@ public abstract class BroydenFletcherGoldfarbShanno extends AbstractGradientDesc
 				double wolfeRight = c2 * VectorAlgbra.innerProduct(currentGradient, currentSearchDirection);			
 				wolfeCondition = (wolfeLeft >= wolfeRight);
 			}			
-			System.out.println(numberOfIterations + ";" + (System.currentTimeMillis() - startTimeInMilliSeconds) +";"+ currentAccuracy);
 		} while(!isDone() && !(armijoCondition && wolfeCondition) && (stepSize > minStepSize));
 
 		// give algorithm the chance to accelerate!
