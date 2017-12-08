@@ -65,8 +65,8 @@ public class LIBORVolatilityModelFourParameterExponentialForm extends LIBORVolat
 	 */
 	public LIBORVolatilityModelFourParameterExponentialForm(AbstractRandomVariableFactory randomVariableFactory, TimeDiscretizationInterface timeDiscretization, TimeDiscretizationInterface liborPeriodDiscretization, double a, double b, double c, double d, boolean isCalibrateable) {
 		super(timeDiscretization, liborPeriodDiscretization);
-		this.randomVariableFactory = randomVariableFactory;
-		this.isCalibrateable = isCalibrateable;
+		this.randomVariableFactory 	= randomVariableFactory;
+		this.isCalibrateable 		= isCalibrateable;
 
 		this.setParameter(new double[]{a,b,c,d}, true);
 	}
@@ -130,10 +130,10 @@ public class LIBORVolatilityModelFourParameterExponentialForm extends LIBORVolat
 		else
 		{
 			//(a + b * timeToMaturity) * Math.exp(-c * timeToMaturity) + d
-			volatilityInstanteaneous = a.add(b.mult(timeToMaturity)).mult(c.mult(-timeToMaturity).exp()).add(d);
+			volatilityInstanteaneous = d.addProduct(a.addProduct(b, timeToMaturity), c.mult(-timeToMaturity).exp());
 		}
 		if(volatilityInstanteaneous.doubleValue() < 0.0) volatilityInstanteaneous = volatilityInstanteaneous.floor(0.0);
-		
+				
 		return volatilityInstanteaneous;
 	}
 	
@@ -153,6 +153,7 @@ public class LIBORVolatilityModelFourParameterExponentialForm extends LIBORVolat
 
 	@Override
 	public RandomVariableInterface[] getParameterAsRandomVariable() {
+		if(!isCalibrateable) return null;
 		return new RandomVariableInterface[] {a,b,c,d};
 	}
 }

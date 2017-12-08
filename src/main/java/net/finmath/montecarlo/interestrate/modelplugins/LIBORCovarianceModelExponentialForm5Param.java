@@ -5,6 +5,8 @@
  */
 package net.finmath.montecarlo.interestrate.modelplugins;
 
+import java.util.stream.IntStream;
+
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.RandomVariableFactory;
@@ -66,13 +68,12 @@ public class LIBORCovarianceModelExponentialForm5Param extends AbstractLIBORCova
 
 	@Override
     public RandomVariableInterface[] getFactorLoading(int timeIndex, int component, RandomVariableInterface[] realizationAtTimeIndex) {
-		RandomVariableInterface[] factorLoading = new RandomVariableInterface[correlationModel.getNumberOfFactors()];
 		RandomVariableInterface volatility = volatilityModel.getVolatility(timeIndex, component);
-
-		for (int factorIndex = 0; factorIndex < factorLoading.length; factorIndex++) {
-			factorLoading[factorIndex] = volatility
-                    .mult(correlationModel.getFactorLoading(timeIndex, factorIndex, component));
-		}
+		
+		RandomVariableInterface[] factorLoading = IntStream.range(0, correlationModel.getNumberOfFactors())
+				.mapToObj(factorIndex -> volatility.mult(correlationModel.getFactorLoading(timeIndex, factorIndex, component)))
+				.toArray(RandomVariableInterface[]::new);
+				
 		return factorLoading;
 	}
 
