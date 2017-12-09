@@ -10,6 +10,7 @@ import java.util.stream.IntStream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
+import net.finmath.montecarlo.RandomVariable;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
 
@@ -88,7 +89,14 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
 	public RandomVariableInterface[] getParameterAsRandomVariable() {
 		// get parameters
 		RandomVariableInterface[] volatilityParameter = volatilityModel.getParameterAsRandomVariable();
-		RandomVariableInterface[] correlationParameter = null;//correlationModel.getParameterAsRandomVariable();
+		RandomVariableInterface[] correlationParameter = null;
+		
+		// convert double array to RandomVariableInterface array
+		double[] correlationParameterAsDouble = correlationModel.getParameter();
+		if(correlationParameterAsDouble != null) 
+			correlationParameter = Arrays.stream(correlationParameterAsDouble)
+				.mapToObj(param -> new RandomVariable(param))
+				.toArray(RandomVariableInterface[]::new);
 		
 		return ArrayUtils.addAll(volatilityParameter, correlationParameter);
 	}
