@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleBinaryOperator;
@@ -193,7 +194,8 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 		 * @author Stefan Sedlmair
 		 * @author Christian Fries
 		 * */	
-		public Map<Long, RandomVariableInterface> getAllPartialDerivatives() {
+		public Map<Long, RandomVariableInterface> getAllPartialDerivatives(Set<Long> targetIDs) {
+			if(targetIDs != null) throw new UnsupportedOperationException();
 			return this.operatorTreeNode.getAllPartialDerivatives();
 		} 
 		
@@ -796,6 +798,11 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 		@Override
 		public Double doubleValue() {
 			return values.doubleValue();
+		}
+
+		@Override
+		public Map<Long, RandomVariableInterface> getGradient(Set<Long> targetIDs) {
+			throw new UnsupportedOperationException();
 		}
 
 	}

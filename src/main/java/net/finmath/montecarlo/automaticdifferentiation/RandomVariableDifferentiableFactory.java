@@ -7,11 +7,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.DoubleBinaryOperator;
 import java.util.function.DoubleUnaryOperator;
@@ -994,11 +994,13 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 		}
 
 		@Override
-		public Map<Long, RandomVariableInterface> getGradient() {
+		public Map<Long, RandomVariableInterface> getGradient(Set<Long> targetIDs) {
+			if(targetIDs != null) throw new UnsupportedOperationException();
 			return opteratorTreeNode.getGradient();
 		}
 
-		public Map<Long, RandomVariableInterface> getAllPartialDerivatives() {
+		public Map<Long, RandomVariableInterface> getAllPartialDerivatives(Set<Long> targetIDs) {
+			if(targetIDs != null) throw new UnsupportedOperationException();
 			if(!factory.enableAD) throw new UnsupportedOperationException();
 			return opteratorTreeNode.getAllPartialDerivatives();
 		}

@@ -6,6 +6,7 @@
 package net.finmath.montecarlo.automaticdifferentiation;
 
 import java.util.Map;
+import java.util.Set;
 
 import net.finmath.stochastic.RandomVariableInterface;
 
@@ -43,7 +44,18 @@ public interface RandomVariableDifferentiableInterface extends RandomVariableInt
 	 * 
 	 * @return The gradient map.
 	 */
-	Map<Long, RandomVariableInterface> getGradient();
+	default Map<Long, RandomVariableInterface> getGradient(){
+		return getGradient(null);
+	}
+	
+	/**
+	 * Returns the gradient of this random variable with respect to the given IDs (if dependent).
+	 * The method calculated the map \( v \mapsto \frac{d u}{d v} \) where \( u \) denotes <code>this</code>.
+	 * 
+	 * @param targetIDs {@link Set} of IDs with respect to which the gradient will be calculated
+	 * @return The gradient map.
+	 */
+	Map<Long, RandomVariableInterface> getGradient(Set<Long> targetIDs);
 
 	/**
 	 * Returns the tangents of this random variable with respect to all its children nodes.
@@ -51,7 +63,18 @@ public interface RandomVariableDifferentiableInterface extends RandomVariableInt
 	 * 
 	 * @return The tangent map.
 	 */
-	Map<Long, RandomVariableInterface> getAllPartialDerivatives();
+	default Map<Long, RandomVariableInterface> getAllPartialDerivatives(){
+		return getAllPartialDerivatives(null);
+	}
+	
+	/**
+	 * Returns the tangents of this random variable with respect to the given IDs (if dependent).
+	 * The method calculated the map \( v \mapsto \frac{d u}{d v} \) where \( v \) denotes <code>this</code>.
+	 * 
+	 * @param targetIDs {@link Set} of IDs with respect to which the tangents will be calculated
+	 * @return The tangent map.
+	 */
+	Map<Long, RandomVariableInterface> getAllPartialDerivatives(Set<Long> targetIDs);
 
 	
 	/**

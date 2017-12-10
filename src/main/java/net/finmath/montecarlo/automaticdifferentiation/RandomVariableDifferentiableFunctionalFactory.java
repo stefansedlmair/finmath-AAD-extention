@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.BiFunction;
@@ -44,8 +45,6 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 
 	private final boolean enableAD;
 	private final boolean enableAAD;
-	private final boolean retainAllTreeNodes;
-
 
 	/**
 	 * @param randomVariableFactoryForNonDifferentiable
@@ -59,7 +58,6 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		// enable AD by keeping track of upwards 
 		this.enableAD 				= (boolean) properties.getOrDefault("enableAD", true);
 		this.enableAAD 				= (boolean) properties.getOrDefault("enableAAD", true);
-		this.retainAllTreeNodes 	= (boolean) properties.getOrDefault("retainAllTreeNodes", false);
 	}
 
 	public RandomVariableDifferentiableFunctionalFactory(AbstractRandomVariableFactory randomVariableFactoryForNonDifferentiable) {
@@ -110,7 +108,6 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 	 * */
 	private static class OperatorTreeNode{
 		private final long id;
-		private final RandomVariableDifferentiableFunctionalFactory factory;
 
 		private final List<OperatorTreeNode> parentTreeNodes;
 		private final List<OperatorTreeNode> childTreeNodes;
@@ -120,9 +117,9 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		/**
 		 * Operator Tree Node that holds parent and child information according to the settings of the given {@link RandomVariableDifferentiableFunctionalFactory}.
 		 * <lu>
-		 * 	<li>if <code>enableAD = true</code> extract parent tree nodes from parents</li>
-		 * 	<li>if <code>enableAAD = true</code> add this instance to child tree nodes of parents</li>
-		 * 	<li>else do not save any information about the operator tree or the parital derivatives</li>
+		 * 	<li>if <code>enableAD = true</code> save upward- and downward facing dependencies</li>
+		 * 	<li>if <code>enableAAD = true</code> only save downward facing dependencies</li>
+		 * 	<li>else do not save any dependencies and no {@link PartialDerivativeFunction}</li>
 		 * </lu>
 		 * @param parents {@link List} of {@link OperatorTreeNode}s from parents   
 		 * @param partialDerivativeFunction {@link PartialDerivativeFunction} to calculate the next addend for the chain rule of derivation
@@ -131,10 +128,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		public OperatorTreeNode(List<OperatorTreeNode> parents, PartialDerivativeFunction partialDerivativeFunction, RandomVariableDifferentiableFunctionalFactory factory) {
 			// get identifier
 			this.id = nextIdentifier.getAndIncrement();
-			
-			// get factory
-			this.factory = factory;
- 
+			 
 			// only connect to children if AD is enabled
 			if(factory.enableAD) {
 				// start with an empty list
@@ -157,7 +151,6 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 				this.derivatives = null;
 				this.parentTreeNodes = null;
 			}
-
 		}
 
 		/**
@@ -165,7 +158,10 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		 * 
 		 * @return {@link Map} with key id and value  dV<sub>this</sub>/dx<sub>id</sub>
 		 * */
-		private Map<Long, RandomVariableInterface> getGradient() {
+		private Map<Long, RandomVariableInterface> getGradient(Set<Long> targetIDs) {
+			
+			long minID = 0;
+			if(targetIDs != null && !targetIDs.isEmpty()) minID = targetIDs.parallelStream().reduce(Long::min).get();
 			
 			Map<Long, RandomVariableInterface> gradient = Collections.synchronizedMap(new HashMap<>());
 
@@ -185,6 +181,8 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 				Entry<Long, OperatorTreeNode> highestEntry = treeNodesToPropagte.pollLastEntry();
 
 				Long childID = highestEntry.getKey();
+				if(childID < minID) break;
+
 				OperatorTreeNode childTreeNode = highestEntry.getValue();
 				
 				final List<OperatorTreeNode> parentTreeNodes = childTreeNode.parentTreeNodes;
@@ -194,7 +192,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 				propergateTreeNodesThroughOperatorTree(gradient, childTreeNode, parentTreeNodes, treeNodesToPropagte);
 				
 				// if not defined otherwise delete child after derivative has been propagated downwards to parents
-				if(!factory.retainAllTreeNodes) gradient.remove(childID); 
+				if(targetIDs == null || !targetIDs.contains(childID)) gradient.remove(childID); 
 			}
 			return gradient;
 		}
@@ -264,7 +262,10 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		 * 
 		 * @return {@link Map} with key id and value  dV<sub>id</sub>/dx<sub>this</sub>
 		 * */
-		private Map<Long, RandomVariableInterface> getAllPartialDerivatives(){
+		private Map<Long, RandomVariableInterface> getAllPartialDerivatives(Set<Long> targetIDs){
+			
+			long maxID = Long.MAX_VALUE;
+			if(targetIDs != null && !targetIDs.isEmpty()) maxID = targetIDs.parallelStream().reduce(Long::max).get();
 			
 			Map<Long, RandomVariableInterface> partialDerivatives = new HashMap<>();
 
@@ -283,6 +284,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 				Entry<Long, OperatorTreeNode> lowestEntry = treeNodesToPropagte.pollFirstEntry();
 
 				Long parentID = lowestEntry.getKey();
+				if(parentID > maxID) break;
 				OperatorTreeNode parentOperatorTreeNode = lowestEntry.getValue();
 
 				final List<OperatorTreeNode> childTreeNodes = parentOperatorTreeNode.childTreeNodes;
@@ -292,7 +294,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 				propergateTreeNodesThroughOperatorTree(partialDerivatives, parentOperatorTreeNode, childTreeNodes, treeNodesToPropagte);
 	
 				// if not defined otherwise delete parent after derivative has been propagated upwards to children
-				if(!factory.retainAllTreeNodes) partialDerivatives.remove(parentID); 
+				if(targetIDs == null || !targetIDs.contains(parentID)) partialDerivatives.remove(parentID); 
 			}
 			return partialDerivatives;
 		}
@@ -1126,13 +1128,14 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		}
 
 		@Override
-		public Map<Long, RandomVariableInterface> getGradient() {
-			return opteratorTreeNode.getGradient();
+		public Map<Long, RandomVariableInterface> getGradient(Set<Long> targetIDs) {
+			if(!factory.enableAD && !factory.enableAAD) throw new UnsupportedOperationException();
+			return opteratorTreeNode.getGradient(targetIDs);
 		}
 
-		public Map<Long, RandomVariableInterface> getAllPartialDerivatives() {
+		public Map<Long, RandomVariableInterface> getAllPartialDerivatives(Set<Long> targetIDs) {
 			if(!factory.enableAD) throw new UnsupportedOperationException();
-			return opteratorTreeNode.getAllPartialDerivatives();
+			return opteratorTreeNode.getAllPartialDerivatives(targetIDs);
 		}
 
 		@Override
