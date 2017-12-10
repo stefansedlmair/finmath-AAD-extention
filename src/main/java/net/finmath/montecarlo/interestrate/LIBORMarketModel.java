@@ -249,6 +249,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 	 * @param properties Key value map specifying properties like <code>measure</code> and <code>stateSpace</code>.
 	 * @throws net.finmath.exception.CalculationException Thrown if the valuation fails, specific cause may be available via the <code>cause()</code> method.
 	 */
+	@SuppressWarnings("unchecked")
 	public LIBORMarketModel(
 			TimeDiscretizationInterface			liborPeriodDiscretization,
 			AnalyticModelInterface				analyticModel,
@@ -266,7 +267,7 @@ public class LIBORMarketModel extends AbstractModel implements LIBORMarketModelI
 		if(properties != null && properties.containsKey("liborCap"))				liborCap	= (Double)properties.get("liborCap");
 
 		Map<String,Object> calibrationParameters = null;
-		if(properties != null && properties.containsKey("calibrationParameters"))	calibrationParameters	= (Map<String,Object>)properties.get("calibrationParameters");
+		if(properties != null && properties.containsKey("calibrationParameters"))	calibrationParameters	= (Map<String,Object>) properties.get("calibrationParameters");
 
 		this.liborPeriodDiscretization	= liborPeriodDiscretization;
 		this.curveModel					= analyticModel;

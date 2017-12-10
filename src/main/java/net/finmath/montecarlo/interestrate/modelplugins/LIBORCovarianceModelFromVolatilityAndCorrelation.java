@@ -61,8 +61,10 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
         // @todo numberOfComponents should be stored as a member?!
         int numberOfComponents = getLiborPeriodDiscretization().getNumberOfTimeSteps();
                
-        double factorWeight = IntStream.range(0, numberOfComponents).mapToDouble(componentIndex -> correlationModel.getFactorLoading(timeIndex, factor, componentIndex))
-        		.map(x -> x*x).sum();
+        double factorWeight = IntStream.range(0, numberOfComponents)
+        		.mapToDouble(componentIndex -> correlationModel.getFactorLoading(timeIndex, factor, componentIndex))
+        		.map(x -> x*x)
+        		.sum();
         
         factorLoadingPseudoInverse = factorLoadingPseudoInverse.div(factorWeight);
 
@@ -112,11 +114,11 @@ public class LIBORCovarianceModelFromVolatilityAndCorrelation extends AbstractLI
 
 	@Override
 	public AbstractLIBORCovarianceModelParametric getCloneWithModifiedParameters(double[] parameters) {
-		LIBORVolatilityModel volatilityModel = this.volatilityModel;
-		LIBORCorrelationModel correlationModel = this.correlationModel;
+		LIBORVolatilityModel volatilityModel 	= this.volatilityModel;
+		LIBORCorrelationModel correlationModel 	= this.correlationModel;
 
-		double[] volatilityParameter = volatilityModel.getParameter();
-		double[] correlationParameter = correlationModel.getParameter();
+		double[] volatilityParameter 	= volatilityModel.getParameter();
+		double[] correlationParameter 	= correlationModel.getParameter();
 
 		int parameterIndex = 0;
 		if(volatilityParameter != null) {

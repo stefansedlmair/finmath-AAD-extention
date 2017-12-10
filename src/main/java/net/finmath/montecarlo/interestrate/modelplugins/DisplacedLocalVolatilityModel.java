@@ -5,6 +5,8 @@
  */
 package net.finmath.montecarlo.interestrate.modelplugins;
 
+import java.util.Arrays;
+
 import org.apache.commons.lang3.ArrayUtils;
 
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
@@ -79,7 +81,7 @@ public class DisplacedLocalVolatilityModel extends AbstractLIBORCovarianceModelP
 	
 	@Override
 	public Object clone() {
-		return new DisplacedLocalVolatilityModel(randomVariableFactory, (AbstractLIBORCovarianceModelParametric) covarianceModel.clone(), getDispacementAsDouble() , isCalibrateable);
+		return new DisplacedLocalVolatilityModel(randomVariableFactory, (AbstractLIBORCovarianceModelParametric) covarianceModel.clone(), displacement.doubleValue() , isCalibrateable);
 	}
 
 	/**
@@ -131,9 +133,7 @@ public class DisplacedLocalVolatilityModel extends AbstractLIBORCovarianceModelP
 
 		if(realizationAtTimeIndex != null && realizationAtTimeIndex[component] != null) {
 			RandomVariableInterface localVolatilityFactor = realizationAtTimeIndex[component].add(displacement);
-			for (int factorIndex = 0; factorIndex < factorLoading.length; factorIndex++) {
-				factorLoading[factorIndex] = factorLoading[factorIndex].mult(localVolatilityFactor);
-			}
+			factorLoading = Arrays.stream(factorLoading).map(FL -> FL.mult(localVolatilityFactor)).toArray(RandomVariableInterface[]::new);
 		}
 
 		return factorLoading;
@@ -142,9 +142,5 @@ public class DisplacedLocalVolatilityModel extends AbstractLIBORCovarianceModelP
 	@Override
 	public RandomVariableInterface getFactorLoadingPseudoInverse(int timeIndex, int component, int factor, RandomVariableInterface[] realizationAtTimeIndex) {
 		throw new UnsupportedOperationException();
-	}
-	
-	private double getDispacementAsDouble() {
-		return displacement.get(0);
 	}
 }
