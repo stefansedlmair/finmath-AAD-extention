@@ -7,7 +7,6 @@ package net.finmath.montecarlo.interestrate.modelplugins;
 
 import java.util.Arrays;
 
-import net.finmath.montecarlo.automaticdifferentiation.RandomVariableDifferentiableInterface;
 import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretizationInterface;
 
@@ -52,7 +51,7 @@ public abstract class LIBORVolatilityModel {
 		if(parameterAsRandomVariable == null) return null;
 
 		// get values of deterministic random variables
-		double[] parameterAsDouble =  Arrays.stream(parameterAsRandomVariable).mapToDouble(param -> param.doubleValue()).toArray();
+		double[] parameterAsDouble = Arrays.stream(parameterAsRandomVariable).mapToDouble(param -> param.doubleValue()).toArray();
 		return parameterAsDouble;
     }
 	
