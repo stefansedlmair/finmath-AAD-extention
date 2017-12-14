@@ -156,6 +156,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		/**
 		 * method implements reverse mode of algorithmic differentiation
 		 * 
+		 * @param targetIDs {@link Set} of IDs for exclusive calculation 
 		 * @return {@link Map} with key id and value  dV<sub>this</sub>/dx<sub>id</sub>
 		 * */
 		private Map<Long, RandomVariableInterface> getGradient(Set<Long> targetIDs) {
@@ -194,6 +195,10 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 				// if not defined otherwise delete child after derivative has been propagated downwards to parents
 				if(targetIDs == null || !targetIDs.contains(childID)) gradient.remove(childID); 
 			}
+
+			// if targetIDs exist delete all other partial derivatives 
+			removeAllEntriesFromMapExcept(gradient, targetIDs);
+			
 			return gradient;
 		}
 
@@ -259,7 +264,8 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 
 		/**
 		 * method implements tangent mode of algorithmic differentiation
-		 * 
+		 *
+		 * @param targetIDs {@link Set} of IDs for exclusive calculation 
 		 * @return {@link Map} with key id and value  dV<sub>id</sub>/dx<sub>this</sub>
 		 * */
 		private Map<Long, RandomVariableInterface> getAllPartialDerivatives(Set<Long> targetIDs){
@@ -267,7 +273,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			long maxID = Long.MAX_VALUE;
 			if(targetIDs != null && !targetIDs.isEmpty()) maxID = targetIDs.parallelStream().reduce(Long::max).get();
 			
-			Map<Long, RandomVariableInterface> partialDerivatives = new HashMap<>();
+			Map<Long, RandomVariableInterface> partialDerivatives = Collections.synchronizedMap(new HashMap<>());
 
 			// every child in the operator tree is of the same instance of its parents
 			ConcurrentSkipListMap<Long, OperatorTreeNode> treeNodesToPropagte = new ConcurrentSkipListMap<>();
@@ -296,11 +302,23 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 				// if not defined otherwise delete parent after derivative has been propagated upwards to children
 				if(targetIDs == null || !targetIDs.contains(parentID)) partialDerivatives.remove(parentID); 
 			}
+			
+			// if targetIDs exist delete all other partial derivatives 
+			removeAllEntriesFromMapExcept(partialDerivatives, targetIDs);
+			
 			return partialDerivatives;
 		}
 		
 		private static RandomVariableInterface randomVariableFromConstant(double value){
 			return RandomVariableDifferentiableFunctional.randomVariableFromConstant(value);
+		}
+		
+		private static void removeAllEntriesFromMapExcept(Map<Long,RandomVariableInterface> map, Set<Long> keys) {
+			if(keys == null) return;
+			map.keySet().stream()
+				.filter(key -> !keys.contains(key))
+				.forEach(key -> map.remove(key));
+			return;
 		}
 	}
 
