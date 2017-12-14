@@ -113,17 +113,9 @@ public class LIBORVolatilityModelPiecewiseConstant extends LIBORVolatilityModel 
 		// initialize with zero and time 
 		RandomVariableInterface volatilityInstanteaneous = randomVariableFactory.createRandomVariable(time, 0.0); 
 		
-		if(timeToMaturity > 0)
-		{
-			int timeIndexSimulationTime = simulationTimeDiscretization.getTimeIndex(time);
-			if(timeIndexSimulationTime < 0) timeIndexSimulationTime = -timeIndexSimulationTime-1-1;
-			if(timeIndexSimulationTime < 0) timeIndexSimulationTime = 0;
-			if(timeIndexSimulationTime >= simulationTimeDiscretization.getNumberOfTimes()) timeIndexSimulationTime--;
-
-			int timeIndexTimeToMaturity = timeToMaturityDiscretization.getTimeIndex(timeToMaturity);
-			if(timeIndexTimeToMaturity < 0) timeIndexTimeToMaturity = -timeIndexTimeToMaturity-1-1;
-			if(timeIndexTimeToMaturity < 0) timeIndexTimeToMaturity = 0;
-			if(timeIndexTimeToMaturity >= timeToMaturityDiscretization.getNumberOfTimes()) timeIndexTimeToMaturity--;
+		if(timeToMaturity > 0){
+			int timeIndexSimulationTime = simulationTimeDiscretization.getTimeIndexNearestLessOrEqual(time);
+			int timeIndexTimeToMaturity = timeToMaturityDiscretization.getTimeIndexNearestLessOrEqual(timeToMaturity);
 
 			volatilityInstanteaneous = volatilityInstanteaneous.add(volatility[indexMap.get(timeIndexSimulationTime).get(timeIndexTimeToMaturity)]);
 		}
