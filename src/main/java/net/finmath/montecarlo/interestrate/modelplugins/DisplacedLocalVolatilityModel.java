@@ -133,7 +133,7 @@ public class DisplacedLocalVolatilityModel extends AbstractLIBORCovarianceModelP
 
 		if(realizationAtTimeIndex != null && realizationAtTimeIndex[component] != null) {
 			RandomVariableInterface localVolatilityFactor = realizationAtTimeIndex[component].add(displacement);
-			factorLoading = Arrays.stream(factorLoading).map(FL -> FL.mult(localVolatilityFactor)).toArray(RandomVariableInterface[]::new);
+			factorLoading = Arrays.stream(factorLoading).map(factorLoad -> factorLoad.mult(localVolatilityFactor)).toArray(RandomVariableInterface[]::new);
 		}
 
 		return factorLoading;
