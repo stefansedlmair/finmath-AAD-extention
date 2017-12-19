@@ -167,19 +167,6 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 			return getOperatorTreeNode().id;
 		}
 		
-		
-		
-		@Override
-		/**
-		 * VERY INEFFICIENT!
-		 * 
-		 * This RandomVariable implements the AD Algorithm and thus calculates a reverse gradient
-		 * 
-		 * */
-		public Map<Long, RandomVariableInterface> getGradient() {
-			throw new UnsupportedOperationException();
-		}
-		
 		/**
 		 * The method implements an AD algorithm, scaling with the number of inputs.
 		 * 
@@ -194,7 +181,7 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 		 * @author Stefan Sedlmair
 		 * @author Christian Fries
 		 * */	
-		public Map<Long, RandomVariableInterface> getAllPartialDerivatives(Set<Long> targetIDs) {
+		public Map<Long, RandomVariableInterface> getPartialDerivativesOf(Set<Long> targetIDs) {
 			if(targetIDs != null) throw new UnsupportedOperationException();
 			return this.operatorTreeNode.getAllPartialDerivatives();
 		} 
@@ -801,7 +788,7 @@ public class RandomVariableADFactory extends AbstractRandomVariableDifferentiabl
 		}
 
 		@Override
-		public Map<Long, RandomVariableInterface> getGradient(Set<Long> targetIDs) {
+		public Map<Long, RandomVariableInterface> getGradientOf(Set<Long> targetIDs) {
 			throw new UnsupportedOperationException();
 		}
 

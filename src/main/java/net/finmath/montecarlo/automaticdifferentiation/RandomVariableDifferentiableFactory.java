@@ -994,12 +994,12 @@ public class RandomVariableDifferentiableFactory extends AbstractRandomVariableD
 		}
 
 		@Override
-		public Map<Long, RandomVariableInterface> getGradient(Set<Long> targetIDs) {
+		public Map<Long, RandomVariableInterface> getGradientOf(Set<Long> targetIDs) {
 			if(targetIDs != null) throw new UnsupportedOperationException();
 			return opteratorTreeNode.getGradient();
 		}
 
-		public Map<Long, RandomVariableInterface> getAllPartialDerivatives(Set<Long> targetIDs) {
+		public Map<Long, RandomVariableInterface> getPartialDerivativesOf(Set<Long> targetIDs) {
 			if(targetIDs != null) throw new UnsupportedOperationException();
 			if(!factory.enableAD) throw new UnsupportedOperationException();
 			return opteratorTreeNode.getAllPartialDerivatives();

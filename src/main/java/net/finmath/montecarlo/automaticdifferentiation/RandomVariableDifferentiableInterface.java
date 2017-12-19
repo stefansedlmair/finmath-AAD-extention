@@ -45,7 +45,7 @@ public interface RandomVariableDifferentiableInterface extends RandomVariableInt
 	 * @return The gradient map.
 	 */
 	default Map<Long, RandomVariableInterface> getGradient(){
-		return getGradient(null);
+		return getGradientOf(null);
 	}
 	
 	/**
@@ -55,7 +55,7 @@ public interface RandomVariableDifferentiableInterface extends RandomVariableInt
 	 * @param targetIDs {@link Set} of IDs with respect to which the gradient will be calculated
 	 * @return The gradient map.
 	 */
-	Map<Long, RandomVariableInterface> getGradient(Set<Long> targetIDs);
+	Map<Long, RandomVariableInterface> getGradientOf(Set<Long> targetIDs);
 
 	/**
 	 * Returns the tangents of this random variable with respect to all its children nodes.
@@ -64,7 +64,7 @@ public interface RandomVariableDifferentiableInterface extends RandomVariableInt
 	 * @return The tangent map.
 	 */
 	default Map<Long, RandomVariableInterface> getAllPartialDerivatives(){
-		return getAllPartialDerivatives(null);
+		return getPartialDerivativesOf(null);
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public interface RandomVariableDifferentiableInterface extends RandomVariableInt
 	 * @param targetIDs {@link Set} of IDs with respect to which the tangents will be calculated
 	 * @return The tangent map.
 	 */
-	Map<Long, RandomVariableInterface> getAllPartialDerivatives(Set<Long> targetIDs);
+	Map<Long, RandomVariableInterface> getPartialDerivativesOf(Set<Long> dependentIDs);
 
 	
 	/**

@@ -157,7 +157,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		 * @param targetIDs {@link Set} of IDs for exclusive calculation 
 		 * @return {@link Map} with key id and value  dV<sub>this</sub>/dx<sub>id</sub>
 		 * */
-		private Map<Long, RandomVariableInterface> getGradient(Set<Long> targetIDs) {
+		private Map<Long, RandomVariableInterface> getGradientOf(Set<Long> targetIDs) {
 			
 			long minID = 0;
 			if(targetIDs != null && !targetIDs.isEmpty()) minID = targetIDs.parallelStream().reduce(Long::min).get();
@@ -266,7 +266,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		 * @param targetIDs {@link Set} of IDs for exclusive calculation 
 		 * @return {@link Map} with key id and value  dV<sub>id</sub>/dx<sub>this</sub>
 		 * */
-		private Map<Long, RandomVariableInterface> getAllPartialDerivatives(Set<Long> targetIDs){
+		private Map<Long, RandomVariableInterface> getPartialDerivativesOf(Set<Long> targetIDs){
 			
 			long maxID = Long.MAX_VALUE;
 			if(targetIDs != null && !targetIDs.isEmpty()) maxID = targetIDs.parallelStream().reduce(Long::max).get();
@@ -1185,14 +1185,14 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		}
 
 		@Override
-		public Map<Long, RandomVariableInterface> getGradient(Set<Long> targetIDs) {
+		public Map<Long, RandomVariableInterface> getGradientOf(Set<Long> targetIDs) {
 			if(!factory.enableAD && !factory.enableAAD) throw new UnsupportedOperationException();
-			return opteratorTreeNode.getGradient(targetIDs);
+			return opteratorTreeNode.getGradientOf(targetIDs);
 		}
 
-		public Map<Long, RandomVariableInterface> getAllPartialDerivatives(Set<Long> targetIDs) {
+		public Map<Long, RandomVariableInterface> getPartialDerivativesOf(Set<Long> targetIDs) {
 			if(!factory.enableAD) throw new UnsupportedOperationException();
-			return opteratorTreeNode.getAllPartialDerivatives(targetIDs);
+			return opteratorTreeNode.getPartialDerivativesOf(targetIDs);
 		}
 
 		@Override
