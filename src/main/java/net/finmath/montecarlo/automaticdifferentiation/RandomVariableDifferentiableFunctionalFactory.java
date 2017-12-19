@@ -1117,17 +1117,17 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		@Override
 		public RandomVariableInterface addSumProduct(List<RandomVariableInterface> factor1,
 				List<RandomVariableInterface> factor2) {
+			// collect values to one list
 			List<RandomVariableInterface> parents = new ArrayList<>();
 			parents.add(this);
 			parents.addAll(factor1);
 			parents.addAll(factor2);
 
+			// determine which values to keep
 			List<Boolean> keepValues = new ArrayList<>();
 			keepValues.add(false);
-			for(int i = 0; i < factor1.size()-1;i++){
-				keepValues.add(isDifferentiable(factor2.get(i))); // keep factor from factor1
-				keepValues.add(isDifferentiable(factor1.get(i))); // keep factor from factor2
-			}
+			factor2.stream().forEach(factor -> keepValues.add(isDifferentiable(factor))); // determine which values to keep from factor1
+			factor1.stream().forEach(factor -> keepValues.add(isDifferentiable(factor))); // determine which values to keep from factor2
 
 			return new RandomVariableDifferentiableFunctional(
 					values.addSumProduct(factor1, factor2),
