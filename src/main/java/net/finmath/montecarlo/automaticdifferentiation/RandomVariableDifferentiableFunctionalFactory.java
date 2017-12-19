@@ -22,8 +22,6 @@ import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
-import org.apache.commons.math3.util.FastMath;
-
 import net.finmath.functions.DoubleTernaryOperator;
 import net.finmath.montecarlo.AbstractRandomVariableFactory;
 import net.finmath.montecarlo.RandomVariable;
@@ -1009,15 +1007,42 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		@Override
 		public RandomVariableInterface barrier(RandomVariableInterface trigger,
 				RandomVariableInterface valueIfTriggerNonNegative, RandomVariableInterface valueIfTriggerNegative) {
-			// for discontinuous functions apply central finite differences
-			return apply((x,y,z) -> x >= 0.0 ? y : z, valueIfTriggerNonNegative, valueIfTriggerNegative);
+			return new RandomVariableDifferentiableFunctional(
+					values.barrier(trigger, valueIfTriggerNonNegative, valueIfTriggerNegative),
+					Arrays.asList(trigger, valueIfTriggerNonNegative, valueIfTriggerNegative),
+					Arrays.asList(true, isDifferentiable(trigger), isDifferentiable(trigger)),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {					
+						switch (i) {
+						case 0:
+							/*
+							 * Approximation via local finite difference
+							 * (see https://ssrn.com/abstract=2995695 for details).
+							 */
+							RandomVariableInterface resultrandomvariable = x.get(1).sub(x.get(2));
+							double epsilon = factory.finiteDifferencesStepSize * x.get(0).getStandardDeviation();
+							if(epsilon > 0) {
+								resultrandomvariable = resultrandomvariable.mult(x.get(0).barrier(x.get(0).add(epsilon/2), randomVariableFromConstant(1.0), randomVariableFromConstant(0.0)));
+								resultrandomvariable = resultrandomvariable.mult(x.get(0).barrier(x.get(0).sub(epsilon/2), randomVariableFromConstant(0.0), randomVariableFromConstant(1.0)));
+								return resultrandomvariable.div(epsilon);
+							}
+							else {
+								return randomVariableFromConstant(0.0);
+							}
+						case 1:
+							return x.get(0).barrier(x.get(0), randomVariableFromConstant(1.0), randomVariableFromConstant(0.0));
+						case 2:
+							return x.get(0).barrier(x.get(0), randomVariableFromConstant(0.0), randomVariableFromConstant(1.0));
+						default:
+							return null;
+						}		
+					}, 
+					getFactory());
 		}
 
 		@Override
 		public RandomVariableInterface barrier(RandomVariableInterface trigger,
 				RandomVariableInterface valueIfTriggerNonNegative, double valueIfTriggerNegative) {
-			// for discontinuous functions apply central finite differences
-			return apply((x,y) -> x >= 0.0 ? y : valueIfTriggerNegative, valueIfTriggerNonNegative);
+			return barrier(trigger, valueIfTriggerNonNegative, randomVariableFromConstant(valueIfTriggerNegative));
 		}
 
 		@Override
@@ -1028,7 +1053,19 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		@Override
 		public RandomVariableInterface abs() {
 			// for discontinuous functions apply central finite differences
-			return apply(FastMath::abs);
+			return new RandomVariableDifferentiableFunctional(
+					values.abs(),
+					Arrays.asList(this),
+					Arrays.asList(true),
+					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
+						switch (i) {
+						case 0:
+							return x.get(0).barrier(x.get(0), randomVariableFromConstant(1.0), randomVariableFromConstant(-1.0));
+						default:
+							return null;
+						}		
+					}, 
+					getFactory());
 		}
 
 		@Override
