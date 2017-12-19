@@ -389,11 +389,11 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		 * @return values of randomVariable if instance of {@link RandomVariableDifferentiableFunctional}
 		 * */
 		private static RandomVariableInterface valuesOf(RandomVariableInterface randomVariable) {
-			return randomVariable instanceof RandomVariableDifferentiableFunctional ? ((RandomVariableDifferentiableFunctional)randomVariable).values : randomVariable;
+			return isDifferentiable(randomVariable) ? ((RandomVariableDifferentiableFunctional)randomVariable).values : randomVariable;
 		}
 
 		private static OperatorTreeNode treeNodeOf(RandomVariableInterface randomVariable) {
-			return randomVariable instanceof RandomVariableDifferentiableFunctional ? ((RandomVariableDifferentiableFunctional)randomVariable).opteratorTreeNode : null;
+			return isDifferentiable(randomVariable) ? ((RandomVariableDifferentiableFunctional)randomVariable).opteratorTreeNode : null;
 		}
 
 		/* (non-Javadoc)
@@ -558,7 +558,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		 */
 		@Override
 		public double getQuantile(double quantile, RandomVariableInterface probabilities) {
-			return ((RandomVariableDifferentiableFunctional) getValues()).getValues().getQuantile(quantile, probabilities);
+			return getValues().getQuantile(quantile, probabilities);
 		}
 
 		/* (non-Javadoc)
@@ -566,7 +566,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		 */
 		@Override
 		public double getQuantileExpectation(double quantileStart, double quantileEnd) {
-			return ((RandomVariableDifferentiableFunctional) getValues()).getValues().getQuantileExpectation(quantileStart, quantileEnd);
+			return getValues().getQuantileExpectation(quantileStart, quantileEnd);
 		}
 
 		/* (non-Javadoc)
@@ -740,7 +740,6 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 						}
 					}, 
 					getFactory());
-			
 		}
 
 		@Override
@@ -898,7 +897,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			return new RandomVariableDifferentiableFunctional(
 					values.mult(randomVariable),
 					Arrays.asList(this, randomVariable),
-					Arrays.asList(true, true),
+					Arrays.asList(isDifferentiable(randomVariable), true /*this always differentiable*/),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
 						switch (i) {
 						case 0:
@@ -917,7 +916,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			return new RandomVariableDifferentiableFunctional(
 					values.div(randomVariable),
 					Arrays.asList(this, randomVariable),
-					Arrays.asList(true, true),
+					Arrays.asList(isDifferentiable(randomVariable), true /*this always differentiable*/),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
 						switch (i) {
 						case 0:
@@ -974,7 +973,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			return new RandomVariableDifferentiableFunctional(
 					values.accrue(rate, periodLength),
 					Arrays.asList(this, rate),
-					Arrays.asList(true, true),
+					Arrays.asList(isDifferentiable(rate), true /*this always differentiable*/),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
 						switch (i) {
 						case 0:
@@ -993,7 +992,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			return new RandomVariableDifferentiableFunctional(
 					values.discount(rate, periodLength),
 					Arrays.asList(this, rate),
-					Arrays.asList(true, true),
+					Arrays.asList(isDifferentiable(rate), true),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
 						switch (i) {
 						case 0:
@@ -1056,7 +1055,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			return new RandomVariableDifferentiableFunctional(
 					values.addProduct(factor1, factor2),
 					Arrays.asList(this, factor1, factor2),
-					Arrays.asList(false, true, true),
+					Arrays.asList(false, isDifferentiable(factor2), isDifferentiable(factor1)),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
 						switch (i) {
 						case 0:
@@ -1077,7 +1076,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			return new RandomVariableDifferentiableFunctional(
 					values.addRatio(numerator, denominator),
 					Arrays.asList(this, numerator, denominator),
-					Arrays.asList(false, true, true),
+					Arrays.asList(false, isDifferentiable(denominator), true),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
 						switch (i) {
 						case 0:
@@ -1099,7 +1098,7 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 			return new RandomVariableDifferentiableFunctional(
 					values.subRatio(numerator, denominator),
 					Arrays.asList(this, numerator, denominator),
-					Arrays.asList(false, true, true),
+					Arrays.asList(false, isDifferentiable(denominator), true),
 					(BiFunction<List<RandomVariableInterface>, Integer, RandomVariableInterface>) (x, i) -> {
 						switch (i) {
 						case 0:
@@ -1125,7 +1124,10 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 
 			List<Boolean> keepValues = new ArrayList<>();
 			keepValues.add(false);
-			for(int i = 0; i < parents.size()-1;i++) keepValues.add(true);
+			for(int i = 0; i < factor1.size()-1;i++){
+				keepValues.add(isDifferentiable(factor2.get(i))); // keep factor from factor1
+				keepValues.add(isDifferentiable(factor1.get(i))); // keep factor from factor2
+			}
 
 			return new RandomVariableDifferentiableFunctional(
 					values.addSumProduct(factor1, factor2),
@@ -1174,6 +1176,10 @@ public class RandomVariableDifferentiableFunctionalFactory extends AbstractRando
 		@Override
 		public String toString() {
 			return "RandomVariableDifferentiableFunctional [values=" + values.toString() + ", ID=" + getID() + "]";
+		}
+		
+		private static boolean isDifferentiable(RandomVariableInterface randomVariable){
+			return (randomVariable instanceof RandomVariableDifferentiableFunctional);
 		}
 		
 		private static RandomVariableInterface randomVariableFromConstant(double value){
